@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GoingMerry</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
 </resources>

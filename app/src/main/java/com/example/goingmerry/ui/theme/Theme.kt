@@ -1,5 +1,6 @@
 package com.example.goingmerry.ui.theme
 
+/*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -17,14 +18,16 @@ private val LightColorPalette = lightColors(
     primaryVariant = Purple700,
     secondary = Teal200
 
-    /* Other default colors to override
+    */
+/* Other default colors to override
     background = Color.White,
     surface = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onBackground = Color.Black,
     onSurface = Color.Black,
-    */
+    *//*
+
 )
 
 @Composable
@@ -41,4 +44,4 @@ fun GoingMerryTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compos
         shapes = Shapes,
         content = content
     )
-}
+}*/
