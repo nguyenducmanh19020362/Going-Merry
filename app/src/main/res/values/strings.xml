@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">GoingMerry</string>
-    <string name="label_email">Email</string>
-    <string name="label_password">Password</string>
+    <string name="label_email">Email của bạn</string>
+    <string name="label_password">Mật khẩu</string>
+    <string name="label_rePassword">Nhập lại mật khẩu</string>
+    <string name="label_userName">Tên tài khoản</string>
 </resources>

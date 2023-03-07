@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val lightColors = lightColors(
-    primary = Color(0xFF6200EE),
-    primaryVariant = Color(0xFF3700B3),
+    primary = Color(0xFF59CAFF),
+    primaryVariant = Color(0xFF5977FF),
     onPrimary = Color(0xFFFFFFFF),
-    secondary = Color(0xFF03DAC5),
-    secondaryVariant = Color(0xFF0606F8),
-    onSecondary = Color(0xFF000000),
+    secondary = Color(0xFF59ADFF),
+    secondaryVariant = Color(0xFFB3C5FF),
+    onSecondary = Color(0xFF686868),
     background = Color(0xFFFFFFFF),
     onBackground = Color(0xFF000000),
     surface = Color(0xFFFFFFFF),
