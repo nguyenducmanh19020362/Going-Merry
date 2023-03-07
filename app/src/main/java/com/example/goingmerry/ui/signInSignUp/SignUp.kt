@@ -59,7 +59,7 @@ fun ScreenSignUp() {
 
             InputTextField(text, onValueChange = { text = it })
 
-            InputPasswordField()
+            //InputPasswordField()
 
             InputRePasswordField()
 
