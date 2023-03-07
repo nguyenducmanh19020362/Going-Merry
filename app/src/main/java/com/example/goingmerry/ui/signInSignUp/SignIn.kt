@@ -23,13 +23,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.example.goingmerry.R
+import com.example.goingmerry.viewModel.LoginViewModel
 
 
 @Composable
 fun ScreenSignIn(){
     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
-    var text by rememberSaveable { mutableStateOf("") }
+    val authLogin = rememberSaveable { mutableStateOf(false)}
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("")}
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -51,13 +55,27 @@ fun ScreenSignIn(){
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
-            InputTextField(text, onValueChange = {text = it})
+            InputTextField(email, onValueChange = {email = it})
 
-            InputPasswordField()
+            InputPasswordField(password, onValueChange = {password = it})
 
             if (invalidEmailNotification){
                 Text(
                     text = "Email không hợp lệ",
+                    modifier = Modifier.padding(bottom = 10.dp),
+                    color = MaterialTheme.colors.error
+                )
+            }
+
+            if(authLogin.value){
+                Text(
+                    text = "Đăng nhập thành công",
+                    modifier = Modifier.padding(bottom = 10.dp),
+                    color = MaterialTheme.colors.error
+                )
+            }else{
+                Text(
+                    text = "Email hoặc password không đúng",
                     modifier = Modifier.padding(bottom = 10.dp),
                     color = MaterialTheme.colors.error
                 )
@@ -72,7 +90,8 @@ fun ScreenSignIn(){
 
         Button(
             onClick = {
-                invalidEmailNotification = !isValidEmail(text)
+                invalidEmailNotification = !isValidEmail(email)
+                LoginViewModel.login(email, password, authLogin = authLogin )
             },
             colors = ButtonDefaults
                 .buttonColors(backgroundColor = MaterialTheme.colors.primary),
@@ -91,14 +110,13 @@ fun PreviewScreenSignIn(){
 
 
 @Composable
-fun InputPasswordField(){
-    var password by rememberSaveable { mutableStateOf("") }
+fun InputPasswordField(password: String, onValueChange: (String) -> Unit){
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     TextField(
         modifier = Modifier.padding(bottom = 10.dp),
         value = password,
-        onValueChange = {password = it},
+        onValueChange = onValueChange,
         label = {
             Text(
                 text = stringResource(id = R.string.label_password),
@@ -126,11 +144,11 @@ fun InputPasswordField(){
     )
 }
 
-@Preview
+/*@Preview
 @Composable
 fun ReviewInputPasswordField(){
     InputPasswordField()
-}
+}*/
 
 @Composable
 fun InputTextField(text: String, onValueChange: (String) -> Unit ){
