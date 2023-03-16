@@ -7,11 +7,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,13 +21,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.LoginViewModel
+import com.example.goingmerry.viewModel.SignUpViewModel
 
 @Composable
-fun ScreenSignUp() {
-    var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
+fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel) {
+    var invalidPasswordNotification by rememberSaveable { mutableStateOf(false) }
     var text by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("")}
+    var rePassword by rememberSaveable { mutableStateOf("") }
 
+    var isValid = rememberSaveable {
+        mutableStateOf(false)
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -39,14 +45,14 @@ fun ScreenSignUp() {
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        Text(
+        /*Text(
             text = "Tạo tài khoản của riêng bạn!",
             fontSize = 38.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 50.dp)
-        )
+        )*/
 
         Column {
             Text(
@@ -59,13 +65,13 @@ fun ScreenSignUp() {
 
             InputTextField(text, onValueChange = { text = it })
 
-            //InputPasswordField()
+            InputPasswordField(password, onValueChange = {password = it})
 
-            InputRePasswordField()
+            InputPasswordField(rePassword, onValueChange = {rePassword = it})
 
-            if (invalidEmailNotification) {
+            if (invalidPasswordNotification) {
                 Text(
-                    text = "Email không hợp lệ",
+                    text = "Password nhập lại không đúng",
                     modifier = Modifier.padding(bottom = 10.dp),
                     color = MaterialTheme.colors.error
                 )
@@ -79,7 +85,13 @@ fun ScreenSignUp() {
 
             Button(
                 onClick = {
-                    invalidEmailNotification = !isValidEmail(text)
+                    if(password != rePassword){
+                        invalidPasswordNotification = true;
+                    }else{
+                        invalidPasswordNotification = false;
+                        signUpViewModel.signUp(email = text, password = password)
+                        navController.navigate(Routes.Welcome.route)
+                    }
                 },
                 colors = ButtonDefaults
                     .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),
@@ -94,11 +106,11 @@ fun ScreenSignUp() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun PreviewScreenSignUp() {
     ScreenSignUp()
-}
+}*/
 
 @Composable
 fun InputUserNameField(text: String, onValueChange: (String) -> Unit) {

@@ -2,7 +2,7 @@ package com.example.goingmerry.dataTransferObjects
 
 import com.google.gson.annotations.SerializedName
 
-data class TokenDto(
+data class DataSignInDto (
     @SerializedName("data")
-    val tokenVerify:Token
+    val dataSignInDto: String
 )

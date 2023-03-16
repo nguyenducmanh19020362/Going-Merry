@@ -1,6 +1,7 @@
 package com.example.goingmerry.ui.signInSignUp
 
 import android.text.TextUtils
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,17 +30,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.LoginViewModel
+import androidx.navigation.compose.composable
 
 
 @Composable
-fun ScreenSignIn() {
+fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
-    val authLogin = rememberSaveable { mutableStateOf(false)}
+    var authLogin by rememberSaveable { mutableStateOf(0)}
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("")}
-
+    LaunchedEffect(key1 = Unit){
+        authLogin = loginViewModel.isSuccessLogin.value;
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,15 +83,9 @@ fun ScreenSignIn() {
                 )
             }
 
-            if(authLogin.value){
+            if(authLogin == 1){
                 Text(
-                    text = "Đăng nhập thành công",
-                    modifier = Modifier.padding(bottom = 10.dp),
-                    color = MaterialTheme.colors.error
-                )
-            }else{
-                Text(
-                    text = "Email hoặc password không đúng",
+                    text = "Đăng nhập thất bại, xin hãy thử lại",
                     modifier = Modifier.padding(bottom = 10.dp),
                     color = MaterialTheme.colors.error
                 )
@@ -100,8 +100,18 @@ fun ScreenSignIn() {
 
         Button(
             onClick = {
-                invalidEmailNotification = !isValidEmail(email)
-                LoginViewModel.login(email, password, authLogin = authLogin )
+                if(!isValidEmail(email)) {
+                    invalidEmailNotification = true
+                }else {
+                    invalidEmailNotification = false
+                    loginViewModel.login(email, password)
+                    if (authLogin == 2) {
+                        Log.e("tag","login1")
+
+                    }else{
+                        Log.e("tag","login2")
+                    }
+                }
             },
             colors = ButtonDefaults
                 .buttonColors(backgroundColor = MaterialTheme.colors.primary),
@@ -115,11 +125,11 @@ fun ScreenSignIn() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun PreviewScreenSignIn() {
     ScreenSignIn()
-}
+}*/
 
 
 @Composable

@@ -13,37 +13,32 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-object LoginViewModel : ViewModel() {
+class LoginViewModel : ViewModel() {
 
-    private val isSuccessLoading = mutableStateOf(value = false)
-    private val loginRequestLiveData = MutableLiveData<Boolean>()
+    val isSuccessLogin = mutableStateOf(value = 0)
 
-    fun login(email: String, password: String, authLogin: MutableState<Boolean>) {
+    fun login(email: String, password: String) {
         Log.e("login", "error0")
-        runBlocking {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val authService = Retrofit.getAuthService()
                 val responseService = authService.getLogin(LoginDto(email = email, password = password))
-                Log.e("login", "error1")
+
                 if (responseService.isSuccessful) {
-                    Log.e("login", "error2")
-                    delay(1500L)
-                    isSuccessLoading.value = true
-                    authLogin.value = true
+                    //delay(1500L)
+                    isSuccessLogin.value = 2
                     responseService.body()?.let { tokenDto ->
                         Log.e("Logging", "Response TokenDto: $tokenDto")
                     }
                 } else {
-                    Log.e("login", "error3")
-                    authLogin.value = false
+                    isSuccessLogin.value = 1
                     responseService.errorBody()?.let { error ->
-                        delay(1500L)
+                        //delay(1500L)
                         error.close()
                         Log.e("Logging", "error")
                     }
                 }
 
-                loginRequestLiveData.postValue(responseService.isSuccessful)
             } catch (e: Exception) {
                 Log.e("Logging", "Error Authentication", e)
             }

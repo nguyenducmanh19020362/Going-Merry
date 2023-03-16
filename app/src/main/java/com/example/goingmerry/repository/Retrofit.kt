@@ -18,12 +18,10 @@ object Retrofit {
         val builder = Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8080")
             .addConverterFactory(GsonConverterFactory.create(gson))
-        Log.e("Retrofit", "error")
-        val loggingInterceptor = HttpLoggingInterceptor()
-        //loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        //val loggingInterceptor = HttpLoggingInterceptor()
 
         val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
+            //.addInterceptor(loggingInterceptor)
             .writeTimeout(0, TimeUnit.MILLISECONDS)
             .writeTimeout(2, TimeUnit.MINUTES)
             .connectTimeout(1, TimeUnit.MINUTES).build()

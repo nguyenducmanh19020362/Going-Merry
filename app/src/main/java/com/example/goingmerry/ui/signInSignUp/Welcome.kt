@@ -16,12 +16,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.LoginViewModel
+import com.example.goingmerry.viewModel.SignUpViewModel
 
 @Composable
-fun WelcomeScreen() {
+fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, signupViewModel: SignUpViewModel) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -31,27 +37,33 @@ fun WelcomeScreen() {
         Spacer(modifier = Modifier.height(25.dp))
 
         Button(
-            onClick = {
-
-            },
             colors = ButtonDefaults
                 .buttonColors(backgroundColor = MaterialTheme.colors.primary),
             modifier = Modifier
                 .height(60.dp)
-                .width(295.dp)
+                .width(295.dp),
+            onClick = {
+                signupViewModel.isSuccessSignUp.value = 1;
+                navController.navigate(Routes.SignUp.route){
+                    launchSingleTop = true
+                }
+            },
         ) {
             Text(text = "Đăng ký")
         }
 
         Button(
-            onClick = {
-
-            },
             colors = ButtonDefaults
                 .buttonColors(backgroundColor = MaterialTheme.colors.primary),
             modifier = Modifier
                 .height(60.dp)
-                .width(295.dp)
+                .width(295.dp),
+            onClick = {
+                loginViewModel.isSuccessLogin.value = 0;
+                navController.navigate(Routes.SignIn.route){
+                    launchSingleTop = true
+                }
+            },
 
         ) {
             Text(text = "Đăng nhập")
@@ -64,7 +76,6 @@ fun WelcomeScreen() {
 fun Banner() {
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .height(520.dp)
             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
             .background(MaterialTheme.colors.secondary),
@@ -116,3 +127,10 @@ fun Banner() {
         )
     }
 }
+/*
+@Preview
+@Composable
+fun ReviewWelcomeScreen(){
+    var navController = rememberNavController()
+    WelcomeScreen(navController = navController)
+}*/
