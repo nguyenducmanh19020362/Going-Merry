@@ -4,11 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
 import com.example.goingmerry.navigate.ScreenStart
-import com.example.goingmerry.ui.home.ScreenHome
-
-import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.theme.NewGoingMerryTheme
 import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel

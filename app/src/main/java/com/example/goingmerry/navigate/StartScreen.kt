@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 
 
 import androidx.navigation.compose.rememberNavController
+import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
@@ -18,11 +19,16 @@ import com.example.goingmerry.viewModel.SignUpViewModel
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Routes.Welcome.route){
+    NavHost(navController = navController, startDestination = Routes.ChatBox.route){
+        composable(Routes.ChatBox.route){
+            ChatBox()
+        }
+
         composable(Routes.Welcome.route){
             WelcomeScreen(navController = navController,
                 signupViewModel = signUpViewModel, loginViewModel = loginViewModel)
         }
+
         composable(Routes.SignIn.route){
             if(loginViewModel.isSuccessLogin.value == 2){
                 LaunchedEffect(key1 = Unit){
@@ -36,9 +42,11 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                 ScreenSignIn(navController = navController, loginViewModel = loginViewModel)
             }
         }
+
         composable(Routes.Home.route){
             ScreenHome()
         }
+
         composable(Routes.SignUp.route){
             if(signUpViewModel.isSuccessSignUp.value == 2) {
                 LaunchedEffect(key1 = Unit) {
