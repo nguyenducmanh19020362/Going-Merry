@@ -13,35 +13,51 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.goingmerry.R
+import com.example.goingmerry.viewModel.HomeViewModel
+import com.example.goingmerry.viewModel.LoginViewModel
 
 @Composable
-fun ScreenHome(){
+fun ScreenHome(model: LoginViewModel){
     Column (modifier = Modifier.fillMaxHeight()){
+        var wordSearch by rememberSaveable { mutableStateOf("") }
+        var buttonSearch by rememberSaveable {
+            mutableStateOf(false)
+        }
+
         LogoHome()
+        Row (
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            SearchForm(wordSearch, onValueChange = {wordSearch = it}, model)
+
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = "profile",
+                modifier = Modifier.size(40.dp)
+            )
+        }
         BodyHome()
     }
 }
 
-@Composable
+/*@Composable
 @Preview
 fun ReviewScreenHome(){
     ScreenHome()
-}
+}*/
 @Composable
 fun LogoHome(){
     Column(
@@ -70,17 +86,6 @@ fun LogoHome(){
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        Row (
-            verticalAlignment = Alignment.CenterVertically
-                ){
-            SearchForm()
-            
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = "profile",
-                modifier = Modifier.size(40.dp)
-            )
-        }
     }
 }
 
@@ -92,6 +97,13 @@ fun ReviewLogoHome(){
 
 @Composable
 fun BodyHome(){
+    val flag by rememberSaveable {
+        mutableStateOf(true)
+    }
+
+    val colorButtonFriend = if(flag) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
+    val colorButtonGroup = if(!flag) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
+
     Column{
         Row(
             modifier = Modifier
@@ -103,20 +115,20 @@ fun BodyHome(){
                 onClick = {},
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults
-                    .buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+                    .buttonColors(backgroundColor = colorButtonFriend)
             ){
                 Text(text = "Bạn bè")
             }
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(50.dp))
             Image(
                 painter = painterResource(id = R.drawable.app_icon), 
                 contentDescription = "image"
             )
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(50.dp))
             Button(
                 onClick = {},
                 colors = ButtonDefaults
-                    .buttonColors(backgroundColor = MaterialTheme.colors.onPrimary),
+                    .buttonColors(backgroundColor = colorButtonGroup),
                 shape = RoundedCornerShape(10.dp)
             ){
                 Text(text = "Nhóm")
@@ -144,12 +156,16 @@ fun BodyHome(){
                     painter = painterResource(id = R.drawable.app_icon),
                     contentDescription = "Ẩn danh",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(50.dp)
                         .clip(CircleShape)
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Column {
-                    Text(text = "Trò chuyện ẩn danh")
+                    Text(
+                        text = "Trò chuyện ẩn danh",
+                        style = MaterialTheme.typography.subtitle2,
+                        fontSize = 20.sp
+                    )
                     Spacer(modifier = Modifier.height(1.dp))
                     Text(text = "Trò chuyện cùng người lạ ẩn danh ngẫu nhiên")
                 }
@@ -167,11 +183,7 @@ fun ReviewBodyHome(){
 }*/
 
 @Composable
-fun SearchForm(){
-    var wordSearch by rememberSaveable { mutableStateOf("") }
-    var buttonSearch by rememberSaveable {
-        mutableStateOf(false)
-    }
+fun SearchForm(wordSearch: String, onValueChange: (String) -> Unit, model: LoginViewModel){
     TextField(
         modifier = Modifier
             .height(50.dp)
@@ -183,14 +195,19 @@ fun SearchForm(){
         shape = RoundedCornerShape(10.dp),
         value = wordSearch,
         onValueChange = {
-            wordSearch = it
+            onValueChange
+            HomeViewModel.findPeoples(wordSearch, model)
+            HomeViewModel.findPeoples("a", model)
+            HomeViewModel.findPeoples("b", model)
+            HomeViewModel.findPeoples("c", model)
+            HomeViewModel.findPeoples("d", model)
         },
         label = { Text(text = "")},
         trailingIcon = {
-            val image = Icons.Filled.Search
+            /*val image = Icons.Filled.Search
             IconButton(onClick = {buttonSearch = true}) {
                 Icon(image, contentDescription = "IconSearch")
-            }
+            }*/
         },
         singleLine = true
     )
@@ -209,18 +226,23 @@ fun ListFriends(){
         items(ListFriends.listFriends){friend->
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(3.dp)
+                .padding(5.dp)
             ) {
                 Image(
                     painter = painterResource(id = friend.linkImageAvatar),
                     contentDescription = "Ẩn danh",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(50.dp)
                         .clip(CircleShape)
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Column {
-                    Text(text = friend.nameUser)
+                    Text(
+                        text = friend.nameUser,
+                        style = MaterialTheme.typography.subtitle2,
+                        fontSize = 20.sp
+                    )
                 }
             }
         }

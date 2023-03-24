@@ -4,11 +4,11 @@ import com.example.goingmerry.R
 
 object ListFriends {
      var listFriends = listOf(
-         Friend(R.drawable.app_icon, "TayLor Swift"),
-         Friend(R.drawable.app_icon, "TayLor Swift"),
-         Friend(R.drawable.app_icon, "TayLor Swift"),
-         Friend(R.drawable.app_icon, "TayLor Swift"),
-         Friend(R.drawable.app_icon, "TayLor Swift")
+         Friend(R.drawable.img, "TayLor Swift"),
+         Friend(R.drawable.img, "TayLor Swift"),
+         Friend(R.drawable.img, "TayLor Swift"),
+         Friend(R.drawable.img, "TayLor Swift"),
+         Friend(R.drawable.img, "TayLor Swift")
      )
  }
 

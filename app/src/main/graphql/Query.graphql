@@ -1,0 +1,7 @@
+query findUsers($matcher: String!){
+    findUsers(matcher: $matcher){
+        id
+        name
+        avatar
+    }
+}

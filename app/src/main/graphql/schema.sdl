@@ -1,0 +1,168 @@
+enum Gender {
+	MALE
+	FEMALE
+	OTHER
+	NOTHING
+}
+
+type User {
+	id: ID!
+	name: String!
+	email: String
+	birthday: String
+	job: String
+	gender: Gender
+	address: String
+	avatar: String
+	favorites: String
+}
+
+type Conversation {
+	id: ID!
+	name: String!
+	members: [User!]!
+	messages: [Message!]!
+	pinnedMessages: [Message!]!
+	lastUpdate: String!
+}
+
+enum MessageType {
+	TEXT
+	VIDEO
+	AUDIO
+	IMAGE
+}
+
+enum MessageState {
+	SENT
+	DELETED
+}
+
+type Message {
+	id: ID!
+	sender: User
+	content: String
+	type: MessageType!
+	sendedAt: String!
+	state: MessageState!
+}
+
+enum UserRole {
+	MEMBER
+	MANAGER
+}
+
+type GroupMember {
+	user: User!
+	role: UserRole!
+}
+
+type Group {
+	id: ID!
+	name: String!
+	members: [GroupMember!]!
+	conversation: Conversation!
+	lastUpdate: String!
+}
+
+type FriendRequest {
+	id: ID!
+	sender: User
+	reciver: User
+	sendedAt: String!
+}
+
+type Account {
+	id: ID!
+	name: String!
+	email: String!
+	birthday: String
+	job: String
+	gender: Gender
+	address: String
+	avatar: String
+	favorites: String
+	groups: [Group!]!
+	conversations: [Conversation!]!
+	friends: [User!]!
+	friendRequests: [FriendRequest!]!
+	blacklist: [User!]!
+	myRequests: [FriendRequest!]!
+}
+
+type Schema {
+	query: Query
+	mutation: Mutation
+}
+
+input AccountInput {
+	name: String
+	birthday: String
+	job: String
+	gender: Gender
+	address: String
+	avatar: String
+	favorites: String
+}
+
+enum FriendRequestReply {
+	ACCEPT
+	DENY
+}
+
+input GroupMemberInput {
+	userId: ID
+	role: UserRole
+}
+
+input GroupInput {
+	id: ID
+	name: String
+	members: [GroupMemberInput!]
+}
+
+
+input ConversationInput {
+	id: ID!
+	name: String
+	members: [ID!]
+	deleteMessages: [ID!]
+	pinnedMessages: [ID!]
+}
+
+type Query {
+	findUsers(matcher: String!): [User!]
+
+	account: Account!
+
+	user(userId: ID!): User!
+
+	group(groupId: ID!): Group
+
+	conversation(conversationId: ID!): Conversation
+
+	latestMessage(conversationId: ID!): [Message!]
+
+	beforeMessage(conversationId: ID!, messageId: ID!): [Message!]
+
+	findMessages(matcher: String!, conversationId: ID!): [Message!]
+}
+
+type Mutation {
+	updateAccount(input: AccountInput!): Account
+
+	request(userId: ID!): FriendRequest
+
+	unfriend(userId: ID!): User
+
+	replyRequest(userId: ID!, reply: FriendRequestReply): FriendRequest
+
+	blacklist(userId: ID!): User
+
+	group(input: GroupInput): Group
+
+	conversation(input: ConversationInput): Conversation
+
+}
+
+

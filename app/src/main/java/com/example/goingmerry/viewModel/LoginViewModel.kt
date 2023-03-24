@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 class LoginViewModel : ViewModel() {
 
     val isSuccessLogin = mutableStateOf(value = 0)
+    val token = mutableStateOf(value = "")
 
     fun login(email: String, password: String) {
         Log.e("login", "error0")
@@ -28,6 +29,7 @@ class LoginViewModel : ViewModel() {
                     //delay(1500L)
                     isSuccessLogin.value = 2
                     responseService.body()?.let { tokenDto ->
+                        token.value = tokenDto.tokenVerify.token;
                         Log.e("Logging", "Response TokenDto: $tokenDto")
                     }
                 } else {

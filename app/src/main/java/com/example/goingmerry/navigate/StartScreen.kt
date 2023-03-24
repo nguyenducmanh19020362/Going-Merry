@@ -19,7 +19,7 @@ import com.example.goingmerry.viewModel.SignUpViewModel
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Routes.ChatBox.route){
+    NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route){
             ChatBox()
         }
@@ -44,7 +44,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Home.route){
-            ScreenHome()
+            ScreenHome(loginViewModel)
         }
 
         composable(Routes.SignUp.route){
