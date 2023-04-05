@@ -1,5 +1,6 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,8 +32,8 @@ import com.example.goingmerry.viewModel.SignUpViewModel
 @Composable
 fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel) {
     var invalidPasswordNotification by rememberSaveable { mutableStateOf(false) }
-    var text by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("")}
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
     var rePassword by rememberSaveable { mutableStateOf("") }
 
     var isValid = rememberSaveable {
@@ -45,14 +47,16 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        /*Text(
+        Text(
             text = "Tạo tài khoản của riêng bạn!",
-            fontSize = 38.sp,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 50.dp)
-        )*/
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .width(300.dp)
+        )
 
         Column {
             Text(
@@ -61,13 +65,11 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
-            InputUserNameField(text, onValueChange = { text = it })
+            InputTextField(email, onValueChange = { email = it })
 
-            InputTextField(text, onValueChange = { text = it })
+            InputPasswordField(password, onValueChange = { password = it })
 
-            InputPasswordField(password, onValueChange = {password = it})
-
-            InputPasswordField(rePassword, onValueChange = {rePassword = it})
+            InputRePasswordField(rePassword, onValueChange = { rePassword = it })
 
             if (invalidPasswordNotification) {
                 Text(
@@ -77,21 +79,41 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
                 )
             }
 
-            Text(
-                text = "Xem chính sách quyền riêng tư của Going Merry",
-                color = MaterialTheme.colors.primary,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
+            Row(
+                modifier = Modifier.padding(bottom = 10.dp)
+            ) {
+                Text(
+                    text = "Đã có tài khoản?",
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Text(
+                    text = "Đăng nhập",
+                    color = MaterialTheme.colors.error,
+                    modifier = Modifier
+                        .clickable(onClick = {
+                            navController.navigate(Routes.SignIn.route){
+                                launchSingleTop = true
+                            }
+                        })
+                )
+            }
 
             Button(
                 onClick = {
-                    if(password != rePassword){
+                    if (password != rePassword) {
                         invalidPasswordNotification = true;
-                    }else{
+                    } else {
                         invalidPasswordNotification = false;
-                        signUpViewModel.signUp(email = text, password = password)
-                        navController.navigate(Routes.Welcome.route)
-                    }
+                        signUpViewModel.signUp(email = email, password = password)
+                        navController.navigate(
+                            route = Routes.Verification.route + "/${email}",
+                            builder = {
+                                launchSingleTop = true
+                            }
+                        ) }
                 },
                 colors = ButtonDefaults
                     .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),
@@ -113,39 +135,7 @@ fun PreviewScreenSignUp() {
 }*/
 
 @Composable
-fun InputUserNameField(text: String, onValueChange: (String) -> Unit) {
-    TextField(
-        modifier = Modifier
-            .padding(bottom = 10.dp)
-            .height(60.dp)
-            .width(295.dp),
-        value = text,
-        onValueChange = onValueChange,
-        label = {
-            Text(
-                text = stringResource(id = R.string.label_userName),
-                color = MaterialTheme.colors.onSecondary
-            )
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = MaterialTheme.colors.secondaryVariant
-        ),
-        shape = RoundedCornerShape(10.dp),
-        maxLines = 1
-    )
-}
-
-@Composable
-@Preview
-fun ReviewInputUserNameField() {
-    var text by rememberSaveable { mutableStateOf("") }
-    InputUserNameField(text, onValueChange = { text = it })
-}
-
-
-@Composable
-fun InputRePasswordField() {
-    var password by rememberSaveable { mutableStateOf("") }
+fun InputRePasswordField(rePassword: String, onValueChange: (String) -> Unit) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     TextField(
@@ -153,8 +143,8 @@ fun InputRePasswordField() {
             .padding(bottom = 10.dp)
             .height(60.dp)
             .width(295.dp),
-        value = password,
-        onValueChange = { password = it },
+        value = rePassword,
+        onValueChange = onValueChange,
         label = {
             Text(
                 text = stringResource(id = R.string.label_rePassword),
@@ -182,8 +172,8 @@ fun InputRePasswordField() {
     )
 }
 
-@Preview
-@Composable
-fun ReviewInputRePasswordField() {
-    InputRePasswordField()
-}
+//@Preview
+//@Composable
+//fun ReviewInputRePasswordField() {
+//    InputRePasswordField()
+//}

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,12 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 
 @Composable
-fun ScreenHome(model: LoginViewModel){
+fun ScreenHome(navController: NavController, model: LoginViewModel){
     Column (modifier = Modifier.fillMaxHeight()){
         var wordSearch by rememberSaveable { mutableStateOf("") }
         var buttonSearch by rememberSaveable {
@@ -46,7 +49,13 @@ fun ScreenHome(model: LoginViewModel){
             Icon(
                 imageVector = Icons.Filled.Person,
                 contentDescription = "profile",
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable(onClick = {
+                        navController.navigate(Routes.Setting.route) {
+                            launchSingleTop = true
+                        }
+                    })
             )
         }
         BodyHome()

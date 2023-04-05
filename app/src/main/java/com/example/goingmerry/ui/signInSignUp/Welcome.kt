@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,10 +39,10 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, 
 
         Button(
             colors = ButtonDefaults
-                .buttonColors(backgroundColor = MaterialTheme.colors.primary),
+                .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),
             modifier = Modifier
-                .height(60.dp)
-                .width(295.dp),
+                .height(50.dp)
+                .width(280.dp),
             onClick = {
                 signupViewModel.isSuccessSignUp.value = 1;
                 navController.navigate(Routes.SignUp.route){
@@ -52,12 +53,14 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, 
             Text(text = "Đăng ký")
         }
 
+        Spacer(modifier = Modifier.height(15.dp))
+
         Button(
             colors = ButtonDefaults
                 .buttonColors(backgroundColor = MaterialTheme.colors.primary),
             modifier = Modifier
-                .height(60.dp)
-                .width(295.dp),
+                .height(50.dp)
+                .width(280.dp),
             onClick = {
                 loginViewModel.isSuccessLogin.value = 0;
                 navController.navigate(Routes.SignIn.route){
@@ -65,7 +68,7 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, 
                 }
             },
 
-        ) {
+            ) {
             Text(text = "Đăng nhập")
         }
     }
@@ -76,7 +79,7 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, 
 fun Banner() {
     Column(
         modifier = Modifier
-            .height(520.dp)
+            .height(480.dp)
             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
             .background(MaterialTheme.colors.secondary),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -88,7 +91,7 @@ fun Banner() {
                 painter = painterResource(R.drawable.party1),
                 contentDescription = "",
                 modifier = Modifier
-                    .size(240.dp)
+                    .size(160.dp)
                     .clip(CircleShape)
             )
 
@@ -97,7 +100,7 @@ fun Banner() {
                     painter = painterResource(R.drawable.party2),
                     contentDescription = "",
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(80.dp)
                         .clip(CircleShape)
                 )
 
@@ -105,7 +108,7 @@ fun Banner() {
                     painter = painterResource(R.drawable.party3),
                     contentDescription = "",
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(80.dp)
                         .clip(CircleShape)
                 )
             }
@@ -116,17 +119,24 @@ fun Banner() {
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-            modifier = Modifier.padding(bottom = 50.dp)
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 15.dp)
+                .width(320.dp)
         )
 
         Text(
             text = "Nơi chia sẻ, trò chuyện, tán gẫu cùng bạn bè, người thân và gia đình!",
             fontSize = 20.sp,
             color = Color.Black,
-            modifier = Modifier.padding(bottom = 50.dp)
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 50.dp)
+                .width(320.dp)
         )
     }
 }
+
 /*
 @Preview
 @Composable

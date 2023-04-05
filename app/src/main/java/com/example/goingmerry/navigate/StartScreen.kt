@@ -8,10 +8,12 @@ import androidx.navigation.compose.composable
 
 import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.ui.ChatBox
+import com.example.goingmerry.ui.home.BodyScreen
 import com.example.goingmerry.ui.home.ScreenHome
-import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
-import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
-import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
+import com.example.goingmerry.ui.home.SettingScreen
+import com.example.goingmerry.ui.setting.ProfileScreen
+import com.example.goingmerry.ui.setting.UserInfoScreen
+import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel
 
@@ -19,9 +21,33 @@ import com.example.goingmerry.viewModel.SignUpViewModel
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Routes.Welcome.route){
+    NavHost(navController = navController, startDestination = Routes.FillInfo.route){
         composable(Routes.ChatBox.route){
             ChatBox()
+        }
+
+        composable(Routes.Setting.route){
+            SettingScreen(navController = navController)
+        }
+
+        composable(Routes.UserInfo.route){
+            UserInfoScreen()
+        }
+
+        composable(Routes.Profile.route){
+            ProfileScreen()
+        }
+
+        composable(Routes.FillInfo.route){
+            FillScreen(navController = navController)
+        }
+
+        composable(Routes.ForgotPassword.route){
+            ForgotPasswordScreen(navController = navController)
+        }
+
+        composable(Routes.Verification.route){
+            VerificationScreen(navController = navController, titlee = "")
         }
 
         composable(Routes.Welcome.route){
@@ -44,7 +70,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Home.route){
-            ScreenHome(loginViewModel)
+            ScreenHome(navController = navController, loginViewModel)
         }
 
         composable(Routes.SignUp.route){
