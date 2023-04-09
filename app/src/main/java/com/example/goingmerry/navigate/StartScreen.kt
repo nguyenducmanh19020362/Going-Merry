@@ -12,12 +12,17 @@ import androidx.navigation.compose.composable
 
 import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.ui.ChatBox
+import com.example.goingmerry.ui.home.BodyScreen
 import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
 import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.HomeViewModel
+import com.example.goingmerry.ui.home.SettingScreen
+import com.example.goingmerry.ui.setting.ProfileScreen
+import com.example.goingmerry.ui.setting.UserInfoScreen
+import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel
 
@@ -33,6 +38,31 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                 Log.e("it", "${it.toInt()}")
                 ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel)
             }
+
+        }
+
+        composable(Routes.Setting.route){
+            SettingScreen(navController = navController)
+        }
+
+        composable(Routes.UserInfo.route){
+            UserInfoScreen()
+        }
+
+        composable(Routes.Profile.route){
+            ProfileScreen()
+        }
+
+        composable(Routes.FillInfo.route){
+            FillScreen(navController = navController)
+        }
+
+        composable(Routes.ForgotPassword.route){
+            ForgotPasswordScreen(navController = navController)
+        }
+
+        composable(Routes.Verification.route){
+            VerificationScreen(navController = navController, titlee = "")
         }
 
         composable(Routes.Welcome.route){

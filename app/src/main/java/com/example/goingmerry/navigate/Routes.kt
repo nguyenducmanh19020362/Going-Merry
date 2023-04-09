@@ -6,4 +6,16 @@ sealed class Routes (val route: String) {
     object Welcome: Routes("welcome")
     object SignUp: Routes("signUp")
     object ChatBox: Routes("chatBox")
+
+    object FillInfo: Routes("fill")
+
+    object Setting: Routes("setting")
+
+    object UserInfo: Routes("userInfo")
+
+    object Profile: Routes("profile")
+
+    object ForgotPassword: Routes("forgotPassword")
+
+    object Verification: Routes("verification")
 }

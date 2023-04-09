@@ -42,6 +42,8 @@ import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +61,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
         chatBoxViewModel.sendMessages(model.token.value)
     }
     val conversations by homeViewModel.conversations.collectAsState()
+
     Column (modifier = Modifier.fillMaxHeight()){
         Column(
             modifier = Modifier
@@ -77,7 +80,6 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                 )
 
                 Spacer(modifier = Modifier.size(10.dp))
-
                 Text(
                     text = "Going Merry",
                     fontSize = 30.sp,
@@ -109,6 +111,17 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                     modifier = Modifier.size(40.dp)
                 )
             }
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = "profile",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable(onClick = {
+                        navController.navigate(Routes.Setting.route) {
+                            launchSingleTop = true
+                        }
+                    })
+            )
         }
         BodyHome(conversations, nav)
     }

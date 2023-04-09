@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.navigate.ScreenStart
 import com.example.goingmerry.ui.theme.NewGoingMerryTheme
 import com.example.goingmerry.viewModel.ChatBoxViewModel
@@ -25,8 +26,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NewGoingMerryTheme (true){
-                ScreenStart(loginViewModel, signUpViewModel, homeViewModel, chatBoxViewModel)
+
+            NewGoingMerryTheme(true) {
+                val navController = rememberNavController()
+                ScreenStart(loginViewModel, signUpViewModel)
+//              VerificationScreen(navController = navController, titlee = "Nhập mã đi")
+
             }
         }
     }

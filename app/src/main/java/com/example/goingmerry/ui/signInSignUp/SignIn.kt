@@ -5,6 +5,7 @@ import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,7 +62,7 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
 
         Text(
             text = "Chào mừng trở lại!",
-            fontSize = 38.sp,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 50.dp)
@@ -103,9 +104,15 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
 
             Text(
                 text = "Quên mật khẩu?",
-                color = MaterialTheme.colors.primary,
-                modifier = Modifier.padding(bottom = 40.dp)
+                color = MaterialTheme.colors.primaryVariant,
+                modifier = Modifier
+                    .clickable(onClick = {
+                        navController.navigate(Routes.ForgotPassword.route){
+                            launchSingleTop = true
+                        }
+                    })
             )
+
             Button(
                 onClick = {
                     invalidEmailNotification = !isValidEmail(email)
@@ -216,7 +223,7 @@ fun LogoApp() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(135.dp)
+            .height(125.dp)
             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
             .background(MaterialTheme.colors.secondary),
         verticalAlignment = Alignment.CenterVertically,
@@ -226,15 +233,15 @@ fun LogoApp() {
             painter = painterResource(R.drawable.app_icon),
             contentDescription = "",
             modifier = Modifier
-                .size(60.dp)
+                .size(48.dp)
                 .clip(CircleShape)
         )
 
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(5.dp))
 
         Text(
             text = "Going Merry",
-            fontSize = 50.sp,
+            fontSize = 45.sp,
             color = Color.White,
             fontWeight = FontWeight.Bold
         )
