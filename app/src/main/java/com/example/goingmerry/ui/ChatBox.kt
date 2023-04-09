@@ -44,13 +44,13 @@ import java.lang.reflect.Member
 
 @Composable
 fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel){
+    chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by rememberSaveable {
         mutableStateOf(conversation.messages)
     }
 
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
-
 
     val lenInputMessage = if(messageTyping == "") 4f else 7f
     Column {
@@ -80,11 +80,15 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                     }
                 }
             }*/
-            items(directMessages){
+            items(directMessages.sortedBy {
+                it.id
+            }.asReversed()){
                 message->
                 MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString())
             }
-            items(messages){
+            items(messages.sortedBy {
+                it.id
+            }.asReversed()){
                     message->
                 Log.e("message", message.content.toString())
                 MessageCard(msg = Message(message.content, message.sender!!.name), conversation.members[1].avatar.toString())
@@ -146,9 +150,11 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             Button(
                 onClick = {
                     if(messageTyping != "") {
+                        Log.e("flag1", chatBoxViewModel.flag.value.toString())
                         chatBoxViewModel.conversationId.value = conversation.id.toLong()
                         chatBoxViewModel.contentSendMessage.value = messageTyping
                         chatBoxViewModel.flag.value = true
+                        Log.e("flag2", chatBoxViewModel.flag.value.toString())
                     }
                 },
                 modifier = Modifier

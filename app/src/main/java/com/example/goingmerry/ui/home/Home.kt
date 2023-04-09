@@ -42,8 +42,6 @@ import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.viewModel.ChatBoxViewModel
-import com.example.goingmerry.R
-import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,11 +53,13 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
     var buttonSearch by rememberSaveable {
         mutableStateOf(false)
     }
+
     homeViewModel.account(model.token.value)
-    chatBoxViewModel.receiverMessages(model.token.value, homeViewModel)
-    if(chatBoxViewModel.conversationId.value != chatBoxViewModel.number){
+    if(chatBoxViewModel.stateSockets.value == "OFF"){
+        chatBoxViewModel.receiverMessages(model.token.value, homeViewModel)
         chatBoxViewModel.sendMessages(model.token.value)
     }
+
     val conversations by homeViewModel.conversations.collectAsState()
 
     Column (modifier = Modifier.fillMaxHeight()){
@@ -117,7 +117,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                 modifier = Modifier
                     .size(40.dp)
                     .clickable(onClick = {
-                        navController.navigate(Routes.Setting.route) {
+                        nav.navigate(Routes.Setting.route) {
                             launchSingleTop = true
                         }
                     })
@@ -314,50 +314,54 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
         Log.e("messages", listConversation[0].messages.toString())
         LazyColumn(modifier = Modifier.fillMaxHeight()){
             items(listConversation){conversion->
-                var mode = "${conversion.members[1].avatar}"
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp)
-                    .clickable {
-                        nav.navigate(
-                            Routes.ChatBox.route + "/${
-                                listConversation.indexOf(
-                                    conversion
-                                )
-                            }"
-                        )
-                    }
-                ) {
-                    AsyncImage(
-                        model = mode,
-                        imageLoader = imageLoader,
-                        contentDescription = "Ẩn danh",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clip(CircleShape)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        var len = 0
-                        if(conversion.messages.isNotEmpty()) {
-                            len = conversion.messages.last().content.toString().length;
-                            if(len >= 20){
-                                len = 20;
-                            }
-                            str = conversion.messages.last().content.toString().subSequence(0, len).toString()
-                            Log.e("str", str)
+                if(conversion.members.size == 2){
+                    var mode = "${conversion.members[1].avatar}"
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                        .clickable {
+                            nav.navigate(
+                                Routes.ChatBox.route + "/${
+                                    listConversation.indexOf(
+                                        conversion
+                                    )
+                                }"
+                            )
                         }
-                        Text(
-                            text = conversion.members[1].name,
-                            style = MaterialTheme.typography.subtitle2,
-                            fontSize = 20.sp
+                    ) {
+                        AsyncImage(
+                            model = mode,
+                            imageLoader = imageLoader,
+                            contentDescription = "Ẩn danh",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
                         )
-                        Text(
-                            text = str,
-                            style = MaterialTheme.typography.body2,
-                            fontSize = 17.sp
-                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            var len = 0
+                            if(conversion.messages.isNotEmpty()) {
+                                len = conversion.messages.first().content.toString().length;
+                                if(len >= 20){
+                                    len = 20;
+                                }
+                                str = conversion.messages.first().content.toString().subSequence(0, len).toString()
+                                Log.e("str", str)
+                            }else{
+                                str = ""
+                            }
+                            Text(
+                                text = conversion.members[0].name,
+                                style = MaterialTheme.typography.subtitle2,
+                                fontSize = 20.sp
+                            )
+                            Text(
+                                text = str,
+                                style = MaterialTheme.typography.body2,
+                                fontSize = 17.sp
+                            )
+                        }
                     }
                 }
             }

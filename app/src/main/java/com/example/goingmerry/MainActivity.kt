@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
 
             NewGoingMerryTheme(true) {
                 val navController = rememberNavController()
-                ScreenStart(loginViewModel, signUpViewModel)
+                ScreenStart(loginViewModel, signUpViewModel,homeViewModel, chatBoxViewModel)
 //              VerificationScreen(navController = navController, titlee = "Nhập mã đi")
 
             }

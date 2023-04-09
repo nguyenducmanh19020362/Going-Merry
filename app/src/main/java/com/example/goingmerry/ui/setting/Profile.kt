@@ -92,7 +92,7 @@ fun ChangeImage() {
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.cover_image),
+                painter = painterResource(id = R.drawable.ic_launcher_background),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
@@ -131,7 +131,7 @@ fun ChangeImage() {
 //        }
 
         RoundImage(
-            image = painterResource(id = R.drawable.profile_image),
+            image = painterResource(id = R.drawable.img),
             modifier = Modifier
                 .size(100.dp)
                 .align(Alignment.CenterHorizontally)
@@ -255,7 +255,7 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable._job_ic),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -286,7 +286,7 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.address_ic),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -317,7 +317,7 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.hobby_ic),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)

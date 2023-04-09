@@ -2,6 +2,7 @@ package com.example.goingmerry.viewModel
 
 import AccountQuery
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,21 +11,19 @@ import com.google.gson.Gson
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
+import io.ktor.utils.io.core.*
 import io.netty.buffer.ByteBufAllocator
 import io.rsocket.kotlin.RSocket
+import io.rsocket.kotlin.core.WellKnownMimeType
 import io.rsocket.kotlin.emitOrClose
 import io.rsocket.kotlin.ktor.client.RSocketSupport
 import io.rsocket.kotlin.ktor.client.rSocket
 import io.rsocket.kotlin.metadata.RoutingMetadata
-import io.rsocket.kotlin.payload.Payload
-import io.rsocket.kotlin.payload.buildPayload
-import io.rsocket.kotlin.payload.data
-import io.rsocket.kotlin.payload.metadata
+import io.rsocket.kotlin.metadata.compositeMetadata
+import io.rsocket.kotlin.metadata.security.BearerAuthMetadata
+import io.rsocket.kotlin.payload.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import type.MessageState
 import java.time.Instant
@@ -32,37 +31,41 @@ import java.util.List
 
 
 class ChatBoxViewModel: ViewModel() {
-    var listMessage = MutableStateFlow(listOf<Any>())
-    var number: Long = 0
-    var conversationId = mutableStateOf(number)
-    private var listSendMessage = MutableStateFlow(listOf<SendMessage>())
-    private val _listReceiverMessage = MutableStateFlow(mutableListOf<AccountQuery.Message>())
+    var stateSockets = mutableStateOf("OFF")
+    var conversationId = mutableStateOf(0L)
+    private val _listReceiverMessage = MutableStateFlow(listOf<AccountQuery.Message>())
     val listReceiverMessage = _listReceiverMessage.asStateFlow()
 
     var contentSendMessage = mutableStateOf("")
     var flag = mutableStateOf(false)
     @RequiresApi(Build.VERSION_CODES.O)
     fun receiverMessages(token: String, homeViewModel: HomeViewModel){
+        stateSockets.value = "ON"
+        val bearerAuthMetadata = BearerAuthMetadata(token)
+        val routeMetadata = RoutingMetadata("api.v1.messages.stream")
         viewModelScope.launch (Dispatchers.Main){
             val client = HttpClient (CIO){ //create and configure ktor client
                 install(WebSockets)
-                install(RSocketSupport)
+                install(RSocketSupport){
+                    connector {
+                        connectionConfig {
+                            payloadMimeType = PayloadMimeType(
+                                data = WellKnownMimeType.ApplicationJson,
+                                metadata = WellKnownMimeType.MessageRSocketCompositeMetadata
+                            )
+                        }
+                    }
+                }
             }
-            /*val rSocket: RSocket = client.rSocket(path = "rsocket/api.v1.messages.stream", host = "10.0.2.2", port = 8080)
-            val metadata = ByteBufAllocator.DEFAULT.compositeBuffer()
-            val routingMetadata: RoutingMetadata = TaggingMetadataCodec.createRoutingMetadata(
-                ByteBufAllocator.DEFAULT,
-                List.of("/route")
-            )
-            CompositeMetadataCodec.encodeAndAddMetadata(
-                metadata,
-                ByteBufAllocator.DEFAULT,
-                MESSAGE_RSOCKET_ROUTING,
-                routingMetadata.getContent()
-            )*/
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "10.0.2.2", port = 8080)
+
             val stream: Flow<Payload> = rSocket.requestStream(
                 buildPayload {
-                    this.metadata("message/x.rsocket.authentication.bearer.v0: Bearer $token")
+                    compositeMetadata {
+                        add(bearerAuthMetadata)
+                        add(routeMetadata)
+                    }
+                    data(ByteReadPacket.Empty)
                 }
             )
             stream.collect { payload: Payload ->
@@ -83,7 +86,7 @@ class ChatBoxViewModel: ViewModel() {
                             type.MessageType.TEXT,
                             MessageState.SENT
                         )
-                        listReceiverMessage.value.add(newReceiverMessage)
+                        _listReceiverMessage.emit(listReceiverMessage.value + newReceiverMessage)
                     }
 
                 }/*
@@ -97,37 +100,58 @@ class ChatBoxViewModel: ViewModel() {
         }
     }
     fun sendMessages(token:String){
+        stateSockets.value = "ON"
+        Log.e("sendMessage", "sendMessage")
+        val bearerAuthMetadata = BearerAuthMetadata(token)
+        val routeMetadata = RoutingMetadata("api.v1.messages.stream")
         viewModelScope.launch (Dispatchers.Main) {
             var gson = Gson()
             val client = HttpClient (CIO){ //create and configure ktor client
                 install(WebSockets)
-                install(RSocketSupport)
-            }
-            val rSocket: RSocket = client.rSocket(path = "rsocket/api.v1.messages.stream", host = "10.0.2.2", port = 8080)
-
-            val sendMessages: Flow<Payload> = flow{
-                if(flag.value){
-                    val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, MessageType.TEXT)
-                    //listMessage.value.plus(sendMessage)
-                    val gsonSendMessage = gson.toJson(sendMessage)
-                    emitOrClose(buildPayload { data("data: $gsonSendMessage ")})
-                    flag.value = false
+                install(RSocketSupport){
+                    connector {
+                        connectionConfig {
+                            payloadMimeType = PayloadMimeType(
+                                data = WellKnownMimeType.ApplicationJson,
+                                metadata = WellKnownMimeType.MessageRSocketCompositeMetadata
+                            )
+                        }
+                    }
                 }
             }
-
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "10.0.2.2", port = 8080)
 
             rSocket.requestChannel(
                 buildPayload {
-                    this.metadata("message/x.rsocket.authentication.bearer.v0: Bearer $token")
+                    compositeMetadata {
+                        add(bearerAuthMetadata)
+                        add(routeMetadata)
+                    }
+                    data(ByteReadPacket.Empty)
                 },
-                sendMessages
-            )
-            /*stream.collect { payload: Payload ->
-                val json = payload.data.readText()
-                val gson = Gson()
-                val receiverMessage = gson.fromJson(json, ReceiverMessage::class.java)
-                listMessage.value.plus(receiverMessage)
-            }*/
+                flow{
+                    Log.e("flag3", flag.value.toString())
+                    while (true){
+                        if(flag.value){
+                            val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, MessageType.TEXT)
+                            //listMessage.value.plus(sendMessage)
+                            val gsonSendMessage = gson.toJson(sendMessage)
+                            emitOrClose(
+                                buildPayload {
+                                    Log.e("gsonMessage", gsonSendMessage)
+                                    compositeMetadata {
+                                        add(bearerAuthMetadata)
+                                        add(routeMetadata)
+                                    }
+                                    data(gsonSendMessage)
+                                }
+                            )
+                            flag.value = false
+                        }
+                    }
+
+                }
+            ).collect()
         }
     }
 }

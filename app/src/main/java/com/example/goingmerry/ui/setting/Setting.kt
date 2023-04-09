@@ -79,7 +79,7 @@ fun TopBar(
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.cover_image),
+                painter = painterResource(id = R.drawable.ic_launcher_background),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
@@ -108,7 +108,7 @@ fun TopBar(
         }
 
         RoundImage(
-            image = painterResource(id = R.drawable.profile_image),
+            image = painterResource(id = R.drawable.img),
             modifier = Modifier
                 .size(90.dp)
                 .align(Alignment.CenterHorizontally)
@@ -181,7 +181,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable._user_info),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -198,7 +198,7 @@ fun BodyScreen(
                 }
 
                 Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
@@ -226,7 +226,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable._profile),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -243,7 +243,7 @@ fun BodyScreen(
                 }
 
                 Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
@@ -267,7 +267,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable._list_friend),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -284,7 +284,7 @@ fun BodyScreen(
                 }
 
                 Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
@@ -327,7 +327,7 @@ fun LogoutCard(
         ) {
             Row() {
                 Image(
-                    painter = painterResource(id = R.drawable._log_out),
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
@@ -344,7 +344,7 @@ fun LogoutCard(
             }
 
             Image(
-                painter = painterResource(id = R.drawable._right_arrow),
+                painter = painterResource(id = R.drawable.ic_launcher_background),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)

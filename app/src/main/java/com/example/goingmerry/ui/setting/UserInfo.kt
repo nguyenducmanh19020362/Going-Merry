@@ -260,7 +260,7 @@ fun ChangUserName() {
                     Spacer(modifier = Modifier.width(5.dp))
 
                     Image(
-                        painter = painterResource(id = R.drawable._right_arrow),
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -302,7 +302,7 @@ fun ChangePassword() {
                 )
 
                 Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
