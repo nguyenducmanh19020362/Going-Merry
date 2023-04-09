@@ -42,6 +42,7 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            resources.excludes.add("META-INF/*")
         }
     }
 }
@@ -73,4 +74,16 @@ dependencies {
 
     implementation "com.apollographql.apollo:apollo-runtime:2.5.14"
     implementation "com.apollographql.apollo:apollo-coroutines-support:2.5.14"
+
+    implementation("io.coil-kt:coil-compose-base:2.3.0")
+
+    implementation("io.rsocket.kotlin:rsocket-core:0.15.4")
+
+    implementation("io.rsocket.kotlin:rsocket-ktor-client:0.15.4")
+
+    implementation("io.rsocket.kotlin:rsocket-ktor-server:0.15.4")
+
+    implementation("io.ktor:ktor-server-netty:2.2.4")
+
+    implementation("io.ktor:ktor-client-cio:2.2.4")
 }

@@ -5,3 +5,27 @@ query findUsers($matcher: String!){
         avatar
     }
 }
+
+query account{
+    account{
+        conversations{
+            id
+            name
+            members{
+                id
+                name
+                avatar
+            }
+            messages{
+                id
+                sender{
+                    id
+                    name
+                }
+                content
+                type
+                state
+            }
+        }
+    }
+}

@@ -35,17 +35,22 @@ import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.LoginViewModel
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 
 @Composable
 fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
-    var authLogin by rememberSaveable { mutableStateOf(0)}
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("")}
-    LaunchedEffect(key1 = Unit){
-        authLogin = loginViewModel.isSuccessLogin.value;
+    var buttonOnClick by rememberSaveable {
+        mutableStateOf(false)
     }
+    if(buttonOnClick){
+        loginViewModel.login(email, password)
+        buttonOnClick = false
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,7 +67,12 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
             modifier = Modifier.padding(bottom = 50.dp)
         )
 
-        Column {
+        Column (
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(8f),
+            verticalArrangement = Arrangement.Center
+                ){
             Text(
                 text = "Thông tin tài khoản",
                 fontWeight = FontWeight.Bold,
@@ -83,7 +93,7 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
                 )
             }
 
-            if(authLogin == 1){
+            if(loginViewModel.isSuccessLogin.value == 1){
                 Text(
                     text = "Đăng nhập thất bại, xin hãy thử lại",
                     modifier = Modifier.padding(bottom = 10.dp),
@@ -96,40 +106,30 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
                 color = MaterialTheme.colors.primary,
                 modifier = Modifier.padding(bottom = 40.dp)
             )
-        }
-
-        Button(
-            onClick = {
-                if(!isValidEmail(email)) {
-                    invalidEmailNotification = true
-                }else {
-                    invalidEmailNotification = false
-                    loginViewModel.login(email, password)
-                    if (authLogin == 2) {
-                        Log.e("tag","login1")
-
-                    }else{
-                        Log.e("tag","login2")
-                    }
-                }
-            },
-            colors = ButtonDefaults
-                .buttonColors(backgroundColor = MaterialTheme.colors.primary),
-            modifier = Modifier
-                .height(60.dp)
-                .width(295.dp)
-
-        ) {
-            Text(text = "Đăng nhập")
+            Button(
+                onClick = {
+                    invalidEmailNotification = !isValidEmail(email)
+                    buttonOnClick = true
+                },
+                colors = ButtonDefaults
+                    .buttonColors(backgroundColor = MaterialTheme.colors.primary),
+                modifier = Modifier
+                    .height(60.dp)
+                    .width(295.dp)
+            ) {
+                Text(text = "Đăng nhập")
+            }
         }
     }
 }
 
-/*@Preview
+@Preview
 @Composable
 fun PreviewScreenSignIn() {
-    ScreenSignIn()
-}*/
+    val navController: NavController = rememberNavController()
+    val loginViewModel: LoginViewModel = LoginViewModel()
+    ScreenSignIn(navController, loginViewModel)
+}
 
 
 @Composable
@@ -201,12 +201,14 @@ fun InputTextField(text: String, onValueChange: (String) -> Unit) {
     )
 }
 
+/*
 @Composable
 @Preview
 fun ReviewInputTextField() {
     var text by rememberSaveable { mutableStateOf("") }
     InputTextField(text, onValueChange = { text = it })
 }
+*/
 
 
 @Composable
@@ -239,11 +241,11 @@ fun LogoApp() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun PreviewLogoApp() {
     LogoApp()
-}
+}*/
 
 //Kiểm tra Email có hợp lệ
 fun isValidEmail(email: CharSequence?): Boolean {

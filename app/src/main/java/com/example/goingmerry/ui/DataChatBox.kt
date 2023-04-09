@@ -1,3 +1,4 @@
+/*
 package com.example.goingmerry.ui
 
 object DataChatBox {
@@ -24,4 +25,4 @@ object DataChatBox {
 data class Message(
     val body: String,
     val author: String
-)
+)*/

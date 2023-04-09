@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.LoginViewModel
@@ -34,7 +35,7 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
     var password by rememberSaveable { mutableStateOf("")}
     var rePassword by rememberSaveable { mutableStateOf("") }
 
-    var isValid = rememberSaveable {
+    var buttonOnClick by rememberSaveable {
         mutableStateOf(false)
     }
     Column(
@@ -54,14 +55,15 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
             modifier = Modifier.padding(bottom = 50.dp)
         )*/
 
-        Column {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = "Thông tin tài khoản",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
-
-            InputUserNameField(text, onValueChange = { text = it })
 
             InputTextField(text, onValueChange = { text = it })
 
@@ -106,11 +108,13 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
     }
 }
 
-/*@Preview
+@Preview
 @Composable
 fun PreviewScreenSignUp() {
-    ScreenSignUp()
-}*/
+    val navController = rememberNavController()
+    val signUpViewModel: SignUpViewModel = SignUpViewModel()
+    ScreenSignUp(navController, signUpViewModel)
+}
 
 @Composable
 fun InputUserNameField(text: String, onValueChange: (String) -> Unit) {
@@ -135,12 +139,14 @@ fun InputUserNameField(text: String, onValueChange: (String) -> Unit) {
     )
 }
 
+/*
 @Composable
 @Preview
 fun ReviewInputUserNameField() {
     var text by rememberSaveable { mutableStateOf("") }
     InputUserNameField(text, onValueChange = { text = it })
 }
+*/
 
 
 @Composable
@@ -182,8 +188,9 @@ fun InputRePasswordField() {
     )
 }
 
+/*
 @Preview
 @Composable
 fun ReviewInputRePasswordField() {
     InputRePasswordField()
-}
+}*/

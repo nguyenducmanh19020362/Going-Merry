@@ -1,5 +1,9 @@
 package com.example.goingmerry.navigate
 
+import AccountQuery
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
@@ -12,16 +16,23 @@ import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
 import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
+import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel){
+fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel, chatBoxViewModel: ChatBoxViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
-        composable(Routes.ChatBox.route){
-            ChatBox()
+        composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
+            val idMember = navBackTrackEntry.arguments?.getString("idConversation")
+            idMember?.let {
+                Log.e("it", "${it.toInt()}")
+                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel)
+            }
         }
 
         composable(Routes.Welcome.route){
@@ -44,7 +55,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Home.route){
-            ScreenHome(loginViewModel)
+            ScreenHome(loginViewModel, chatBoxViewModel = chatBoxViewModel, homeViewModel = homeViewModel, navController)
         }
 
         composable(Routes.SignUp.route){

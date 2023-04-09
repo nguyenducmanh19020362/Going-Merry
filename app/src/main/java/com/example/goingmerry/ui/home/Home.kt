@@ -1,9 +1,13 @@
 package com.example.goingmerry.ui.home
 
+import AccountQuery
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,46 +24,108 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.composable
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.goingmerry.R
+import com.example.goingmerry.ScreenSizes
+import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.ui.ChatBox
+import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ScreenHome(model: LoginViewModel){
+fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeViewModel: HomeViewModel, nav: NavController){
+    var buttonSearch by rememberSaveable {
+        mutableStateOf(false)
+    }
+    homeViewModel.account(model.token.value)
+    chatBoxViewModel.receiverMessages(model.token.value, homeViewModel)
+    if(chatBoxViewModel.conversationId.value != chatBoxViewModel.number){
+        chatBoxViewModel.sendMessages(model.token.value)
+    }
+    val conversations by homeViewModel.conversations.collectAsState()
     Column (modifier = Modifier.fillMaxHeight()){
-        var wordSearch by rememberSaveable { mutableStateOf("") }
-        var buttonSearch by rememberSaveable {
-            mutableStateOf(false)
-        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(135.dp)
+                .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+                .background(MaterialTheme.colors.secondary)
+        ) {
+            Row {
+                Image(
+                    painter = painterResource(R.drawable.app_icon),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                )
 
-        LogoHome()
-        Row (
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            SearchForm(wordSearch, onValueChange = {wordSearch = it}, model)
+                Spacer(modifier = Modifier.size(10.dp))
 
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = "profile",
-                modifier = Modifier.size(40.dp)
-            )
+                Text(
+                    text = "Going Merry",
+                    fontSize = 30.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row (
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                var wordSearch by rememberSaveable { mutableStateOf("") }
+                TextField(
+                    value = wordSearch,
+                    onValueChange = {wordSearch = it},
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = MaterialTheme.colors.onPrimary
+                    ),
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .width((ScreenSizes.weight() / 3 * 2).dp),
+                    shape = RoundedCornerShape(15.dp),
+                    textStyle = TextStyle.Default.copy(fontSize = 18.sp)
+                )
+
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = "profile",
+                    modifier = Modifier.size(40.dp)
+                )
+            }
         }
-        BodyHome()
+        BodyHome(conversations, nav)
     }
 }
 
-/*@Composable
+@Composable
 @Preview
 fun ReviewScreenHome(){
-    ScreenHome()
-}*/
+    val model: LoginViewModel = LoginViewModel()
+    //ScreenHome(model)
+}
 @Composable
-fun LogoHome(){
+fun LogoHome(model: LoginViewModel){
+    var wordSearch by rememberSaveable { mutableStateOf("") }
+    var buttonSearch by rememberSaveable {
+        mutableStateOf(false)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -86,6 +152,17 @@ fun LogoHome(){
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
+        Row (
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            SearchForm(wordSearch, onValueChange = {wordSearch = it}, model)
+
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = "profile",
+                modifier = Modifier.size(40.dp)
+            )
+        }
     }
 }
 
@@ -96,7 +173,7 @@ fun ReviewLogoHome(){
 }*/
 
 @Composable
-fun BodyHome(){
+fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController){
     val flag by rememberSaveable {
         mutableStateOf(true)
     }
@@ -171,7 +248,7 @@ fun BodyHome(){
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            ListFriends()
+            ListFriends(conversations, nav)
         }
     }
 }
@@ -189,19 +266,12 @@ fun SearchForm(wordSearch: String, onValueChange: (String) -> Unit, model: Login
             .height(50.dp)
             .clip(RoundedCornerShape(15.dp))
             .padding(10.dp),
+        value = wordSearch,
+        onValueChange = onValueChange,
         colors = TextFieldDefaults.textFieldColors(
             backgroundColor = MaterialTheme.colors.onPrimary
         ),
         shape = RoundedCornerShape(10.dp),
-        value = wordSearch,
-        onValueChange = {
-            onValueChange
-            HomeViewModel.findPeoples(wordSearch, model)
-            HomeViewModel.findPeoples("a", model)
-            HomeViewModel.findPeoples("b", model)
-            HomeViewModel.findPeoples("c", model)
-            HomeViewModel.findPeoples("d", model)
-        },
         label = { Text(text = "")},
         trailingIcon = {
             /*val image = Icons.Filled.Search
@@ -221,28 +291,61 @@ fun ReviewSearchForm(){
 }*/
 
 @Composable
-fun ListFriends(){
-    LazyColumn(modifier = Modifier.fillMaxHeight()){
-        items(ListFriends.listFriends){friend->
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = friend.linkImageAvatar),
-                    contentDescription = "Ẩn danh",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text(
-                        text = friend.nameUser,
-                        style = MaterialTheme.typography.subtitle2,
-                        fontSize = 20.sp
+fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavController){
+    val imageLoader = ImageLoader(context = LocalContext.current)
+    var str by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    if(listConversation.isNotEmpty()){
+        Log.e("messages", listConversation[0].messages.toString())
+        LazyColumn(modifier = Modifier.fillMaxHeight()){
+            items(listConversation){conversion->
+                var mode = "${conversion.members[1].avatar}"
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+                    .clickable {
+                        nav.navigate(
+                            Routes.ChatBox.route + "/${
+                                listConversation.indexOf(
+                                    conversion
+                                )
+                            }"
+                        )
+                    }
+                ) {
+                    AsyncImage(
+                        model = mode,
+                        imageLoader = imageLoader,
+                        contentDescription = "Ẩn danh",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
                     )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        var len = 0
+                        if(conversion.messages.isNotEmpty()) {
+                            len = conversion.messages.last().content.toString().length;
+                            if(len >= 20){
+                                len = 20;
+                            }
+                            str = conversion.messages.last().content.toString().subSequence(0, len).toString()
+                            Log.e("str", str)
+                        }
+                        Text(
+                            text = conversion.members[1].name,
+                            style = MaterialTheme.typography.subtitle2,
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            text = str,
+                            style = MaterialTheme.typography.body2,
+                            fontSize = 17.sp
+                        )
+                    }
                 }
             }
         }

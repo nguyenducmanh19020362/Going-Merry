@@ -1,6 +1,8 @@
 package com.example.goingmerry.ui
 
+import AccountQuery
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,26 +25,69 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.goingmerry.R
+import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.viewModel.ReceiverMessage
+import com.example.goingmerry.viewModel.SendMessage
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
+import java.lang.reflect.Member
 
 @Composable
-fun ChatBox(){
+fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel){
     var messageTyping by rememberSaveable { mutableStateOf("") }
-    var lenInputMessage = if(messageTyping == "") 4f else 7f
+    val messages by rememberSaveable {
+        mutableStateOf(conversation.messages)
+    }
+
+    val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
+
+
+    val lenInputMessage = if(messageTyping == "") 4f else 7f
     Column {
-        TopBar()
+        TopBar(conversation.members[1])
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
         ){
-            items(DataChatBox.listMessage){
+            /*items(directMessages.value){
+                var directMessage = it
+                if(directMessage.conversationId == conversation.id.toLong()){
+                    if(conversation.members[0].id.toLong() == directMessage.senderId) {
+                        MessageCard(
+                            msg = Message(
+                                directMessage.content,
+                                conversation.members[0].name
+                            ), url = conversation.members[1].avatar.toString()
+                        )
+                    }
+                    if(conversation.members[1].id.toLong() == directMessage.senderId) {
+                        MessageCard(
+                            msg = Message(
+                                directMessage.content,
+                                conversation.members[1].name
+                            ), url = conversation.members[1].avatar.toString()
+                        )
+                    }
+                }
+            }*/
+            items(directMessages){
+                message->
+                MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString())
+            }
+            items(messages){
                     message->
-                MessageCard(msg = message)
+                Log.e("message", message.content.toString())
+                MessageCard(msg = Message(message.content, message.sender!!.name), conversation.members[1].avatar.toString())
             }
         }
         Row(
@@ -99,7 +144,13 @@ fun ChatBox(){
                 }
             )
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    if(messageTyping != "") {
+                        chatBoxViewModel.conversationId.value = conversation.id.toLong()
+                        chatBoxViewModel.contentSendMessage.value = messageTyping
+                        chatBoxViewModel.flag.value = true
+                    }
+                },
                 modifier = Modifier
                     .weight(1.5f)
                     .clip(CircleShape)
@@ -118,7 +169,6 @@ fun ChatBox(){
 @Preview
 @Composable
 fun PreviewBoxChat(){
-    ChatBox()
 }
 
 @Composable
@@ -133,15 +183,17 @@ fun PreviewInputMessage(){
 }
 
 @Composable
-fun TopBar(){
+fun TopBar(member: AccountQuery.Member){
+    val imageLoader = ImageLoader(context = LocalContext.current)
     TopAppBar (
         modifier = Modifier
             .height(70.dp)
             .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)),
         backgroundColor = MaterialTheme.colors.secondaryVariant,
         title = {
-            Image(
-                painter = painterResource(R.drawable.img),
+            AsyncImage(
+                model = member.avatar,
+                imageLoader = imageLoader,
                 contentDescription = "Friend",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -149,7 +201,7 @@ fun TopBar(){
                     .padding(end = 5.dp)
                     .clip(CircleShape)
             )
-            Text(text = "Taylor Swift")
+            Text(text = member.name)
         },
         navigationIcon = {
             val image = Icons.Filled.ArrowBack
@@ -170,19 +222,21 @@ fun TopBar(){
 }
 
 @Composable
-fun MessageCard(msg: Message) {
+fun MessageCard(msg: Message, url: String) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
+    val imageLoader = ImageLoader(LocalContext.current)
     Row(
         modifier = Modifier
             .padding(all = 8.dp)
             .fillMaxWidth(),
-        horizontalArrangement = if(msg.author != "me") Arrangement.Start else Arrangement.End
+        horizontalArrangement = if(msg.author != "User") Arrangement.Start else Arrangement.End
     ) {
-        if(msg.author != "me"){
-            Image(
-                painter = painterResource(id = R.drawable.img),
+        if(msg.author != "User"){
+            AsyncImage(
+                model = url,
+                imageLoader = imageLoader,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -200,14 +254,14 @@ fun MessageCard(msg: Message) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val backgroundBody = if(msg.author == "me") MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
+            val backgroundBody = if(msg.author == "User") MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 elevation = 1.dp,
                 color = backgroundBody
             ) {
                 Text(
-                    text = msg.body,
+                    text = msg.content.toString(),
                     modifier = Modifier
                         .padding(all = 4.dp)
                         .widthIn(0.dp, (screenWidth / 2)),
@@ -218,4 +272,9 @@ fun MessageCard(msg: Message) {
         }
     }
 }
+
+data class Message(
+    val content: String?,
+    val author: String
+)
 

@@ -19,7 +19,6 @@ class LoginViewModel : ViewModel() {
     val token = mutableStateOf(value = "")
 
     fun login(email: String, password: String) {
-        Log.e("login", "error0")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val authService = Retrofit.getAuthService()
