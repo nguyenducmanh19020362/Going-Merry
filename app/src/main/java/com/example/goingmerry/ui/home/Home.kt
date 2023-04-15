@@ -125,7 +125,9 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
             }
         }
         if(wordSearch == ""){
-            BodyHome(conversations, nav, homeViewModel.idAccount.value)
+            BodyHome(conversations, nav, homeViewModel.idAccount.value,typeList, changeTypeList = {type: String ->
+                typeList = type
+            })
         }else{
             homeViewModel.findPeoples(wordSearch, model)
             ListPeople(listPeople, nav)
@@ -134,13 +136,13 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
 }
 
 @Composable
-fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
+fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController, idAccount: String, typeList: String,  changeTypeList: (type: String) -> Unit){
     val flag by rememberSaveable {
         mutableStateOf(true)
     }
 
-    val colorButtonFriend = if(flag) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
-    val colorButtonGroup = if(!flag) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
+    val colorButtonFriend = if(typeList == "Friend") MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
+    val colorButtonGroup = if(typeList == "Group") MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
 
     Column{
         Row(
@@ -150,7 +152,7 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             horizontalArrangement = Arrangement.Center
         ){
             Button(
-                onClick = {},
+                onClick = {changeTypeList("Friend")},
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults
                     .buttonColors(backgroundColor = colorButtonFriend)
@@ -164,7 +166,7 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             )
             Spacer(modifier = Modifier.width(50.dp))
             Button(
-                onClick = {},
+                onClick = {changeTypeList("Group")},
                 colors = ButtonDefaults
                     .buttonColors(backgroundColor = colorButtonGroup),
                 shape = RoundedCornerShape(10.dp)
@@ -209,7 +211,11 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            ListFriends(conversations, nav, idAccount)
+            if(typeList == "Friend") {
+                ListFriends(conversations, nav, idAccount)
+            }else{
+                ListGroups(listConversation = conversations, nav = nav, idAccount = idAccount)
+            }
         }
     }
 }
@@ -266,7 +272,7 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
                     for(member in conversion.members){
                         //Log.e("id", member.id + " " + idAccount)
                         if(member.id != idAccount){
-                            var mode = "${member.avatar}"
+                            val mode = "${member.avatar}"
                             Row(modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(5.dp)
@@ -322,65 +328,68 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
     }
 }
 
-/*
 @Composable
-fun ListGroups(listConversation: List<AccountQuery.Conversation1>, nav: NavController, idAccount: String){
+fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     var str by rememberSaveable {
         mutableStateOf("")
     }
 
-    if(true){
+    if(listConversation.isNotEmpty()){
         Log.e("messages", listConversation[0].messages.toString())
         LazyColumn(modifier = Modifier.fillMaxHeight()){
             items(listConversation){conversion->
-                if(conversion.members.size > 2 && conversion.messages.isNotEmpty()){
-                    var mode = "${conversion.avatar}"
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                        .clickable {
-                            nav.navigate(
-                                Routes.ChatBox.route + "/${
-                                    listConversation.indexOf(
-                                        conversion
+                if(conversion.members.size > 2){
+                    for(member in conversion.members){
+                        //Log.e("id", member.id + " " + idAccount)
+                        if(member.id != idAccount){
+                            var mode = "${member.avatar}"
+                            Row(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp)
+                                .clickable {
+                                    nav.navigate(
+                                        Routes.ChatBox.route + "/${
+                                            listConversation.indexOf(
+                                                conversion
+                                            )
+                                        }"
                                     )
-                                }"
-                            )
-                        }
-                    ) {
-                        AsyncImage(
-                            model = mode,
-                            imageLoader = imageLoader,
-                            contentDescription = "Ẩn danh",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(CircleShape)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            var len = 0
-                            if(conversion.messages.isNotEmpty()) {
-                                len = conversion.messages.first().content.toString().length;
-                                if(len >= 20){
-                                    len = 20;
                                 }
-                                str = conversion.messages.first().content.toString().subSequence(0, len).toString()
-                                Log.e("str", str)
-                            }else{
-                                str = ""
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.app_icon),
+                                    contentDescription = "Ẩn danh",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .clip(CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    var len = 0
+                                    if(conversion.messages.isNotEmpty()) {
+                                        len = conversion.messages.first().content.toString().length;
+                                        if(len >= 20){
+                                            len = 20;
+                                        }
+                                        str = conversion.messages.first().content.toString().subSequence(0, len).toString()
+                                    }else{
+                                        str = ""
+                                    }
+                                    Text(
+                                        text = member.name,
+                                        style = MaterialTheme.typography.subtitle2,
+                                        fontSize = 20.sp
+                                    )
+                                    Text(
+                                        text = str,
+                                        style = MaterialTheme.typography.body2,
+                                        fontSize = 17.sp
+                                    )
+                                }
                             }
-                            Text(
-                                text = conversion.members[0].name,
-                                style = MaterialTheme.typography.subtitle2,
-                                fontSize = 20.sp
-                            )
-                            Text(
-                                text = str,
-                                style = MaterialTheme.typography.body2,
-                                fontSize = 17.sp
-                            )
+                            break;
                         }
                     }
                 }
@@ -388,7 +397,6 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation1>, nav: NavContr
         }
     }
 }
-*/
 
 @Composable
 fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController){
