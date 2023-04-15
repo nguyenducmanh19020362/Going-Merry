@@ -30,7 +30,8 @@ import com.example.goingmerry.viewModel.*
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
-                chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel){
+                chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel,
+                listRAFViewModel: ListRAFViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
@@ -123,7 +124,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
         composable(Routes.ListRequestAddFriend.route){
             val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()
-            ListRequestAddFriends(listFriendRequest = listRequestAddFriend.value)
+            ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel)
         }
     }
 }

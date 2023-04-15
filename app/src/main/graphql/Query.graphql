@@ -64,3 +64,17 @@ mutation AddFriend($userId: ID!){
     }
 }
 
+mutation ReplyRequestAddFriend($userId: ID!, $reply: FriendRequestReply!){
+    replyRequest(userId: $userId, reply: $reply){
+        sender{
+            id
+        }
+    }
+}
+
+mutation CreateConversation($input: ConversationInput!){
+    conversation(input: $input){
+        id
+    }
+}
+

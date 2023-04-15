@@ -122,7 +122,7 @@ input GroupInput {
 
 
 input ConversationInput {
-	id: ID!
+	id: ID
 	name: String
 	members: [ID!]
 	deleteMessages: [ID!]
@@ -154,13 +154,13 @@ type Mutation {
 
 	unfriend(userId: ID!): User
 
-	replyRequest(userId: ID!, reply: FriendRequestReply): FriendRequest
+	replyRequest(userId: ID!, reply: FriendRequestReply!): FriendRequest
 
 	blacklist(userId: ID!): User
 
 	group(input: GroupInput): Group
 
-	conversation(input: ConversationInput): Conversation
+	conversation(input: ConversationInput!): Conversation
 
 }
 

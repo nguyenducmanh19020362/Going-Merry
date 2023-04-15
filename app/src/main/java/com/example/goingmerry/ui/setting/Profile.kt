@@ -8,13 +8,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,14 +35,39 @@ import com.example.goingmerry.viewModel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel, isFriend: Boolean) {
+    var showDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     Log.e("ProfileScreen", "$id $token")
     profileViewModel.matchProfiles(id, token)
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(showDialog){
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(text = "Xác nhận") },
+                text = { Text(text = "Bạn có muốn gửi yêu cầu kết bạn?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showDialog = false
+                        profileViewModel.addFriend(id, token)
+                    }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDialog = false
+                    }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
         TopBar()
 
-        ChangeImage(profileViewModel.avatar.value, isFriend, profileViewModel, id, token)
+        ChangeImage(profileViewModel.avatar.value, isFriend, changeShowDialog = {showDialog = true})
 
         BodyProfile(profileViewModel)
 
@@ -83,8 +109,7 @@ fun TopBar() {
 }
 
 @Composable
-fun ChangeImage(linkImage: String, isFriend: Boolean, profileViewModel: ProfileViewModel
-                    , id: String, token:String) {
+fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Unit) {
     val imageLoader = ImageLoader(context = LocalContext.current)
     Column(
         modifier = Modifier
@@ -116,10 +141,11 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, profileViewModel: ProfileV
             Icon(
                 imageVector = if(isFriend) Icons.Default.PersonRemoveAlt1 else Icons.Default.People,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier
+                    .size(40.dp)
                     .padding(10.dp)
                     .clickable {
-                        profileViewModel.addFriend(id, token)
+                        changeShowDialog()
                     }
             )
 
