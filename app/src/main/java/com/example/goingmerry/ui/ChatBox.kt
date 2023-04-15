@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.asFlow
 import java.lang.reflect.Member
 
 @Composable
-fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel){
+fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by rememberSaveable {
@@ -53,8 +53,18 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
 
     val lenInputMessage = if(messageTyping == "") 4f else 7f
+
+    var nameUser by rememberSaveable {
+        mutableStateOf("")
+    }
     Column {
-        TopBar(conversation.members[1])
+        for(member in conversation.members){
+            if(member.id != id){
+                TopBar(member)
+            }else{
+                nameUser = member.name
+            }
+        }
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
@@ -84,14 +94,14 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 it.id
             }.asReversed()){
                 message->
-                MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString())
+                MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString(), nameUser)
             }
             items(messages.sortedBy {
                 it.id
             }.asReversed()){
                     message->
                 Log.e("message", message.content.toString())
-                MessageCard(msg = Message(message.content, message.sender!!.name), conversation.members[1].avatar.toString())
+                MessageCard(msg = Message(message.content, message.sender!!.name), conversation.members[1].avatar.toString(), nameUser)
             }
         }
         Row(
@@ -228,7 +238,7 @@ fun TopBar(member: AccountQuery.Member){
 }
 
 @Composable
-fun MessageCard(msg: Message, url: String) {
+fun MessageCard(msg: Message, url: String, nameUser: String) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
@@ -239,7 +249,7 @@ fun MessageCard(msg: Message, url: String) {
             .fillMaxWidth(),
         horizontalArrangement = if(msg.author != "User") Arrangement.Start else Arrangement.End
     ) {
-        if(msg.author != "User"){
+        if(msg.author != nameUser){
             AsyncImage(
                 model = url,
                 imageLoader = imageLoader,
@@ -260,7 +270,7 @@ fun MessageCard(msg: Message, url: String) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val backgroundBody = if(msg.author == "User") MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
+            val backgroundBody = if(msg.author == nameUser) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 elevation = 1.dp,

@@ -1,8 +1,10 @@
 package com.example.goingmerry.ui.setting
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,8 +13,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,23 +21,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
+import coil.compose.AsyncImage
 import com.example.goingmerry.R
+import com.example.goingmerry.viewModel.ProfileViewModel
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel, isFriend: Boolean) {
+    Log.e("ProfileScreen", "$id $token")
+    profileViewModel.matchProfiles(id, token)
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         TopBar()
 
-        ChangeImage()
+        ChangeImage(profileViewModel.avatar.value, isFriend, profileViewModel, id, token)
 
-        BodyProfile(name = "Lisa", age = 25)
+        BodyProfile(profileViewModel)
 
     }
 }
@@ -44,7 +51,7 @@ fun ProfileScreen() {
 @Composable
 @Preview
 fun PreviewProfile() {
-    ProfileScreen()
+    ProfileScreen("","", profileViewModel = ProfileViewModel(), true)
 }
 
 @Composable
@@ -76,7 +83,9 @@ fun TopBar() {
 }
 
 @Composable
-fun ChangeImage() {
+fun ChangeImage(linkImage: String, isFriend: Boolean, profileViewModel: ProfileViewModel
+                    , id: String, token:String) {
+    val imageLoader = ImageLoader(context = LocalContext.current)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -96,6 +105,22 @@ fun ChangeImage() {
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
+            )
+
+            /*Icon(
+                imageVector = Icons.Default.People,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )*/
+
+            Icon(
+                imageVector = if(isFriend) Icons.Default.PersonRemoveAlt1 else Icons.Default.People,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+                    .padding(10.dp)
+                    .clickable {
+                        profileViewModel.addFriend(id, token)
+                    }
             )
 
             Box(
@@ -130,8 +155,10 @@ fun ChangeImage() {
 //        ) {
 //        }
 
-        RoundImage(
-            image = painterResource(id = R.drawable.img),
+        AsyncImage(
+            model = linkImage,
+            imageLoader = imageLoader,
+            contentDescription = "",
             modifier = Modifier
                 .size(100.dp)
                 .align(Alignment.CenterHorizontally)
@@ -198,8 +225,7 @@ fun RoundImage(
 
 @Composable
 fun BodyProfile(
-    name: String,
-    age: Int
+    profileViewModel: ProfileViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -213,7 +239,7 @@ fun BodyProfile(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "$name, $age tuổi",
+            text = profileViewModel.name.value,
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -246,7 +272,6 @@ fun BodyProfile(
                 backgroundColor = MaterialTheme.colors.primary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -264,7 +289,36 @@ fun BodyProfile(
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
-                        text = "Ca sĩ tại Black Pink Office",
+                        text = profileViewModel.age.value,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                    )
+                }
+            }
+            Card(
+                elevation = 4.dp,
+                backgroundColor = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(25.dp))
+
+                    Text(
+                        text = profileViewModel.job.value,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -277,7 +331,6 @@ fun BodyProfile(
                 backgroundColor = MaterialTheme.colors.primary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -295,7 +348,7 @@ fun BodyProfile(
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
-                        text = "Sống tại Hà Nội",
+                        text = profileViewModel.address.value,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -308,7 +361,6 @@ fun BodyProfile(
                 backgroundColor = MaterialTheme.colors.primary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -326,7 +378,7 @@ fun BodyProfile(
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
-                        text = "Sở thích: ca hát, ăn uống",
+                        text = profileViewModel.favorites.value,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,

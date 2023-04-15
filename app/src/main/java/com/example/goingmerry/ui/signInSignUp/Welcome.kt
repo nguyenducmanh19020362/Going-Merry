@@ -1,5 +1,8 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,6 +13,8 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,18 +22,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.example.goingmerry.DataUserInfo
 import com.example.goingmerry.R
+import com.example.goingmerry.UserInformation
+import com.example.goingmerry.UserInformationDao
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, signupViewModel: SignUpViewModel) {
+fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel,
+                  signupViewModel: SignUpViewModel, userInfo: DataUserInfo) {
+    val info by userInfo.listInfo.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,8 +77,38 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel, 
                 .height(50.dp)
                 .width(280.dp),
             onClick = {
+                //userInfo.getAllInfo()
+                Log.e("info", info.size.toString())
+                /*if(info.isNotEmpty()){
+                    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    val ldt = LocalDateTime.parse(info[0].expiredToken, format)
+                    Log.e("ldt", ldt.toString())
+                    val current = LocalDateTime.parse(Instant.now().toString(), format)
+                    Log.e("current", current.toString())
+                    if(ldt < current) {
+                        loginViewModel.isSuccessLogin.value = 0;
+                        navController.navigate(Routes.SignIn.route) {
+                            launchSingleTop = true
+                        }
+                        if(loginViewModel.token.value != "" && loginViewModel.expiredToken.value != ""){
+                            userInfo.insert(loginViewModel.token.value, loginViewModel.expiredToken.value)
+                        }
+                    }else{
+                        loginViewModel.token.value = info[0].token.orEmpty()
+                        navController.navigate(Routes.Home.route)
+                    }
+                }else{
+                    Log.e("error", "1")
+                    loginViewModel.isSuccessLogin.value = 0;
+                    navController.navigate(Routes.SignIn.route) {
+                        launchSingleTop = true
+                    }
+                    if(loginViewModel.token.value != "" && loginViewModel.expiredToken.value != ""){
+                        userInfo.insert(loginViewModel.token.value, loginViewModel.expiredToken.value)
+                    }
+                }*/
                 loginViewModel.isSuccessLogin.value = 0;
-                navController.navigate(Routes.SignIn.route){
+                navController.navigate(Routes.SignIn.route) {
                     launchSingleTop = true
                 }
             },

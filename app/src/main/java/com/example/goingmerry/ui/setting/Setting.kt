@@ -1,5 +1,6 @@
 package com.example.goingmerry.ui.home
 
+import AccountQuery
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -24,17 +26,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.ImageLoader
+import coil.compose.AsyncImage
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
 
 @Composable
-fun SettingScreen(navController: NavController) {
+fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TopBar(name = "Lisa", id = "0007")
+        TopBar(name = name, avatar = avatar)
 
         BodyScreen(
             navController = navController,
@@ -44,7 +48,12 @@ fun SettingScreen(navController: NavController) {
                 }
             },
             onNavigateToProfile = {
-                navController.navigate("profile") {
+                navController.navigate(Routes.Profile.route + "/${idAccount}") {
+                    launchSingleTop = true
+                }
+            },
+            onNavigateToListAddFriend = {
+                navController.navigate(Routes.ListRequestAddFriend.route){
                     launchSingleTop = true
                 }
             }
@@ -57,13 +66,13 @@ fun SettingScreen(navController: NavController) {
 @Preview
 fun PreviewSetting() {
     val navController = rememberNavController()
-    SettingScreen(navController = navController)
+    SettingScreen(navController = navController, "", "","")
 }
 
 @Composable
 fun TopBar(
     name: String,
-    id: String
+    avatar: String
 ) {
     Column(
         modifier = Modifier
@@ -95,7 +104,7 @@ fun TopBar(
                 .align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = "$name #$id",
+                text = "$name",
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
@@ -106,13 +115,17 @@ fun TopBar(
                     .align(Alignment.BottomStart)
             )
         }
-
-        RoundImage(
-            image = painterResource(id = R.drawable.img),
+        val imageLoader = ImageLoader(context = LocalContext.current)
+        AsyncImage(
+            model = avatar,
+            imageLoader = imageLoader,
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(90.dp)
                 .align(Alignment.CenterHorizontally)
                 .offset(x = (-110).dp, y = (-130).dp)
+                .clip(CircleShape)
         )
     }
 }
@@ -121,7 +134,7 @@ fun TopBar(
 @Composable
 @Preview
 fun PreviewTopBar() {
-    TopBar(name = "Lisa", id = "0007")
+    TopBar(name = "Lisa", avatar = "0007")
 }
 
 @Composable
@@ -149,6 +162,7 @@ fun BodyScreen(
     navController: NavController,
     onNavigateToUserInfo: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToListAddFriend: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -258,6 +272,9 @@ fun BodyScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
+                .clickable {
+                    onNavigateToListAddFriend()
+                }
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -276,7 +293,7 @@ fun BodyScreen(
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
-                        text = "Danh sách bạn bè",
+                        text = "Danh sách yêu cầu kết bạn",
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White

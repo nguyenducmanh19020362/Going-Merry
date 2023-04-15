@@ -101,7 +101,6 @@ class ChatBoxViewModel: ViewModel() {
     }
     fun sendMessages(token:String){
         stateSockets.value = "ON"
-        Log.e("sendMessage", "sendMessage")
         val bearerAuthMetadata = BearerAuthMetadata(token)
         val routeMetadata = RoutingMetadata("api.v1.messages.stream")
         viewModelScope.launch (Dispatchers.Main) {
@@ -130,7 +129,6 @@ class ChatBoxViewModel: ViewModel() {
                     data(ByteReadPacket.Empty)
                 },
                 flow{
-                    Log.e("flag3", flag.value.toString())
                     while (true){
                         if(flag.value){
                             val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, MessageType.TEXT)

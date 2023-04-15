@@ -43,7 +43,7 @@ type Message {
 	sender: User
 	content: String
 	type: MessageType!
-	sendedAt: String!
+	sendedAt: Int
 	state: MessageState!
 }
 
@@ -62,14 +62,13 @@ type Group {
 	name: String!
 	members: [GroupMember!]!
 	conversation: Conversation!
-	lastUpdate: String!
+	lastUpdate: Int!
 }
 
 type FriendRequest {
-	id: ID!
 	sender: User
-	reciver: User
-	sendedAt: String!
+	receiver: User
+	sendAt: Int!
 }
 
 type Account {

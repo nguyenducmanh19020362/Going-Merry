@@ -18,4 +18,5 @@ sealed class Routes (val route: String) {
     object ForgotPassword: Routes("forgotPassword")
 
     object Verification: Routes("verification")
+    object ListRequestAddFriend: Routes("listRequestAddFriend")
 }

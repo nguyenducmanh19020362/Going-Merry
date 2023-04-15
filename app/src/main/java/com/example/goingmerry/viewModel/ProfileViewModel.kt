@@ -1,11 +1,9 @@
 package com.example.goingmerry.viewModel
 
-import AccountQuery
-import FindUsersQuery
-import android.content.Context
+import AddFriendMutation
+import UserProfileQuery
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo.ApolloCall
@@ -14,59 +12,20 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
-class HomeViewModel: ViewModel(){
-    private val _listPeople = MutableStateFlow(listOf<FindUsersQuery.FindUser>())
-    val listPeople = _listPeople.asStateFlow()
-
-    private val _conversations = MutableStateFlow(listOf<AccountQuery.Conversation>())
-    val conversations = _conversations.asStateFlow()
-
-    private val _listRequestAddFriend = MutableStateFlow(listOf<AccountQuery.FriendRequest>())
-    val listRequestAddFriend = _listRequestAddFriend.asStateFlow()
-
-    val idAccount = mutableStateOf("")
-    val nameAccount = mutableStateOf("")
-    val avatarAccount =  mutableStateOf("")
-    fun findPeoples(matcher: String, model: LoginViewModel){
+class ProfileViewModel: ViewModel(){
+    var name = mutableStateOf("")
+    var age = mutableStateOf("")
+    var job = mutableStateOf("")
+    var gender = mutableStateOf("")
+    var address = mutableStateOf("")
+    var avatar = mutableStateOf("")
+    var favorites = mutableStateOf("")
+    fun matchProfiles(id: String, token: String){
         viewModelScope.launch (Dispatchers.IO){
-            try {
-                val okHttp = OkHttpClient.Builder()
-                    .addInterceptor{chain ->
-                        val original = chain.request()
-                        val builder = original.newBuilder().method("POST", original.body)
-                        builder.addHeader("Authorization", "Bearer ${model.token.value}")
-                        builder.addHeader("Content-Type","application/json")
-                        chain.proceed(builder.build())
-                    }.build()
-                val apolloClient = ApolloClient.builder()
-                    .serverUrl("http://10.0.2.2:8080/graphql")
-                    .okHttpClient(okHttp)
-                    .build()
-                val users = apolloClient.query(FindUsersQuery(matcher = matcher))
-                users.enqueue(object: ApolloCall.Callback<FindUsersQuery.Data>(){
-                    override fun onResponse(response: Response<FindUsersQuery.Data>) {
-                        _listPeople.tryEmit(response.data!!.findUsers.orEmpty())
-                        Log.e("data", response.data.toString())
-                    }
-
-                    override fun onFailure(e: ApolloException) {
-                        Log.e("Todo", e.toString())
-                    }
-                })
-            }catch (e: Exception){
-                Log.d("error", e.toString())
-            }
-        }
-    }
-    fun account(token: String){
-        Log.e("account", "account");
-        viewModelScope.launch (Dispatchers.Main){
             try {
                 val okHttp = OkHttpClient.Builder()
                     .addInterceptor{chain ->
@@ -80,18 +39,17 @@ class HomeViewModel: ViewModel(){
                     .serverUrl("http://10.0.2.2:8080/graphql")
                     .okHttpClient(okHttp)
                     .build()
-                val conversation = apolloClient.query(AccountQuery())
-                conversation.enqueue(object: ApolloCall.Callback<AccountQuery.Data>(){
-                    override fun onResponse(response: Response<AccountQuery.Data>) {
-                        if(response.data != null){
-                            //Log.e("dbt", response.data.toString())
-                            _conversations.tryEmit(response.data!!.account.conversations)
-                            idAccount.value = response.data!!.account.id
-                            nameAccount.value = response.data!!.account.name
-                            avatarAccount.value = response.data!!.account.avatar.orEmpty()
-                            _listRequestAddFriend.tryEmit(response.data!!.account.friendRequests)
-                        }
-                        Log.e("Abcdef", response.data.toString())
+                val users = apolloClient.query(UserProfileQuery(id))
+                users.enqueue(object: ApolloCall.Callback<UserProfileQuery.Data>(){
+                    override fun onResponse(response: Response<UserProfileQuery.Data>) {
+                        name.value = response.data!!.user.name
+                        age.value = response.data!!.user.birthday.toString()
+                        job.value = response.data!!.user.job.toString()
+                        gender.value = response.data!!.user.gender.toString()
+                        address.value = response.data!!.user.address.toString()
+                        avatar.value = response.data!!.user.avatar.toString()
+                        favorites.value = response.data!!.user.favorites.toString()
+                        Log.e("data", response.data.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {
@@ -103,4 +61,34 @@ class HomeViewModel: ViewModel(){
             }
         }
     }
+    fun addFriend(id: String, token: String){
+        viewModelScope.launch (Dispatchers.IO){
+            try {
+                val okHttp = OkHttpClient.Builder()
+                    .addInterceptor{chain ->
+                        val original = chain.request()
+                        val builder = original.newBuilder().method("POST", original.body)
+                        builder.addHeader("Authorization", "Bearer $token")
+                        builder.addHeader("Content-Type","application/json")
+                        chain.proceed(builder.build())
+                    }.build()
+                val apolloClient = ApolloClient.builder()
+                    .serverUrl("http://10.0.2.2:8080/graphql")
+                    .okHttpClient(okHttp)
+                    .build()
+                val users = apolloClient.mutate(AddFriendMutation(id))
+                users.enqueue(object: ApolloCall.Callback<AddFriendMutation.Data>(){
+                    override fun onResponse(response: Response<AddFriendMutation.Data>) {
+                        Log.e("data", response.data.toString())
+                    }
+                    override fun onFailure(e: ApolloException) {
+                        Log.e("Todo", e.toString())
+                    }
+                })
+            }catch (e: Exception){
+                Log.d("error", e.toString())
+            }
+        }
+    }
 }
+

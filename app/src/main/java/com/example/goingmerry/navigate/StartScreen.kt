@@ -4,56 +4,73 @@ import AccountQuery
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
 
 import androidx.navigation.compose.rememberNavController
+import com.example.goingmerry.DataUserInfo
+import com.example.goingmerry.UserInformationDao
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.home.BodyScreen
 import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
 import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
-import com.example.goingmerry.viewModel.ChatBoxViewModel
-import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.ui.home.SettingScreen
+import com.example.goingmerry.ui.setting.ListRequestAddFriends
 import com.example.goingmerry.ui.setting.ProfileScreen
 import com.example.goingmerry.ui.setting.UserInfoScreen
 import com.example.goingmerry.ui.signInSignUp.*
-import com.example.goingmerry.viewModel.LoginViewModel
-import com.example.goingmerry.viewModel.SignUpViewModel
+import com.example.goingmerry.viewModel.*
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel, chatBoxViewModel: ChatBoxViewModel){
+fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
+                chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
             val idMember = navBackTrackEntry.arguments?.getString("idConversation")
             idMember?.let {
                 Log.e("it", "${it.toInt()}")
-                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel)
+                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value)
             }
 
         }
 
         composable(Routes.Setting.route){
-            SettingScreen(navController = navController)
+            SettingScreen(navController = navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
+            homeViewModel.idAccount.value)
         }
 
         composable(Routes.UserInfo.route){
             UserInfoScreen()
         }
 
-        composable(Routes.Profile.route){
-            ProfileScreen()
+        composable(Routes.Profile.route + "/{idUser}"){navBackTrackEntry->
+            val idUser = navBackTrackEntry.arguments?.getString("idUser")
+            idUser?.let {
+                var isFriend: Boolean = false;
+                if(homeViewModel.conversations.value.isNotEmpty()){
+                    for(conversation in homeViewModel.conversations.value){
+                        if(conversation.members.size == 2){
+                            if(conversation.members[0].id == idUser){
+                                isFriend = true;
+                                break;
+                            }
+                            if(conversation.members[1].id == idUser){
+                                isFriend = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                ProfileScreen(idUser.orEmpty(), loginViewModel.token.value, profileViewModel, isFriend)
+            }
         }
 
         composable(Routes.FillInfo.route){
@@ -70,7 +87,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
 
         composable(Routes.Welcome.route){
             WelcomeScreen(navController = navController,
-                signupViewModel = signUpViewModel, loginViewModel = loginViewModel)
+                signupViewModel = signUpViewModel, loginViewModel = loginViewModel, userInfo = userInfo)
         }
 
         composable(Routes.SignIn.route){
@@ -103,6 +120,10 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
             }else{
                 ScreenSignUp(navController = navController, signUpViewModel = signUpViewModel)
             }
+        }
+        composable(Routes.ListRequestAddFriend.route){
+            val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()
+            ListRequestAddFriends(listFriendRequest = listRequestAddFriend.value)
         }
     }
 }

@@ -8,6 +8,9 @@ query findUsers($matcher: String!){
 
 query account{
     account{
+        id
+        name
+        avatar
         conversations{
             id
             name
@@ -27,5 +30,37 @@ query account{
                 state
             }
         }
+        friendRequests{
+            sender{
+                id
+                name
+            }
+            receiver{
+                id
+                name
+            }
+        }
     }
 }
+
+query userProfile($userId: ID!){
+    user(userId: $userId){
+        id
+        name
+        birthday
+        job
+        gender
+        address
+        avatar
+        favorites
+    }
+}
+
+mutation AddFriend($userId: ID!){
+    request(userId: $userId){
+        sender{
+            id
+        }
+    }
+}
+

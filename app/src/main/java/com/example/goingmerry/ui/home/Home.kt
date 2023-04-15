@@ -1,6 +1,7 @@
 package com.example.goingmerry.ui.home
 
 import AccountQuery
+import FindUsersQuery
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -50,8 +51,14 @@ import kotlinx.coroutines.flow.asStateFlow
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeViewModel: HomeViewModel, nav: NavController){
+    val listPeople by homeViewModel.listPeople.collectAsState()
+    var wordSearch by rememberSaveable { mutableStateOf("") }
     var buttonSearch by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    var typeList by rememberSaveable {
+        mutableStateOf("Friend")
     }
 
     homeViewModel.account(model.token.value)
@@ -91,7 +98,6 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
             Row (
                 verticalAlignment = Alignment.CenterVertically
             ){
-                var wordSearch by rememberSaveable { mutableStateOf("") }
                 TextField(
                     value = wordSearch,
                     onValueChange = {wordSearch = it},
@@ -108,85 +114,27 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "profile",
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable(onClick = {
+                            nav.navigate(Routes.Setting.route) {
+                                launchSingleTop = true
+                            }
+                        })
                 )
             }
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = "profile",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable(onClick = {
-                        nav.navigate(Routes.Setting.route) {
-                            launchSingleTop = true
-                        }
-                    })
-            )
         }
-        BodyHome(conversations, nav)
-    }
-}
-
-@Composable
-@Preview
-fun ReviewScreenHome(){
-    val model: LoginViewModel = LoginViewModel()
-    //ScreenHome(model)
-}
-@Composable
-fun LogoHome(model: LoginViewModel){
-    var wordSearch by rememberSaveable { mutableStateOf("") }
-    var buttonSearch by rememberSaveable {
-        mutableStateOf(false)
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(135.dp)
-            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-            .background(MaterialTheme.colors.secondary)
-    ) {
-        Row {
-            Image(
-                painter = painterResource(R.drawable.app_icon),
-                contentDescription = "",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-            )
-
-            Spacer(modifier = Modifier.size(10.dp))
-
-            Text(
-                text = "Going Merry",
-                fontSize = 30.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Row (
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            SearchForm(wordSearch, onValueChange = {wordSearch = it}, model)
-
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = "profile",
-                modifier = Modifier.size(40.dp)
-            )
+        if(wordSearch == ""){
+            BodyHome(conversations, nav, homeViewModel.idAccount.value)
+        }else{
+            homeViewModel.findPeoples(wordSearch, model)
+            ListPeople(listPeople, nav)
         }
     }
 }
 
-/*@Preview
 @Composable
-fun ReviewLogoHome(){
-    LogoHome()
-}*/
-
-@Composable
-fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController){
+fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
     val flag by rememberSaveable {
         mutableStateOf(true)
     }
@@ -261,7 +209,7 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController)
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            ListFriends(conversations, nav)
+            ListFriends(conversations, nav, idAccount)
         }
     }
 }
@@ -304,7 +252,7 @@ fun ReviewSearchForm(){
 }*/
 
 @Composable
-fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavController){
+fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     var str by rememberSaveable {
         mutableStateOf("")
@@ -315,7 +263,79 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
         LazyColumn(modifier = Modifier.fillMaxHeight()){
             items(listConversation){conversion->
                 if(conversion.members.size == 2){
-                    var mode = "${conversion.members[1].avatar}"
+                    for(member in conversion.members){
+                        //Log.e("id", member.id + " " + idAccount)
+                        if(member.id != idAccount){
+                            var mode = "${member.avatar}"
+                            Row(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp)
+                                .clickable {
+                                    nav.navigate(
+                                        Routes.ChatBox.route + "/${
+                                            listConversation.indexOf(
+                                                conversion
+                                            )
+                                        }"
+                                    )
+                                }
+                            ) {
+                                AsyncImage(
+                                    model = mode,
+                                    imageLoader = imageLoader,
+                                    contentDescription = "Ẩn danh",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .clip(CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    var len = 0
+                                    if(conversion.messages.isNotEmpty()) {
+                                        len = conversion.messages.first().content.toString().length;
+                                        if(len >= 20){
+                                            len = 20;
+                                        }
+                                        str = conversion.messages.first().content.toString().subSequence(0, len).toString()
+                                    }else{
+                                        str = ""
+                                    }
+                                    Text(
+                                        text = member.name,
+                                        style = MaterialTheme.typography.subtitle2,
+                                        fontSize = 20.sp
+                                    )
+                                    Text(
+                                        text = str,
+                                        style = MaterialTheme.typography.body2,
+                                        fontSize = 17.sp
+                                    )
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/*
+@Composable
+fun ListGroups(listConversation: List<AccountQuery.Conversation1>, nav: NavController, idAccount: String){
+    val imageLoader = ImageLoader(context = LocalContext.current)
+    var str by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    if(true){
+        Log.e("messages", listConversation[0].messages.toString())
+        LazyColumn(modifier = Modifier.fillMaxHeight()){
+            items(listConversation){conversion->
+                if(conversion.members.size > 2 && conversion.messages.isNotEmpty()){
+                    var mode = "${conversion.avatar}"
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)
@@ -368,9 +388,43 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
         }
     }
 }
+*/
 
-/*@Composable
-@Preview
-fun ReviewListFriends(){
-    ListFriends()
-}*/
+@Composable
+fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController){
+    val imageLoader = ImageLoader(context = LocalContext.current)
+    if(listPeople.isNotEmpty()){
+        LazyColumn(modifier = Modifier.fillMaxHeight()){
+            items(listPeople){people->
+                var mode = "${people.avatar}"
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+                    .clickable {
+                        nav.navigate(
+                            Routes.Profile.route + "/${people.id}"
+                        )
+                    }
+                ) {
+                    AsyncImage(
+                        model = mode,
+                        imageLoader = imageLoader,
+                        contentDescription = "Ẩn danh",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = people.name,
+                            style = MaterialTheme.typography.subtitle2,
+                            fontSize = 20.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
