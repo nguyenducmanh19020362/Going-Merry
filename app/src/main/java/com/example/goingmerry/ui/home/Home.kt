@@ -340,56 +340,50 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
         LazyColumn(modifier = Modifier.fillMaxHeight()){
             items(listConversation){conversion->
                 if(conversion.members.size > 2){
-                    for(member in conversion.members){
                         //Log.e("id", member.id + " " + idAccount)
-                        if(member.id != idAccount){
-                            var mode = "${member.avatar}"
-                            Row(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp)
-                                .clickable {
-                                    nav.navigate(
-                                        Routes.ChatBox.route + "/${
-                                            listConversation.indexOf(
-                                                conversion
-                                            )
-                                        }"
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                        .clickable {
+                            nav.navigate(
+                                Routes.ChatBoxGroup.route + "/${
+                                    listConversation.indexOf(
+                                        conversion
                                     )
+                                }"
+                            )
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.app_icon),
+                            contentDescription = "Ẩn danh",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            var len = 0
+                            if(conversion.messages.isNotEmpty()) {
+                                len = conversion.messages.first().content.toString().length;
+                                if(len >= 20){
+                                    len = 20;
                                 }
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.app_icon),
-                                    contentDescription = "Ẩn danh",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .clip(CircleShape)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    var len = 0
-                                    if(conversion.messages.isNotEmpty()) {
-                                        len = conversion.messages.first().content.toString().length;
-                                        if(len >= 20){
-                                            len = 20;
-                                        }
-                                        str = conversion.messages.first().content.toString().subSequence(0, len).toString()
-                                    }else{
-                                        str = ""
-                                    }
-                                    Text(
-                                        text = member.name,
-                                        style = MaterialTheme.typography.subtitle2,
-                                        fontSize = 20.sp
-                                    )
-                                    Text(
-                                        text = str,
-                                        style = MaterialTheme.typography.body2,
-                                        fontSize = 17.sp
-                                    )
-                                }
+                                str = conversion.messages.first().content.toString().subSequence(0, len).toString()
+                            }else{
+                                str = ""
                             }
-                            break;
+                            Text(
+                                text = conversion.name,
+                                style = MaterialTheme.typography.subtitle2,
+                                fontSize = 20.sp
+                            )
+                            Text(
+                                text = str,
+                                style = MaterialTheme.typography.body2,
+                                fontSize = 17.sp
+                            )
                         }
                     }
                 }

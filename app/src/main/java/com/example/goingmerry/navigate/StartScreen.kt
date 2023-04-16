@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.DataUserInfo
 import com.example.goingmerry.UserInformationDao
 import com.example.goingmerry.ui.ChatBox
+import com.example.goingmerry.ui.ChatBoxGroup
 import com.example.goingmerry.ui.home.BodyScreen
 import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
@@ -39,6 +40,14 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
             idMember?.let {
                 Log.e("it", "${it.toInt()}")
                 ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value)
+            }
+        }
+
+        composable(Routes.ChatBoxGroup.route + "/{idConversation}"){navBackTrackEntry->
+            val idMember = navBackTrackEntry.arguments?.getString("idConversation")
+            idMember?.let {
+                Log.e("it", "${it.toInt()}")
+                ChatBoxGroup(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value)
             }
 
         }
