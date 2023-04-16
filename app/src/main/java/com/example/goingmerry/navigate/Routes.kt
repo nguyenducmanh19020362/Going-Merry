@@ -19,4 +19,6 @@ sealed class Routes (val route: String) {
 
     object Verification: Routes("verification")
     object ListRequestAddFriend: Routes("listRequestAddFriend")
+
+    object ChatBoxGroup: Routes("chatBoxGroup")
 }

@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.asFlow
 import java.lang.reflect.Member
 
 @Composable
-fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String){
+fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by rememberSaveable {
@@ -59,12 +59,11 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     }
     Column {
         for(member in conversation.members){
-            if(member.id != id){
-                TopBar(member)
-            }else{
+            if(id == member.id){
                 nameUser = member.name
             }
         }
+        TopBarGroup(conversation.name)
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
@@ -93,7 +92,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             items(directMessages.sortedBy {
                 it.id
             }.asReversed()){
-                message->
+                    message->
                 MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString(), nameUser)
             }
             items(messages.sortedBy {
@@ -160,9 +159,11 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             Button(
                 onClick = {
                     if(messageTyping != "") {
+                        Log.e("flag1", chatBoxViewModel.flag.value.toString())
                         chatBoxViewModel.conversationId.value = conversation.id.toLong()
                         chatBoxViewModel.contentSendMessage.value = messageTyping
                         chatBoxViewModel.flag.value = true
+                        Log.e("flag2", chatBoxViewModel.flag.value.toString())
                     }
                 },
                 modifier = Modifier
@@ -180,26 +181,25 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     }
 }
 
+
 @Composable
-fun TopBar(member: AccountQuery.Member){
-    val imageLoader = ImageLoader(context = LocalContext.current)
+fun TopBarGroup(nameGroup: String){
     TopAppBar (
         modifier = Modifier
             .height(70.dp)
             .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)),
         backgroundColor = MaterialTheme.colors.secondaryVariant,
         title = {
-            AsyncImage(
-                model = member.avatar,
-                imageLoader = imageLoader,
-                contentDescription = "Friend",
+            Image(
+                painter = painterResource(R.drawable.app_icon),
+                contentDescription = "Group",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(50.dp)
                     .padding(end = 5.dp)
                     .clip(CircleShape)
             )
-            Text(text = member.name)
+            Text(text = nameGroup)
         },
         navigationIcon = {
             val image = Icons.Filled.ArrowBack
@@ -218,61 +218,3 @@ fun TopBar(member: AccountQuery.Member){
         }
     )
 }
-
-@Composable
-fun MessageCard(msg: Message, url: String, nameUser: String) {
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
-    val imageLoader = ImageLoader(LocalContext.current)
-    Row(
-        modifier = Modifier
-            .padding(all = 8.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = if(msg.author != nameUser) Arrangement.Start else Arrangement.End
-    ) {
-        if(msg.author != nameUser){
-            AsyncImage(
-                model = url,
-                imageLoader = imageLoader,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-
-        var isExpanded by remember { mutableStateOf(false) }
-
-        Column(
-            modifier = Modifier.clickable { isExpanded = !isExpanded },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val backgroundBody = if(msg.author == nameUser) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                elevation = 1.dp,
-                color = backgroundBody
-            ) {
-                Text(
-                    text = msg.content.toString(),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                        .widthIn(0.dp, (screenWidth / 2)),
-                    maxLines = Int.MAX_VALUE,
-                    style = MaterialTheme.typography.body2
-                )
-            }
-        }
-    }
-}
-
-data class Message(
-    val content: String?,
-    val author: String
-)
-
