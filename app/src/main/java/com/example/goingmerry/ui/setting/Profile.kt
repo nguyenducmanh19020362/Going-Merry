@@ -126,7 +126,7 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                painter = painterResource(id = R.drawable.age_ic),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
@@ -335,7 +335,7 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable._job_ic),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -365,7 +365,7 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable.address_ic),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
@@ -395,7 +395,7 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable.hobby_ic),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
