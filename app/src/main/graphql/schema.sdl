@@ -53,7 +53,7 @@ enum UserRole {
 }
 
 type GroupMember {
-	user: User!
+	user: User
 	role: UserRole!
 }
 

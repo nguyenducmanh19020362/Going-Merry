@@ -32,7 +32,7 @@ import com.example.goingmerry.viewModel.*
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
                 chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel,
-                listRAFViewModel: ListRAFViewModel){
+                listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
@@ -134,6 +134,10 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         composable(Routes.ListRequestAddFriend.route){
             val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()
             ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel)
+        }
+
+        composable(Routes.GroupManager.route){
+            GroupManager(groupManagerViewModel, loginViewModel.token.value)
         }
     }
 }

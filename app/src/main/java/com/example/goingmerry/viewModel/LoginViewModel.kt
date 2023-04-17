@@ -17,6 +17,7 @@ class LoginViewModel : ViewModel() {
 
     val isSuccessLogin = mutableStateOf(value = 0)
     val token = mutableStateOf(value = "")
+    val firstLogin = mutableStateOf(false)
     val expiredToken = mutableStateOf("")
 
     fun login(email: String, password: String) {
@@ -31,6 +32,7 @@ class LoginViewModel : ViewModel() {
                     responseService.body()?.let { tokenDto ->
                         token.value = tokenDto.tokenVerify.token;
                         expiredToken.value = tokenDto.tokenVerify.expire
+                        firstLogin.value = tokenDto.tokenVerify.firstLogin
                         Log.e("Logging", "Response TokenDto: $tokenDto")
                     }
                 } else {

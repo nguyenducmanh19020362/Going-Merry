@@ -120,7 +120,8 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                             nav.navigate(Routes.Setting.route) {
                                 launchSingleTop = true
                             }
-                        })
+                        }
+                    )
                 )
             }
         }
@@ -330,7 +331,6 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
 
 @Composable
 fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
-    val imageLoader = ImageLoader(context = LocalContext.current)
     var str by rememberSaveable {
         mutableStateOf("")
     }

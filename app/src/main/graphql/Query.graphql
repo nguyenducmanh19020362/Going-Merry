@@ -78,3 +78,34 @@ mutation CreateConversation($input: ConversationInput!){
     }
 }
 
+query GetGroups{
+    account{
+        id
+        name
+        avatar
+        groups{
+            id
+            name
+            members{
+                user{
+                    id
+                    name
+                }
+                role
+            }
+        }
+        friends{
+            id
+            name
+            avatar
+        }
+    }
+}
+
+mutation AddGroup($input: GroupInput){
+    group(input: $input){
+        id
+        name
+    }
+}
+

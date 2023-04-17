@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
     private val chatBoxViewModel: ChatBoxViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
     private val listRAFViewModel: ListRAFViewModel by viewModels()
+    private val groupManagerViewModel: GroupManagerViewModel by viewModels()
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +32,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             NewGoingMerryTheme(true) {
                 val navController = rememberNavController()
-                ScreenStart(loginViewModel, signUpViewModel,homeViewModel, chatBoxViewModel, userInfo, profileViewModel, listRAFViewModel)
+                ScreenStart(loginViewModel, signUpViewModel,homeViewModel, chatBoxViewModel, userInfo,
+                    profileViewModel, listRAFViewModel, groupManagerViewModel)
 //              VerificationScreen(navController = navController, titlee = "Nhập mã đi")
             }
         }

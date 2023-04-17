@@ -56,6 +56,11 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 navController.navigate(Routes.ListRequestAddFriend.route){
                     launchSingleTop = true
                 }
+            },
+            onNavigateToGroupManager = {
+                navController.navigate(Routes.GroupManager.route){
+                    launchSingleTop = true
+                }
             }
         )
     }
@@ -162,7 +167,8 @@ fun BodyScreen(
     navController: NavController,
     onNavigateToUserInfo: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onNavigateToListAddFriend: () -> Unit
+    onNavigateToListAddFriend: () -> Unit,
+    onNavigateToGroupManager: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -294,6 +300,50 @@ fun BodyScreen(
 
                     Text(
                         text = "Danh sách yêu cầu kết bạn",
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                )
+            }
+        }
+
+        Card(
+            elevation = 4.dp,
+            backgroundColor = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .align(Alignment.CenterHorizontally)
+                .clickable(onClick = {
+                    onNavigateToGroupManager()
+                })
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Row() {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(30.dp))
+
+                    Text(
+                        text = "Quản lý Nhóm",
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
