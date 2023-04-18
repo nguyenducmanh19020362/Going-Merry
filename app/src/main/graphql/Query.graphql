@@ -109,3 +109,10 @@ mutation AddGroup($input: GroupInput){
     }
 }
 
+mutation UpdateAccount($input: AccountInput!){
+    updateAccount(input: $input){
+        id
+        name
+    }
+}
+

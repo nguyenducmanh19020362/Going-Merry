@@ -1,6 +1,7 @@
 package com.example.goingmerry.repository
 
 import android.util.Log
+import com.example.goingmerry.URL
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,7 +17,7 @@ object Retrofit {
         val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
 
         val builder = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080")
+            .baseUrl("${URL.urlServer}")
             .addConverterFactory(GsonConverterFactory.create(gson))
         //val loggingInterceptor = HttpLoggingInterceptor()
 

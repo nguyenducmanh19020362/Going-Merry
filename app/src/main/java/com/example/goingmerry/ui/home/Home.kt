@@ -40,6 +40,7 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
+import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.viewModel.ChatBoxViewModel
@@ -78,18 +79,24 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                 .background(MaterialTheme.colors.secondary)
         ) {
             Row {
+                var size  = 40.dp
+                var fonts = 30.sp
+                if(ScreenSizes.type() == TypeScreen.Compat){
+                    size = 30.dp
+                    fonts = 20.sp
+                }
                 Image(
                     painter = painterResource(R.drawable.app_icon),
                     contentDescription = "",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(size)
                         .clip(CircleShape)
                 )
 
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = "Going Merry",
-                    fontSize = 30.sp,
+                    fontSize = fonts,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
@@ -121,7 +128,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
                                 launchSingleTop = true
                             }
                         }
-                    )
+                        )
                 )
             }
         }
@@ -152,6 +159,12 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
                 .padding(5.dp),
             horizontalArrangement = Arrangement.Center
         ){
+            var size  = 40.dp
+            var fonts = 30.sp
+            if(ScreenSizes.type() == TypeScreen.Compat){
+                size = 30.dp
+                fonts = 20.sp
+            }
             Button(
                 onClick = {changeTypeList("Friend")},
                 shape = RoundedCornerShape(10.dp),
@@ -160,12 +173,13 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             ){
                 Text(text = "Bạn bè")
             }
-            Spacer(modifier = Modifier.width(50.dp))
+            Spacer(modifier = Modifier.width(40.dp))
             Image(
                 painter = painterResource(id = R.drawable.app_icon), 
-                contentDescription = "image"
+                contentDescription = "image",
+                modifier = Modifier.size(size)
             )
-            Spacer(modifier = Modifier.width(50.dp))
+            Spacer(modifier = Modifier.width(40.dp))
             Button(
                 onClick = {changeTypeList("Group")},
                 colors = ButtonDefaults
@@ -183,8 +197,14 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
                 .background(MaterialTheme.colors.secondary)
                 .padding(10.dp)
         ) {
+            var size  = 50.dp
+            var fonts = 20.sp
+            if(ScreenSizes.type() == TypeScreen.Compat){
+                size = 40.dp
+                fonts = 15.sp
+            }
             Text(
-                fontSize = 20.sp,
+                fontSize = fonts,
                 text = "Tin nhắn trực tiếp",
                 modifier = Modifier.padding(5.dp)
             )
@@ -197,7 +217,7 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
                     painter = painterResource(id = R.drawable.app_icon),
                     contentDescription = "Ẩn danh",
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(size)
                         .clip(CircleShape)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
@@ -287,13 +307,21 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
                                     )
                                 }
                             ) {
+                                var size  = 50.dp
+                                var fonts = 20.sp
+                                var fonts1 = 17.sp
+                                if(ScreenSizes.type() == TypeScreen.Compat){
+                                    size = 40.dp
+                                    fonts = 15.sp
+                                    fonts1 = 12.sp
+                                }
                                 AsyncImage(
                                     model = mode,
                                     imageLoader = imageLoader,
                                     contentDescription = "Ẩn danh",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .size(50.dp)
+                                        .size(size)
                                         .clip(CircleShape)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
@@ -311,12 +339,12 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
                                     Text(
                                         text = member.name,
                                         style = MaterialTheme.typography.subtitle2,
-                                        fontSize = 20.sp
+                                        fontSize = fonts
                                     )
                                     Text(
                                         text = str,
                                         style = MaterialTheme.typography.body2,
-                                        fontSize = 17.sp
+                                        fontSize = fonts1
                                     )
                                 }
                             }
@@ -354,12 +382,20 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
                             )
                         }
                     ) {
+                        var size  = 50.dp
+                        var fonts = 20.sp
+                        var fonts1 = 17.sp
+                        if(ScreenSizes.type() == TypeScreen.Compat){
+                            size = 40.dp
+                            fonts = 15.sp
+                            fonts1 = 12.sp
+                        }
                         Image(
                             painter = painterResource(R.drawable.app_icon),
                             contentDescription = "Ẩn danh",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(size)
                                 .clip(CircleShape)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
@@ -377,12 +413,12 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
                             Text(
                                 text = conversion.name,
                                 style = MaterialTheme.typography.subtitle2,
-                                fontSize = 20.sp
+                                fontSize = fonts
                             )
                             Text(
                                 text = str,
                                 style = MaterialTheme.typography.body2,
-                                fontSize = 17.sp
+                                fontSize = fonts1
                             )
                         }
                     }
@@ -408,13 +444,19 @@ fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController){
                         )
                     }
                 ) {
+                    var size  = 50.dp
+                    var fonts = 20.sp
+                    if(ScreenSizes.type() == TypeScreen.Compat){
+                        size = 40.dp
+                        fonts = 15.sp
+                    }
                     AsyncImage(
                         model = mode,
                         imageLoader = imageLoader,
                         contentDescription = "Ẩn danh",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(size)
                             .clip(CircleShape)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
@@ -422,7 +464,7 @@ fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController){
                         Text(
                             text = people.name,
                             style = MaterialTheme.typography.subtitle2,
-                            fontSize = 20.sp
+                            fontSize = fonts
                         )
                     }
                 }

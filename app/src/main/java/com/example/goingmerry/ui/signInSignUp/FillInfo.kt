@@ -1,5 +1,6 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,10 +24,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.apollographql.apollo.api.Input
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.FillInfoViewModel
+import type.AccountInput
+import type.Gender
 
 @Composable
-fun FillScreen(navController: NavController) {
+fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
     ) {
@@ -45,7 +50,7 @@ fun FillScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        BodyFill(navController = navController)
+        BodyFill(navController = navController, fillInfoViewModel, token)
     }
 }
 
@@ -53,18 +58,23 @@ fun FillScreen(navController: NavController) {
 @Preview
 fun PreviewFill() {
     val navController = rememberNavController()
-    FillScreen(navController = navController)
+    //FillScreen(navController = navController)
 }
 
 @Composable
-fun BodyFill(navController: NavController) {
+fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {
     var nameAccount by rememberSaveable { mutableStateOf("") }
     var birthDate by rememberSaveable { mutableStateOf("") }
-    var gender by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("An Giang") }
     val selectedGender = remember { mutableStateOf("") }
     var job by rememberSaveable { mutableStateOf("") }
     var hobby by rememberSaveable { mutableStateOf("") }
-
+    if(fillInfoViewModel.idAccountUpdate.value != ""){
+        navController.navigate(Routes.Home.route){
+            launchSingleTop = true
+        }
+        fillInfoViewModel.idAccountUpdate.value = ""
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,7 +123,7 @@ fun BodyFill(navController: NavController) {
                     keyboardType = KeyboardType.Number
                 ),
                 singleLine = true,
-                placeholder = { Text("dd/MM/yyyy") },
+                placeholder = { Text("yyyy-MM-dd") },
                 modifier = Modifier
                     .padding(bottom = 15.dp)
                     .height(60.dp)
@@ -146,7 +156,7 @@ fun BodyFill(navController: NavController) {
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            DropBoxFill()
+            DropBoxFill(changeAddress = {selectedProvince: String -> address = selectedProvince})
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -200,9 +210,17 @@ fun BodyFill(navController: NavController) {
 
             Button(
                 onClick = {
-                    navController.navigate(Routes.Home.route){
-                        launchSingleTop = true
+                    Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
+                    var render = Gender.MALE
+                    if(selectedGender.value == "Nữ"){
+                        render = Gender.FEMALE
                     }
+                    if(selectedGender.value == "Khác"){
+                        render = Gender.OTHER
+                    }
+                    val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(address),
+                                    Input.fromNullable(render), Input.fromNullable(job), Input.fromNullable(hobby))
+                    fillInfoViewModel.updateAccount(token, input)
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
                 shape = RoundedCornerShape(10.dp),
@@ -261,7 +279,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
 }
 
 @Composable
-fun DropBoxFill() {
+fun DropBoxFill(changeAddress: (String) -> Unit) {
     Column {
         val provinceList = listOf(
             "An Giang",
@@ -347,6 +365,7 @@ fun DropBoxFill() {
             provinceList.forEachIndexed { index, province ->
                 DropdownMenuItem(onClick = {
                     selectedProvince = province
+                    changeAddress(selectedProvince)
                     selectedIndex = index
                     expanded = false
                 }) {

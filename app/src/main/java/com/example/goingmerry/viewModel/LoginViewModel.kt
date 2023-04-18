@@ -28,12 +28,16 @@ class LoginViewModel : ViewModel() {
 
                 if (responseService.isSuccessful) {
                     //delay(1500L)
-                    isSuccessLogin.value = 2
                     responseService.body()?.let { tokenDto ->
                         token.value = tokenDto.tokenVerify.token;
                         expiredToken.value = tokenDto.tokenVerify.expire
-                        firstLogin.value = tokenDto.tokenVerify.firstLogin
+                        firstLogin.value = tokenDto.tokenVerify.enough
                         Log.e("Logging", "Response TokenDto: $tokenDto")
+                    }
+                    if(!firstLogin.value){
+                        isSuccessLogin.value = 3
+                    }else{
+                        isSuccessLogin.value = 2
                     }
                 } else {
                     isSuccessLogin.value = 1

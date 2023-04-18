@@ -1,6 +1,7 @@
 package com.example.goingmerry.ui.home
 
 import AccountQuery
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.example.goingmerry.R
+import com.example.goingmerry.ScreenSizes
+import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
 
 @Composable
@@ -79,10 +82,18 @@ fun TopBar(
     name: String,
     avatar: String
 ) {
+    var sizeBar = 300.dp
+    var fonts = 25.sp
+    var sizeImage = 90.dp
+    if(ScreenSizes.type() == TypeScreen.Compat){
+        sizeBar = 200.dp
+        fonts = 20.sp
+        sizeImage = 70.dp
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
+            .height(sizeBar),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -110,7 +121,7 @@ fun TopBar(
         ) {
             Text(
                 text = "$name",
-                fontSize = 25.sp,
+                fontSize = fonts,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
                 color = Color.White,
@@ -127,7 +138,7 @@ fun TopBar(
             contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(90.dp)
+                .size(sizeImage)
                 .align(Alignment.CenterHorizontally)
                 .offset(x = (-110).dp, y = (-130).dp)
                 .clip(CircleShape)
@@ -178,6 +189,14 @@ fun BodyScreen(
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(MaterialTheme.colors.primary)
     ) {
+        var size  = 40.dp
+        var fonts = 25.sp
+        var cardHeight = 80.dp
+        if(ScreenSizes.type() == TypeScreen.Compat){
+            cardHeight = 60.dp
+            size = 30.dp
+            fonts = 20.sp
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -187,7 +206,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
                     onNavigateToUserInfo()
@@ -201,28 +220,21 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable._user_info),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Thông tin tài khoản",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
             }
         }
 
@@ -232,7 +244,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .clickable(onClick = {
                     onNavigateToProfile()
                 })
@@ -246,28 +258,21 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable._profile),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Hồ sơ người dùng",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
             }
         }
 
@@ -277,7 +282,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .clickable {
                     onNavigateToListAddFriend()
                 }
@@ -290,28 +295,21 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable._list_friend),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Danh sách yêu cầu kết bạn",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
             }
         }
 
@@ -320,7 +318,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
                     onNavigateToGroupManager()
@@ -337,25 +335,18 @@ fun BodyScreen(
                         painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Quản lý Nhóm",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
             }
         }
 
@@ -375,13 +366,20 @@ fun LogoutCard(
     onNavigateToWelcome: () -> Unit
 ) {
     val showDialog = remember { mutableStateOf(false) }
-
+    var size  = 40.dp
+    var fonts = 25.sp
+    var cardHeight = 80.dp
+    if(ScreenSizes.type() == TypeScreen.Compat){
+        cardHeight = 60.dp
+        size = 30.dp
+        fonts = 20.sp
+    }
     Card(
         elevation = 4.dp,
         backgroundColor = MaterialTheme.colors.primary,
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(cardHeight)
             .clickable(onClick = {
                 showDialog.value = true
             })
@@ -394,28 +392,21 @@ fun LogoutCard(
         ) {
             Row() {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                    painter = painterResource(id = R.drawable._log_out),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(size)
                 )
 
                 Spacer(modifier = Modifier.width(30.dp))
 
                 Text(
                     text = "Đăng xuất tài khoản",
-                    fontSize = 25.sp,
+                    fontSize = fonts,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
-
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-            )
         }
 
         if (showDialog.value) {

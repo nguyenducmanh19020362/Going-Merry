@@ -32,7 +32,8 @@ import com.example.goingmerry.viewModel.*
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
                 chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel,
-                listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel){
+                listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,
+                fillInfoViewModel: FillInfoViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
@@ -84,7 +85,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.FillInfo.route){
-            FillScreen(navController = navController)
+            FillScreen(navController = navController, fillInfoViewModel, loginViewModel.token.value)
         }
 
         composable(Routes.ForgotPassword.route){
@@ -109,7 +110,15 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                         }
                     }
                 }
-            }else {
+            }else if(loginViewModel.isSuccessLogin.value == 3){
+                LaunchedEffect(key1 = Unit){
+                    navController.navigate(route = Routes.FillInfo.route){
+                        popUpTo(route = Routes.SignIn.route){
+                            inclusive = true
+                        }
+                    }
+                }
+            }else{
                 ScreenSignIn(navController = navController, loginViewModel = loginViewModel)
             }
         }

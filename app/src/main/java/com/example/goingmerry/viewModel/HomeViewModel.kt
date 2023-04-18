@@ -12,6 +12,7 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import com.example.goingmerry.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +46,7 @@ class HomeViewModel: ViewModel(){
                         chain.proceed(builder.build())
                     }.build()
                 val apolloClient = ApolloClient.builder()
-                    .serverUrl("http://10.0.2.2:8080/graphql")
+                    .serverUrl("${URL.urlServer}/graphql")
                     .okHttpClient(okHttp)
                     .build()
                 val users = apolloClient.query(FindUsersQuery(matcher = matcher))
@@ -77,7 +78,7 @@ class HomeViewModel: ViewModel(){
                         chain.proceed(builder.build())
                     }.build()
                 val apolloClient = ApolloClient.builder()
-                    .serverUrl("http://10.0.2.2:8080/graphql")
+                    .serverUrl("${URL.urlServer}/graphql")
                     .okHttpClient(okHttp)
                     .build()
                 val conversation = apolloClient.query(AccountQuery())

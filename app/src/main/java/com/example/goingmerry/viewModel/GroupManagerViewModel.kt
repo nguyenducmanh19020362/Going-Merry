@@ -10,6 +10,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import com.example.goingmerry.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +45,7 @@ class GroupManagerViewModel: ViewModel() {
                         chain.proceed(builder.build())
                     }.build()
                 val apolloClient = ApolloClient.builder()
-                    .serverUrl("http://10.0.2.2:8080/graphql")
+                    .serverUrl("${URL.urlServer}/graphql")
                     .okHttpClient(okHttp)
                     .build()
                 val users = apolloClient.query(GetGroupsQuery())
@@ -78,7 +79,7 @@ class GroupManagerViewModel: ViewModel() {
                         chain.proceed(builder.build())
                     }.build()
                 val apolloClient = ApolloClient.builder()
-                    .serverUrl("http://10.0.2.2:8080/graphql")
+                    .serverUrl("${URL.urlServer}/graphql")
                     .okHttpClient(okHttp)
                     .build()
                 Log.e("group", AddGroupMutation(Input.fromNullable(GroupInput(Input.absent(), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))).toString())

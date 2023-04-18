@@ -115,7 +115,7 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
                 modifier = Modifier.padding(start = 5.dp)
             )
             Spacer(modifier = Modifier.height(5.dp))
-            LazyColumn(modifier = Modifier.height((ScreenSizes.height()/2).dp)){
+            LazyColumn(modifier = Modifier.weight(2f)){
                 if(listFriend.isNotEmpty()){
                     items(listFriend){ friend->
                         Row(modifier = Modifier
@@ -195,7 +195,7 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
             style = MaterialTheme.typography.h2,
             modifier = Modifier.padding(start = 5.dp)
         )
-        LazyColumn{
+        LazyColumn(modifier = Modifier.weight(1f)){
             if(listGroup.isNotEmpty()){
                 items(listGroup){
                     if(it.members.any(predicate1)){
@@ -229,7 +229,7 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
             style = MaterialTheme.typography.h2,
             modifier = Modifier.padding(start = 5.dp)
         )
-        LazyColumn{
+        LazyColumn(modifier = Modifier.weight(1f)){
             if(listGroup.isNotEmpty()){
                 items(listGroup){
                     if(it.members.any(predicate2)) {
