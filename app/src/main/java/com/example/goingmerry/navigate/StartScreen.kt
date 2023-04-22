@@ -104,6 +104,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         composable(Routes.SignIn.route){
             if(loginViewModel.isSuccessLogin.value == 2){
                 LaunchedEffect(key1 = Unit){
+                    chatBoxViewModel.stateSockets.value = "OFF"
                     navController.navigate(route = Routes.Home.route){
                         popUpTo(route = Routes.SignIn.route) {
                             inclusive = true

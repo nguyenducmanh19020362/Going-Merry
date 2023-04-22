@@ -44,6 +44,7 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel,
                   signupViewModel: SignUpViewModel, userInfo: DataUserInfo) {
     val info by userInfo.listInfo.collectAsState()
 
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally

@@ -69,39 +69,33 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             modifier = Modifier.weight(9f),
             reverseLayout = true
         ){
-            /*items(directMessages.value){
-                var directMessage = it
-                if(directMessage.conversationId == conversation.id.toLong()){
-                    if(conversation.members[0].id.toLong() == directMessage.senderId) {
-                        MessageCard(
-                            msg = Message(
-                                directMessage.content,
-                                conversation.members[0].name
-                            ), url = conversation.members[1].avatar.toString()
-                        )
-                    }
-                    if(conversation.members[1].id.toLong() == directMessage.senderId) {
-                        MessageCard(
-                            msg = Message(
-                                directMessage.content,
-                                conversation.members[1].name
-                            ), url = conversation.members[1].avatar.toString()
-                        )
-                    }
-                }
-            }*/
             items(directMessages.sortedBy {
-                it.id
+                it.sendAt
             }.asReversed()){
                 message->
-                MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString(), nameUser)
+                var avatar = "";
+                if(conversation.id == message.idConversation){
+                    for(member in conversation.members){
+                        if(member.id == message.idSender){
+                            avatar = member.avatar.toString()
+                            break;
+                        }
+                    }
+                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id)
+                }
             }
             items(messages.sortedBy {
-                it.id
+                it.sendAt
             }.asReversed()){
                     message->
-                Log.e("message", message.content.toString())
-                MessageCard(msg = Message(message.content, message.sender!!.name), conversation.members[1].avatar.toString(), nameUser)
+                var avatar = "";
+                for(member in conversation.members){
+                    if(message.sender!!.id == member.id){
+                        avatar = member.avatar.toString()
+                        break;
+                    }
+                }
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
             }
         }
         Row(
@@ -220,18 +214,19 @@ fun TopBar(member: AccountQuery.Member){
 }
 
 @Composable
-fun MessageCard(msg: Message, url: String, nameUser: String) {
+fun MessageCard(msg: Message, url: String, id: String) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
     val imageLoader = ImageLoader(LocalContext.current)
+    Log.e("sosanh", msg.idMember + " " + msg.author + " " + msg.content + " " + id)
     Row(
         modifier = Modifier
             .padding(all = 8.dp)
             .fillMaxWidth(),
-        horizontalArrangement = if(msg.author != nameUser) Arrangement.Start else Arrangement.End
+        horizontalArrangement = if(id != msg.idMember) Arrangement.Start else Arrangement.End
     ) {
-        if(msg.author != nameUser){
+        if(id != msg.idMember){
             AsyncImage(
                 model = url,
                 imageLoader = imageLoader,
@@ -252,7 +247,7 @@ fun MessageCard(msg: Message, url: String, nameUser: String) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val backgroundBody = if(msg.author == nameUser) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
+            val backgroundBody = if(id == msg.idMember) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 elevation = 1.dp,
@@ -272,6 +267,7 @@ fun MessageCard(msg: Message, url: String, nameUser: String) {
 }
 
 data class Message(
+    val idMember: String,
     val content: String?,
     val author: String
 )

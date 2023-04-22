@@ -23,6 +23,7 @@ import io.rsocket.kotlin.metadata.compositeMetadata
 import io.rsocket.kotlin.metadata.security.BearerAuthMetadata
 import io.rsocket.kotlin.payload.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import type.MessageState
@@ -33,17 +34,20 @@ import java.util.List
 class ChatBoxViewModel: ViewModel() {
     var stateSockets = mutableStateOf("OFF")
     var conversationId = mutableStateOf(0L)
-    private val _listReceiverMessage = MutableStateFlow(listOf<AccountQuery.Message>())
+    private val _listReceiverMessage = MutableStateFlow(listOf<DirectMessage>())
     val listReceiverMessage = _listReceiverMessage.asStateFlow()
-
     var contentSendMessage = mutableStateOf("")
     var flag = mutableStateOf(false)
+    var jobReceiver: Job? = null
+    var sendJob: Job? = null
     @RequiresApi(Build.VERSION_CODES.O)
-    fun receiverMessages(token: String, homeViewModel: HomeViewModel){
+    fun receiverMessages(loginViewModel: LoginViewModel, homeViewModel: HomeViewModel){
         stateSockets.value = "ON"
-        val bearerAuthMetadata = BearerAuthMetadata(token)
+        val bearerAuthMetadata = BearerAuthMetadata(loginViewModel.token.value)
         val routeMetadata = RoutingMetadata("api.v1.messages.stream")
-        viewModelScope.launch (Dispatchers.Main){
+        jobReceiver?.cancel()
+        jobReceiver = viewModelScope.launch (Dispatchers.IO){
+            val gson = Gson()
             val client = HttpClient (CIO){ //create and configure ktor client
                 install(WebSockets)
                 install(RSocketSupport){
@@ -57,7 +61,7 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.57.103", port = 8080)
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.57.104", port = 8080)
 
             val stream: Flow<Payload> = rSocket.requestStream(
                 buildPayload {
@@ -65,13 +69,14 @@ class ChatBoxViewModel: ViewModel() {
                         add(bearerAuthMetadata)
                         add(routeMetadata)
                     }
-                    data(ByteReadPacket.Empty)
+                    Log.e("time", Instant.now().toString())
+                    data(Instant.now().epochSecond.toString())
                 }
             )
             stream.collect { payload: Payload ->
                 val json = payload.data.readText()
-                val gson = Gson()
                 val receiverMessage = gson.fromJson(json, ReceiverMessage::class.java)
+                Log.e("hi", receiverMessage.toString())
                 for(item in homeViewModel.conversations.value){
                     if(item.id.toLong() == receiverMessage.conversationId){
                         var name = ""
@@ -80,13 +85,14 @@ class ChatBoxViewModel: ViewModel() {
                                 name = member.name
                             }
                         }
-                        val newReceiverMessage = AccountQuery.Message("Message", item.id,
-                            AccountQuery.Sender("Sender", receiverMessage.senderId.toString(), name ),
+                        val directMessage = DirectMessage(
+                            receiverMessage.conversationId.toString(),
+                            receiverMessage.senderId.toString(),
                             receiverMessage.content,
-                            type.MessageType.TEXT,
-                            MessageState.SENT
+                            name,
+                            Instant.parse(receiverMessage.sentAt).epochSecond.toInt(),
                         )
-                        _listReceiverMessage.emit(listReceiverMessage.value + newReceiverMessage)
+                        _listReceiverMessage.emit(listReceiverMessage.value + directMessage)
                     }
 
                 }/*
@@ -99,12 +105,14 @@ class ChatBoxViewModel: ViewModel() {
             }
         }
     }
-    fun sendMessages(token:String){
+    fun sendMessages(loginViewModel: LoginViewModel){
+        Log.e("send", "sendMessage")
         stateSockets.value = "ON"
-        val bearerAuthMetadata = BearerAuthMetadata(token)
+        val bearerAuthMetadata = BearerAuthMetadata(loginViewModel.token.value)
         val routeMetadata = RoutingMetadata("api.v1.messages.stream")
-        viewModelScope.launch (Dispatchers.Main) {
-            var gson = Gson()
+        sendJob?.cancel()
+        sendJob = viewModelScope.launch (Dispatchers.IO) {
+            val gson = Gson()
             val client = HttpClient (CIO){ //create and configure ktor client
                 install(WebSockets)
                 install(RSocketSupport){
@@ -118,7 +126,7 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.57.103", port = 8080)
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.57.104", port = 8080)
 
             rSocket.requestChannel(
                 buildPayload {
@@ -159,9 +167,14 @@ data class ReceiverMessage(
     val type: MessageType,
     val senderId: Long,
     val conversationId: Long,
-    val createdAt: Instant,
-    val updatedAt: Instant,
-    val deletedAt: Instant?,
+    val sentAt: String,
+)
+data class DirectMessage(
+    val idConversation: String,
+    val idSender: String,
+    val messageContent: String,
+    val messageName: String,
+    val sendAt: Int
 )
 
 enum class MessageType{
@@ -174,5 +187,5 @@ enum class MessageType{
 data class SendMessage(
     val content: String,
     val conversationId: Long,
-    val type: MessageType
+    val type: MessageType,
 )

@@ -64,8 +64,8 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
 
     homeViewModel.account(model.token.value)
     if(chatBoxViewModel.stateSockets.value == "OFF"){
-        chatBoxViewModel.receiverMessages(model.token.value, homeViewModel)
-        chatBoxViewModel.sendMessages(model.token.value)
+        chatBoxViewModel.receiverMessages(model, homeViewModel)
+        chatBoxViewModel.sendMessages(model)
     }
 
     val conversations by homeViewModel.conversations.collectAsState()

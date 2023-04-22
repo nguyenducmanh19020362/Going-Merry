@@ -29,7 +29,7 @@ class LoginViewModel : ViewModel() {
                 if (responseService.isSuccessful) {
                     //delay(1500L)
                     responseService.body()?.let { tokenDto ->
-                        token.value = tokenDto.tokenVerify.token;
+                        token.value = tokenDto.tokenVerify.token
                         expiredToken.value = tokenDto.tokenVerify.expire
                         firstLogin.value = tokenDto.tokenVerify.enough
                         Log.e("Logging", "Response TokenDto: $tokenDto")
