@@ -9,9 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,17 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import com.example.goingmerry.DataStore
 import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.LoginViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String) {
+fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore, loginViewModel: LoginViewModel) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -64,7 +67,9 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 navController.navigate(Routes.GroupManager.route){
                     launchSingleTop = true
                 }
-            }
+            },
+            data,
+            loginViewModel
         )
     }
 
@@ -74,7 +79,7 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
 @Preview
 fun PreviewSetting() {
     val navController = rememberNavController()
-    SettingScreen(navController = navController, "", "","")
+    //SettingScreen(navController = navController, "", "","")
 }
 
 @Composable
@@ -179,7 +184,9 @@ fun BodyScreen(
     onNavigateToUserInfo: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToListAddFriend: () -> Unit,
-    onNavigateToGroupManager: () -> Unit
+    onNavigateToGroupManager: () -> Unit,
+    data: DataStore,
+    loginViewModel: LoginViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -356,16 +363,27 @@ fun BodyScreen(
                 navController.navigate("welcome") {
                     launchSingleTop = true
                 }
-            }
+            },
+            data,
+            loginViewModel
         )
     }
 }
 
 @Composable
 fun LogoutCard(
-    onNavigateToWelcome: () -> Unit
+    onNavigateToWelcome: () -> Unit,
+    data: DataStore,
+    loginViewModel: LoginViewModel
 ) {
     val showDialog = remember { mutableStateOf(false) }
+    var clickOk by rememberSaveable{ mutableStateOf(false) }
+    if(clickOk){
+        LaunchedEffect(key1 = Unit){
+            data.saveToken("", 0L)
+            clickOk = false
+        }
+    }
     var size  = 40.dp
     var fonts = 25.sp
     var cardHeight = 80.dp
@@ -417,9 +435,7 @@ fun LogoutCard(
                 confirmButton = {
                     TextButton(onClick = {
                         showDialog.value = false
-//                        navController?.navigate(Routes.Welcome.route) {
-//                            launchSingleTop = true
-//                        }
+                        clickOk = true
                         onNavigateToWelcome()
                     }) {
                         Text("OK")

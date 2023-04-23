@@ -54,8 +54,8 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Setting.route){
-            SettingScreen(navController = navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value)
+            SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
+            homeViewModel.idAccount.value, data, loginViewModel)
         }
 
         composable(Routes.UserInfo.route){
@@ -111,7 +111,6 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                             inclusive = true
                         }
                     }
-                    loginViewModel.isSuccessLogin.value = 0
                 }
             }else if(loginViewModel.isSuccessLogin.value == 3){
                 LaunchedEffect(key1 = Unit){
@@ -120,7 +119,6 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                             inclusive = true
                         }
                     }
-                    loginViewModel.isSuccessLogin.value = 0
                 }
             }else{
                 ScreenSignIn(navController = navController, loginViewModel = loginViewModel, data = data)
