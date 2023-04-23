@@ -1,17 +1,21 @@
 package com.example.goingmerry.viewModel
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.goingmerry.DataStore
 import com.example.goingmerry.dataTransferObjects.LoginDto
 import com.example.goingmerry.repository.Retrofit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.time.Instant
 
 class LoginViewModel : ViewModel() {
 
@@ -20,7 +24,8 @@ class LoginViewModel : ViewModel() {
     val firstLogin = mutableStateOf(false)
     val expiredToken = mutableStateOf("")
 
-    fun login(email: String, password: String) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun login(email: String, password: String, data: DataStore) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val authService = Retrofit.getAuthService()
@@ -31,6 +36,7 @@ class LoginViewModel : ViewModel() {
                     responseService.body()?.let { tokenDto ->
                         token.value = tokenDto.tokenVerify.token
                         expiredToken.value = tokenDto.tokenVerify.expire
+                        data.saveToken(token.value, Instant.parse(expiredToken.value).epochSecond)
                         firstLogin.value = tokenDto.tokenVerify.enough
                         Log.e("Logging", "Response TokenDto: $tokenDto")
                     }

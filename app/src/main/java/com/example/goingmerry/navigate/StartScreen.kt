@@ -11,8 +11,7 @@ import androidx.navigation.compose.composable
 
 
 import androidx.navigation.compose.rememberNavController
-import com.example.goingmerry.DataUserInfo
-import com.example.goingmerry.UserInformationDao
+import com.example.goingmerry.DataStore
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.ChatBoxGroup
 import com.example.goingmerry.ui.home.BodyScreen
@@ -31,9 +30,10 @@ import com.example.goingmerry.viewModel.*
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
-                chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel,
+                chatBoxViewModel: ChatBoxViewModel, profileViewModel: ProfileViewModel,
                 listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,
-                fillInfoViewModel: FillInfoViewModel){
+                fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel, data: DataStore
+){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
@@ -98,7 +98,8 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
 
         composable(Routes.Welcome.route){
             WelcomeScreen(navController = navController,
-                signupViewModel = signUpViewModel, loginViewModel = loginViewModel, userInfo = userInfo)
+                signupViewModel = signUpViewModel, loginViewModel = loginViewModel,
+                startScreenViewModel = startScreenViewModel, dataStore = data)
         }
 
         composable(Routes.SignIn.route){
@@ -110,6 +111,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                             inclusive = true
                         }
                     }
+                    loginViewModel.isSuccessLogin.value = 0
                 }
             }else if(loginViewModel.isSuccessLogin.value == 3){
                 LaunchedEffect(key1 = Unit){
@@ -118,9 +120,10 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                             inclusive = true
                         }
                     }
+                    loginViewModel.isSuccessLogin.value = 0
                 }
             }else{
-                ScreenSignIn(navController = navController, loginViewModel = loginViewModel)
+                ScreenSignIn(navController = navController, loginViewModel = loginViewModel, data = data)
             }
         }
 
