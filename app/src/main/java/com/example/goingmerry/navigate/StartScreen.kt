@@ -11,8 +11,7 @@ import androidx.navigation.compose.composable
 
 
 import androidx.navigation.compose.rememberNavController
-import com.example.goingmerry.DataUserInfo
-import com.example.goingmerry.UserInformationDao
+import com.example.goingmerry.DataStore
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.ChatBoxGroup
 import com.example.goingmerry.ui.home.BodyScreen
@@ -31,8 +30,10 @@ import com.example.goingmerry.viewModel.*
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
-                chatBoxViewModel: ChatBoxViewModel, userInfo: DataUserInfo, profileViewModel: ProfileViewModel,
-                listRAFViewModel: ListRAFViewModel){
+                chatBoxViewModel: ChatBoxViewModel, profileViewModel: ProfileViewModel,
+                listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,
+                fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel, data: DataStore
+){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
@@ -53,8 +54,8 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Setting.route){
-            SettingScreen(navController = navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value)
+            SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
+            homeViewModel.idAccount.value, data, loginViewModel)
         }
 
         composable(Routes.UserInfo.route){
@@ -84,7 +85,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.FillInfo.route){
-            FillScreen(navController = navController)
+            FillScreen(navController = navController, fillInfoViewModel, loginViewModel.token.value)
         }
 
         composable(Routes.ForgotPassword.route){
@@ -97,20 +98,30 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
 
         composable(Routes.Welcome.route){
             WelcomeScreen(navController = navController,
-                signupViewModel = signUpViewModel, loginViewModel = loginViewModel, userInfo = userInfo)
+                signupViewModel = signUpViewModel, loginViewModel = loginViewModel,
+                startScreenViewModel = startScreenViewModel, dataStore = data)
         }
 
         composable(Routes.SignIn.route){
             if(loginViewModel.isSuccessLogin.value == 2){
                 LaunchedEffect(key1 = Unit){
+                    chatBoxViewModel.stateSockets.value = "OFF"
                     navController.navigate(route = Routes.Home.route){
                         popUpTo(route = Routes.SignIn.route) {
                             inclusive = true
                         }
                     }
                 }
-            }else {
-                ScreenSignIn(navController = navController, loginViewModel = loginViewModel)
+            }else if(loginViewModel.isSuccessLogin.value == 3){
+                LaunchedEffect(key1 = Unit){
+                    navController.navigate(route = Routes.FillInfo.route){
+                        popUpTo(route = Routes.SignIn.route){
+                            inclusive = true
+                        }
+                    }
+                }
+            }else{
+                ScreenSignIn(navController = navController, loginViewModel = loginViewModel, data = data)
             }
         }
 
@@ -134,6 +145,10 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         composable(Routes.ListRequestAddFriend.route){
             val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()
             ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel)
+        }
+
+        composable(Routes.GroupManager.route){
+            GroupManager(groupManagerViewModel, loginViewModel.token.value)
         }
     }
 }

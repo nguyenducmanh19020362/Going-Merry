@@ -27,6 +27,7 @@ query account{
                 }
                 content
                 type
+                sendAt
                 state
             }
         }
@@ -75,6 +76,44 @@ mutation ReplyRequestAddFriend($userId: ID!, $reply: FriendRequestReply!){
 mutation CreateConversation($input: ConversationInput!){
     conversation(input: $input){
         id
+    }
+}
+
+query GetGroups{
+    account{
+        id
+        name
+        avatar
+        groups{
+            id
+            name
+            members{
+                user{
+                    id
+                    name
+                }
+                role
+            }
+        }
+        friends{
+            id
+            name
+            avatar
+        }
+    }
+}
+
+mutation AddGroup($input: GroupInput){
+    group(input: $input){
+        id
+        name
+    }
+}
+
+mutation UpdateAccount($input: AccountInput!){
+    updateAccount(input: $input){
+        id
+        name
     }
 }
 

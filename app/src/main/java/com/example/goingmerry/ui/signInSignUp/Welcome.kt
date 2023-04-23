@@ -26,13 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.goingmerry.DataUserInfo
+import com.example.goingmerry.DataStore
 import com.example.goingmerry.R
-import com.example.goingmerry.UserInformation
-import com.example.goingmerry.UserInformationDao
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel
+import com.example.goingmerry.viewModel.StartScreenViewModel
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -41,9 +40,8 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel,
-                  signupViewModel: SignUpViewModel, userInfo: DataUserInfo) {
-    val info by userInfo.listInfo.collectAsState()
-
+                  signupViewModel: SignUpViewModel, startScreenViewModel: StartScreenViewModel, dataStore: DataStore
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,37 +75,7 @@ fun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel,
                 .height(50.dp)
                 .width(280.dp),
             onClick = {
-                //userInfo.getAllInfo()
-                Log.e("info", info.size.toString())
-                /*if(info.isNotEmpty()){
-                    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                    val ldt = LocalDateTime.parse(info[0].expiredToken, format)
-                    Log.e("ldt", ldt.toString())
-                    val current = LocalDateTime.parse(Instant.now().toString(), format)
-                    Log.e("current", current.toString())
-                    if(ldt < current) {
-                        loginViewModel.isSuccessLogin.value = 0;
-                        navController.navigate(Routes.SignIn.route) {
-                            launchSingleTop = true
-                        }
-                        if(loginViewModel.token.value != "" && loginViewModel.expiredToken.value != ""){
-                            userInfo.insert(loginViewModel.token.value, loginViewModel.expiredToken.value)
-                        }
-                    }else{
-                        loginViewModel.token.value = info[0].token.orEmpty()
-                        navController.navigate(Routes.Home.route)
-                    }
-                }else{
-                    Log.e("error", "1")
-                    loginViewModel.isSuccessLogin.value = 0;
-                    navController.navigate(Routes.SignIn.route) {
-                        launchSingleTop = true
-                    }
-                    if(loginViewModel.token.value != "" && loginViewModel.expiredToken.value != ""){
-                        userInfo.insert(loginViewModel.token.value, loginViewModel.expiredToken.value)
-                    }
-                }*/
-                loginViewModel.isSuccessLogin.value = 0;
+                startScreenViewModel.setLogin(dataStore, loginViewModel)
                 navController.navigate(Routes.SignIn.route) {
                     launchSingleTop = true
                 }

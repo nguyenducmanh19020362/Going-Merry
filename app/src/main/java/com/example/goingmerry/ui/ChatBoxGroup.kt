@@ -90,17 +90,32 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 }
             }*/
             items(directMessages.sortedBy {
-                it.id
+                it.sendAt
             }.asReversed()){
                     message->
-                MessageCard(msg = Message(message.content, message.sender!!.name), url = conversation.members[1].avatar.toString(), nameUser)
+                var avatar = ""
+                if(conversation.id == message.idConversation){
+                    for(member in conversation.members){
+                        if(member.id == message.idSender){
+                            avatar = member.avatar.toString()
+                            break;
+                        }
+                    }
+                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id)
+                }
             }
             items(messages.sortedBy {
-                it.id
+                it.sendAt
             }.asReversed()){
                     message->
-                Log.e("message", message.content.toString())
-                MessageCard(msg = Message(message.content, message.sender!!.name), conversation.members[1].avatar.toString(), nameUser)
+                var avatar = "";
+                for(member in conversation.members){
+                    if(message.sender!!.id == member.id){
+                        avatar = member.avatar.toString()
+                        break;
+                    }
+                }
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
             }
         }
         Row(
@@ -159,11 +174,9 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
             Button(
                 onClick = {
                     if(messageTyping != "") {
-                        Log.e("flag1", chatBoxViewModel.flag.value.toString())
                         chatBoxViewModel.conversationId.value = conversation.id.toLong()
                         chatBoxViewModel.contentSendMessage.value = messageTyping
                         chatBoxViewModel.flag.value = true
-                        Log.e("flag2", chatBoxViewModel.flag.value.toString())
                     }
                 },
                 modifier = Modifier

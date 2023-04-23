@@ -1,9 +1,8 @@
 package com.example.goingmerry.viewModel
 
-import CreateConversationMutation
-import ReplyRequestAddFriendMutation
+import AddGroupMutation
+import GetGroupsQuery
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo.ApolloCall
@@ -13,17 +12,28 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.example.goingmerry.URL
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import type.ConversationInput
-import type.FriendRequestReply
+import type.GroupInput
+import type.GroupMemberInput
 
-class ListRAFViewModel: ViewModel(){
-    private val _res = MutableStateFlow("")
-    val res = _res.asStateFlow()
-    fun replyRequestAddFriend(token: String, id: String, reply: FriendRequestReply){
+class GroupManagerViewModel: ViewModel() {
+    private val _listGroups = MutableStateFlow(listOf<GetGroupsQuery.Group>())
+    val listGroups = _listGroups.asStateFlow()
+
+    private val _listFriends = MutableStateFlow(listOf<GetGroupsQuery.Friend>())
+    val listFriend = _listFriends.asStateFlow()
+
+    private val _idAccount = MutableStateFlow("")
+    val idAccount = _idAccount.asStateFlow()
+
+    private val _listChecks = MutableStateFlow<List<Boolean>>(emptyList())
+    val listChecks = _listChecks.asStateFlow()
+
+    fun getGroups(token: String){
         viewModelScope.launch(Dispatchers.IO){
             try {
                 val okHttp = OkHttpClient.Builder()
@@ -38,42 +48,13 @@ class ListRAFViewModel: ViewModel(){
                     .serverUrl("${URL.urlServer}/graphql")
                     .okHttpClient(okHttp)
                     .build()
-                val users = apolloClient.mutate(ReplyRequestAddFriendMutation(id, reply))
-                users.enqueue(object: ApolloCall.Callback<ReplyRequestAddFriendMutation.Data>(){
-                    override fun onResponse(response: Response<ReplyRequestAddFriendMutation.Data>) {
-                        Log.e("reply", response.data.toString())
-                        _res.tryEmit(response.data!!.replyRequest!!.sender!!.id)
-                    }
-
-                    override fun onFailure(e: ApolloException) {
-                        Log.e("Todo", e.toString())
-                    }
-                })
-            }catch(e: Exception){
-                Log.d("error", e.toString())
-            }
-        }
-    }
-
-    fun createConversation(token: String, input: ConversationInput){
-        viewModelScope.launch(Dispatchers.IO){
-            try {
-                val okHttp = OkHttpClient.Builder()
-                    .addInterceptor{chain ->
-                        val original = chain.request()
-                        val builder = original.newBuilder().method("POST", original.body)
-                        builder.addHeader("Authorization", "Bearer $token")
-                        builder.addHeader("Content-Type","application/json")
-                        chain.proceed(builder.build())
-                    }.build()
-                val apolloClient = ApolloClient.builder()
-                    .serverUrl("${URL.urlServer}/graphql")
-                    .okHttpClient(okHttp)
-                    .build()
-                val users = apolloClient.mutate(CreateConversationMutation(input))
-                Log.e("input", input.toString())
-                users.enqueue(object: ApolloCall.Callback<CreateConversationMutation.Data>(){
-                    override fun onResponse(response: Response<CreateConversationMutation.Data>) {
+                val users = apolloClient.query(GetGroupsQuery())
+                users.enqueue(object: ApolloCall.Callback<GetGroupsQuery.Data>(){
+                    override fun onResponse(response: Response<GetGroupsQuery.Data>) {
+                        _listGroups.tryEmit(response.data!!.account.groups)
+                        _listFriends.tryEmit(response.data!!.account.friends)
+                        _listChecks.tryEmit(List<Boolean>(response.data!!.account.friends.size){false})
+                        _idAccount.tryEmit(response.data!!.account.id)
                         Log.e("data", response.data.toString())
                     }
 
@@ -81,13 +62,49 @@ class ListRAFViewModel: ViewModel(){
                         Log.e("Todo", e.toString())
                     }
                 })
-            }catch(e: Exception){
-                Log.d("error", e.toString())
+            }catch (e: Exception){
+                Log.e("error", e.toString())
             }
         }
     }
+    fun createGroups(token: String, listPeople: List<GroupMemberInput>, nameGroup: String){
+        viewModelScope.launch(Dispatchers.IO){
+            try {
+                val okHttp = OkHttpClient.Builder()
+                    .addInterceptor{chain ->
+                        val original = chain.request()
+                        val builder = original.newBuilder().method("POST", original.body)
+                        builder.addHeader("Authorization", "Bearer $token")
+                        builder.addHeader("Content-Type","application/json")
+                        chain.proceed(builder.build())
+                    }.build()
+                val apolloClient = ApolloClient.builder()
+                    .serverUrl("${URL.urlServer}/graphql")
+                    .okHttpClient(okHttp)
+                    .build()
+                Log.e("group", AddGroupMutation(Input.fromNullable(GroupInput(Input.absent(), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))).toString())
+                val users = apolloClient.mutate(AddGroupMutation(Input.fromNullable(GroupInput(Input.absent(), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))))
+                users.enqueue(object: ApolloCall.Callback<AddGroupMutation.Data>(){
+                    override fun onResponse(response: Response<AddGroupMutation.Data>) {
+                        Log.e("data", response.data.toString())
+                    }
 
-    fun resetRes(){
-        _res.tryEmit("")
+                    override fun onFailure(e: ApolloException) {
+                        Log.e("Todo", e.toString())
+                    }
+                })
+            }catch (e: Exception){
+                Log.e("error", e.toString())
+            }
+        }
+    }
+    fun checkAt(index: Int){
+        viewModelScope.launch(Dispatchers.IO){
+            val list = listChecks.value.toMutableList()
+            if(index < list.size){
+                list[index] = !list[index]
+                _listChecks.emit(list.toList())
+            }
+        }
     }
 }

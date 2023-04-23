@@ -1,8 +1,10 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import android.util.Patterns
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,10 +39,12 @@ import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.LoginViewModel
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.goingmerry.DataStore
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
+fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, data: DataStore) {
     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("")}
@@ -48,7 +52,7 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
         mutableStateOf(false)
     }
     if(buttonOnClick){
-        loginViewModel.login(email, password)
+        loginViewModel.login(email, password, data)
         buttonOnClick = false
     }
 
@@ -135,7 +139,7 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel) {
 fun PreviewScreenSignIn() {
     val navController: NavController = rememberNavController()
     val loginViewModel: LoginViewModel = LoginViewModel()
-    ScreenSignIn(navController, loginViewModel)
+    //ScreenSignIn(navController, loginViewModel)
 }
 
 

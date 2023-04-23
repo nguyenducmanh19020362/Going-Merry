@@ -1,6 +1,7 @@
 package com.example.goingmerry.ui.home
 
 import AccountQuery
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,9 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,15 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import com.example.goingmerry.DataStore
 import com.example.goingmerry.R
+import com.example.goingmerry.ScreenSizes
+import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.LoginViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String) {
+fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore, loginViewModel: LoginViewModel) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -56,7 +62,14 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 navController.navigate(Routes.ListRequestAddFriend.route){
                     launchSingleTop = true
                 }
-            }
+            },
+            onNavigateToGroupManager = {
+                navController.navigate(Routes.GroupManager.route){
+                    launchSingleTop = true
+                }
+            },
+            data,
+            loginViewModel
         )
     }
 
@@ -66,7 +79,7 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
 @Preview
 fun PreviewSetting() {
     val navController = rememberNavController()
-    SettingScreen(navController = navController, "", "","")
+    //SettingScreen(navController = navController, "", "","")
 }
 
 @Composable
@@ -74,10 +87,18 @@ fun TopBar(
     name: String,
     avatar: String
 ) {
+    var sizeBar = 300.dp
+    var fonts = 25.sp
+    var sizeImage = 90.dp
+    if(ScreenSizes.type() == TypeScreen.Compat){
+        sizeBar = 200.dp
+        fonts = 20.sp
+        sizeImage = 70.dp
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
+            .height(sizeBar),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -105,7 +126,7 @@ fun TopBar(
         ) {
             Text(
                 text = "$name",
-                fontSize = 25.sp,
+                fontSize = fonts,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
                 color = Color.White,
@@ -122,7 +143,7 @@ fun TopBar(
             contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(90.dp)
+                .size(sizeImage)
                 .align(Alignment.CenterHorizontally)
                 .offset(x = (-110).dp, y = (-130).dp)
                 .clip(CircleShape)
@@ -162,7 +183,10 @@ fun BodyScreen(
     navController: NavController,
     onNavigateToUserInfo: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onNavigateToListAddFriend: () -> Unit
+    onNavigateToListAddFriend: () -> Unit,
+    onNavigateToGroupManager: () -> Unit,
+    data: DataStore,
+    loginViewModel: LoginViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -172,6 +196,14 @@ fun BodyScreen(
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(MaterialTheme.colors.primary)
     ) {
+        var size  = 40.dp
+        var fonts = 25.sp
+        var cardHeight = 80.dp
+        if(ScreenSizes.type() == TypeScreen.Compat){
+            cardHeight = 60.dp
+            size = 30.dp
+            fonts = 20.sp
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -181,7 +213,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
                     onNavigateToUserInfo()
@@ -198,25 +230,18 @@ fun BodyScreen(
                         painter = painterResource(id = R.drawable._user_info),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Thông tin tài khoản",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
             }
         }
 
@@ -226,7 +251,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .clickable(onClick = {
                     onNavigateToProfile()
                 })
@@ -243,25 +268,18 @@ fun BodyScreen(
                         painter = painterResource(id = R.drawable._profile),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Hồ sơ người dùng",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
             }
         }
 
@@ -271,7 +289,7 @@ fun BodyScreen(
             backgroundColor = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(cardHeight)
                 .clickable {
                     onNavigateToListAddFriend()
                 }
@@ -287,25 +305,55 @@ fun BodyScreen(
                         painter = painterResource(id = R.drawable._list_friend),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
                         text = "Danh sách yêu cầu kết bạn",
-                        fontSize = 25.sp,
+                        fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
+            }
+        }
 
-                Image(
-                    painter = painterResource(id = R.drawable._right_arrow),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
+        Card(
+            elevation = 4.dp,
+            backgroundColor = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(cardHeight)
+                .align(Alignment.CenterHorizontally)
+                .clickable(onClick = {
+                    onNavigateToGroupManager()
+                })
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Row() {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size)
+                    )
+
+                    Spacer(modifier = Modifier.width(30.dp))
+
+                    Text(
+                        text = "Quản lý Nhóm",
+                        fontSize = fonts,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
         }
 
@@ -315,23 +363,41 @@ fun BodyScreen(
                 navController.navigate("welcome") {
                     launchSingleTop = true
                 }
-            }
+            },
+            data,
+            loginViewModel
         )
     }
 }
 
 @Composable
 fun LogoutCard(
-    onNavigateToWelcome: () -> Unit
+    onNavigateToWelcome: () -> Unit,
+    data: DataStore,
+    loginViewModel: LoginViewModel
 ) {
     val showDialog = remember { mutableStateOf(false) }
-
+    var clickOk by rememberSaveable{ mutableStateOf(false) }
+    if(clickOk){
+        LaunchedEffect(key1 = Unit){
+            data.saveToken("", 0L)
+            clickOk = false
+        }
+    }
+    var size  = 40.dp
+    var fonts = 25.sp
+    var cardHeight = 80.dp
+    if(ScreenSizes.type() == TypeScreen.Compat){
+        cardHeight = 60.dp
+        size = 30.dp
+        fonts = 20.sp
+    }
     Card(
         elevation = 4.dp,
         backgroundColor = MaterialTheme.colors.primary,
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(cardHeight)
             .clickable(onClick = {
                 showDialog.value = true
             })
@@ -347,25 +413,18 @@ fun LogoutCard(
                     painter = painterResource(id = R.drawable._log_out),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(size)
                 )
 
                 Spacer(modifier = Modifier.width(30.dp))
 
                 Text(
                     text = "Đăng xuất tài khoản",
-                    fontSize = 25.sp,
+                    fontSize = fonts,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
-
-            Image(
-                painter = painterResource(id = R.drawable._right_arrow),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-            )
         }
 
         if (showDialog.value) {
@@ -376,9 +435,7 @@ fun LogoutCard(
                 confirmButton = {
                     TextButton(onClick = {
                         showDialog.value = false
-//                        navController?.navigate(Routes.Welcome.route) {
-//                            launchSingleTop = true
-//                        }
+                        clickOk = true
                         onNavigateToWelcome()
                     }) {
                         Text("OK")

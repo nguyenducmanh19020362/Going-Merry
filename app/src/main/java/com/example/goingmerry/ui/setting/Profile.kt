@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.example.goingmerry.R
+import com.example.goingmerry.ScreenSizes
+import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.viewModel.ProfileViewModel
 
 @Composable
@@ -111,10 +113,18 @@ fun TopBar() {
 @Composable
 fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Unit) {
     val imageLoader = ImageLoader(context = LocalContext.current)
+    var sizeColumn  = 240.dp
+    var sizeImageProfile = 100.dp
+    var fonts = 30.sp
+    if(ScreenSizes.type() == TypeScreen.Compat){
+        sizeColumn = 180.dp
+        fonts = 20.sp
+        sizeImageProfile = 80.dp
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(240.dp),
+            .height(sizeColumn),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -186,7 +196,7 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
             imageLoader = imageLoader,
             contentDescription = "",
             modifier = Modifier
-                .size(100.dp)
+                .size(sizeImageProfile)
                 .align(Alignment.CenterHorizontally)
                 .weight(0.4f)
                 .offset(y = (-50).dp)
@@ -262,11 +272,21 @@ fun BodyProfile(
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(MaterialTheme.colors.primary)
     ) {
+        var size  = 40.dp
+        var fontsName = 30.sp
+        var fontsDescribe = 20.sp
+        var fontsContent = 18.sp
+        if(ScreenSizes.type() == TypeScreen.Compat){
+            size = 30.dp
+            fontsName = 20.sp
+            fontsDescribe = 17.sp
+            fontsContent = 18.sp
+        }
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = profileViewModel.name.value,
-            fontSize = 30.sp,
+            fontSize = fontsName,
             fontWeight = FontWeight.Bold,
             color = Color.White
         )
@@ -276,7 +296,7 @@ fun BodyProfile(
         Text(
             text = "GIỚI THIỆU VỀ TÔI",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = fontsDescribe,
             color = Color.LightGray,
         )
 
@@ -306,17 +326,17 @@ fun BodyProfile(
                         .padding(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable.age_ic),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
                         text = profileViewModel.age.value,
-                        fontSize = 18.sp,
+                        fontSize = fontsContent,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )
@@ -338,14 +358,14 @@ fun BodyProfile(
                         painter = painterResource(id = R.drawable._job_ic),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
                         text = profileViewModel.job.value,
-                        fontSize = 18.sp,
+                        fontSize = fontsContent,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )
@@ -368,14 +388,14 @@ fun BodyProfile(
                         painter = painterResource(id = R.drawable.address_ic),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
                         text = profileViewModel.address.value,
-                        fontSize = 18.sp,
+                        fontSize = fontsContent,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )
@@ -398,14 +418,14 @@ fun BodyProfile(
                         painter = painterResource(id = R.drawable.hobby_ic),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(size)
                     )
 
                     Spacer(modifier = Modifier.width(25.dp))
 
                     Text(
                         text = profileViewModel.favorites.value,
-                        fontSize = 18.sp,
+                        fontSize = fontsContent,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )
