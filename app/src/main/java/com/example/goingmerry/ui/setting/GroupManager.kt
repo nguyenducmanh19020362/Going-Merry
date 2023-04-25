@@ -1,7 +1,6 @@
-package com.example.goingmerry.ui.signInSignUp
+package com.example.goingmerry.ui.setting
 
 import GetGroupsQuery
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -32,10 +30,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.apollographql.apollo.api.Input
 import com.example.goingmerry.R
-import com.example.goingmerry.ScreenSizes
-import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.GroupManagerViewModel
-import type.FriendRequestReply
 import type.GroupMemberInput
 import type.UserRole
 
@@ -63,7 +58,8 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colors.secondary)) {
+        .background(MaterialTheme.colors.secondary)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ){

@@ -31,10 +31,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
@@ -43,7 +45,7 @@ import kotlinx.coroutines.flow.asFlow
 import java.lang.reflect.Member
 
 @Composable
-fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String){
+fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String, navController: NavController){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by rememberSaveable {
@@ -63,32 +65,11 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 nameUser = member.name
             }
         }
-        TopBarGroup(conversation.name)
+        TopBarGroup(conversation.name, navController ,conversation.id)
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
         ){
-            /*items(directMessages.value){
-                var directMessage = it
-                if(directMessage.conversationId == conversation.id.toLong()){
-                    if(conversation.members[0].id.toLong() == directMessage.senderId) {
-                        MessageCard(
-                            msg = Message(
-                                directMessage.content,
-                                conversation.members[0].name
-                            ), url = conversation.members[1].avatar.toString()
-                        )
-                    }
-                    if(conversation.members[1].id.toLong() == directMessage.senderId) {
-                        MessageCard(
-                            msg = Message(
-                                directMessage.content,
-                                conversation.members[1].name
-                            ), url = conversation.members[1].avatar.toString()
-                        )
-                    }
-                }
-            }*/
             items(directMessages.sortedBy {
                 it.sendAt
             }.asReversed()){
@@ -196,7 +177,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
 
 
 @Composable
-fun TopBarGroup(nameGroup: String){
+fun TopBarGroup(nameGroup: String, navController: NavController, idConversation: String){
     TopAppBar (
         modifier = Modifier
             .height(70.dp)
@@ -221,9 +202,15 @@ fun TopBarGroup(nameGroup: String){
             }
         },
         actions = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                navController.navigate(
+                    Routes.GroupMember.route + "/${
+                        idConversation
+                    }"
+                )
+            }) {
                 Icon(
-                    Icons.Filled.Person,
+                    Icons.Default.Groups,
                     contentDescription = "To Profile",
                     modifier = Modifier.size(30.dp)
                 )

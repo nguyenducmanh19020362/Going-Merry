@@ -160,10 +160,8 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             horizontalArrangement = Arrangement.Center
         ){
             var size  = 40.dp
-            var fonts = 30.sp
             if(ScreenSizes.type() == TypeScreen.Compat){
                 size = 30.dp
-                fonts = 20.sp
             }
             Button(
                 onClick = {changeTypeList("Friend")},
