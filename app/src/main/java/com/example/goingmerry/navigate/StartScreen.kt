@@ -42,7 +42,8 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
             val idMember = navBackTrackEntry.arguments?.getString("idConversation")
             idMember?.let {
-                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value)
+                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,
+                loginViewModel.token.value)
             }
         }
 
@@ -63,14 +64,14 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
             idMember?.let {
                 Log.e("it", "${it.toInt()}")
                 ChatBoxGroup(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,
-                navController)
+                navController, loginViewModel.token.value)
             }
 
         }
 
         composable(Routes.Setting.route){
             SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value, data, loginViewModel)
+            homeViewModel.idAccount.value, data, chatBoxViewModel)
         }
 
         composable(Routes.UserInfo.route){
@@ -118,9 +119,9 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.SignIn.route){
+            chatBoxViewModel.stateSockets.value = "OFF"
             if(loginViewModel.isSuccessLogin.value == 2){
                 LaunchedEffect(key1 = Unit){
-                    chatBoxViewModel.stateSockets.value = "OFF"
                     navController.navigate(route = Routes.Home.route){
                         popUpTo(route = Routes.SignIn.route) {
                             inclusive = true
@@ -141,6 +142,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Home.route){
+            chatBoxViewModel.resetListReceiverMessage()
             ScreenHome(loginViewModel, chatBoxViewModel = chatBoxViewModel, homeViewModel = homeViewModel, navController)
         }
 

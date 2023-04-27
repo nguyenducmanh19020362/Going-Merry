@@ -4,6 +4,7 @@ import AccountQuery
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -34,11 +35,12 @@ import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore, loginViewModel: LoginViewModel) {
+fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore, chatBoxViewModel: ChatBoxViewModel) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -69,7 +71,7 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 }
             },
             data,
-            loginViewModel
+            chatBoxViewModel
         )
     }
 
@@ -147,6 +149,7 @@ fun TopBar(
                 .align(Alignment.CenterHorizontally)
                 .offset(x = (-110).dp, y = (-130).dp)
                 .clip(CircleShape)
+                .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
         )
     }
 }
@@ -186,7 +189,7 @@ fun BodyScreen(
     onNavigateToListAddFriend: () -> Unit,
     onNavigateToGroupManager: () -> Unit,
     data: DataStore,
-    loginViewModel: LoginViewModel
+    chatBoxViewModel: ChatBoxViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -365,7 +368,7 @@ fun BodyScreen(
                 }
             },
             data,
-            loginViewModel
+            chatBoxViewModel
         )
     }
 }
@@ -374,12 +377,14 @@ fun BodyScreen(
 fun LogoutCard(
     onNavigateToWelcome: () -> Unit,
     data: DataStore,
-    loginViewModel: LoginViewModel
+    chatBoxViewModel: ChatBoxViewModel
 ) {
     val showDialog = remember { mutableStateOf(false) }
     var clickOk by rememberSaveable{ mutableStateOf(false) }
     if(clickOk){
         LaunchedEffect(key1 = Unit){
+            chatBoxViewModel.jobReceiver?.cancel()
+            chatBoxViewModel.sendJob?.cancel()
             data.saveToken("", 0L)
             clickOk = false
         }

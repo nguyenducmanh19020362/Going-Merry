@@ -21,7 +21,7 @@ type Conversation {
 	id: ID!
 	name: String!
 	members: [User!]!
-	messages: [Message!]!
+	latestMessages: [Message!]!
 	pinnedMessages: [Message!]!
 	lastUpdate: String!
 }

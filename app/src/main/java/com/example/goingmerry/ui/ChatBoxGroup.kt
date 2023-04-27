@@ -40,25 +40,32 @@ import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import java.lang.reflect.Member
 
 @Composable
-fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String, navController: NavController){
+fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String,
+                 navController: NavController, token: String){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by rememberSaveable {
-        mutableStateOf(conversation.messages)
+        mutableStateOf(conversation.latestMessages)
     }
 
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
+
+    var beforeMessage by rememberSaveable {
+        mutableStateOf(listOf<BeforeMessageQuery.BeforeMessage>())
+    }
 
     val lenInputMessage = if(messageTyping == "") 4f else 7f
 
     var nameUser by rememberSaveable {
         mutableStateOf("")
     }
+    val progressBar by chatBoxViewModel.progressBar.collectAsState()
     Column {
         for(member in conversation.members){
             if(id == member.id){
@@ -66,6 +73,14 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
             }
         }
         TopBarGroup(conversation.name, navController ,conversation.id)
+        if(progressBar){
+            Column (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                CircularProgressIndicator()
+            }
+        }
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
@@ -97,6 +112,38 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                     }
                 }
                 MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+            }
+            items(beforeMessage.sortedBy {
+                it.sendAt
+            }.asReversed()){
+                    message->
+                var avatar = "";
+                for(member in conversation.members){
+                    if(message.sender!!.id == member.id){
+                        avatar = member.avatar.toString()
+                        break;
+                    }
+                }
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+            }
+            item{
+                LaunchedEffect(true) {
+                    var idMessage: String = messages.last().id
+                    if(beforeMessage.isNotEmpty()){
+                        Log.e("IdMessage", idMessage)
+                        idMessage = beforeMessage.last().id
+                    }
+                    if(!progressBar){
+                        chatBoxViewModel.setProgressBar(true)
+                        chatBoxViewModel.getBeforeMessage(token, conversation.id, idMessage)
+                    }
+                    if(chatBoxViewModel.beforeMessages.value.isNotEmpty()){
+                        beforeMessage = beforeMessage + chatBoxViewModel.beforeMessages.value
+                        Log.e("error", beforeMessage.size.toString())
+                        chatBoxViewModel.resetBeforeMessage()
+                        chatBoxViewModel.setProgressBar(false)
+                    }
+                }
             }
         }
         Row(

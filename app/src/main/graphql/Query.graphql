@@ -19,7 +19,7 @@ query account{
                 name
                 avatar
             }
-            messages{
+            latestMessages{
                 id
                 sender{
                     id
@@ -114,6 +114,20 @@ mutation UpdateAccount($input: AccountInput!){
     updateAccount(input: $input){
         id
         name
+    }
+}
+
+query BeforeMessage($conversationId: ID!, $messageId: ID!){
+    beforeMessage(conversationId: $conversationId, messageId: $messageId){
+        id
+        sender{
+            id
+            name
+        }
+        content
+        type
+        sendAt
+        state
     }
 }
 

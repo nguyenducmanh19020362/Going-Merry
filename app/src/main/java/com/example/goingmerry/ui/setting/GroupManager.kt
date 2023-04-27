@@ -26,22 +26,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.apollographql.apollo.api.Input
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.GroupManagerViewModel
 import type.GroupMemberInput
 import type.UserRole
 
 @Composable
-fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
+fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, nav: NavController){
     groupManagerViewModel.getGroups(token)
     val listGroup by groupManagerViewModel.listGroups.collectAsState()
     val listFriend by groupManagerViewModel.listFriend.collectAsState()
     val idAccount by groupManagerViewModel.idAccount.collectAsState()
 
-    val predicate1: (GetGroupsQuery.Member) -> Boolean = {it.role == UserRole.MEMBER && it.user != null && it.user.id == idAccount}
     val predicate2: (GetGroupsQuery.Member) -> Boolean = {it.role == UserRole.MANAGER && it.user != null && it.user.id == idAccount}
 
     var addGroupClick by rememberSaveable {
@@ -93,7 +94,7 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
                     backgroundColor = MaterialTheme.colors.onPrimary
                 ),
                 modifier = Modifier
-                    .padding(10.dp),
+                    .padding(5.dp),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle.Default.copy(fontSize = 18.sp)
             )
@@ -147,8 +148,9 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                    .fillMaxWidth()
+                    .padding(top = 5.dp),
+                horizontalArrangement = Arrangement.Center
             ){
                 Row(
                     modifier = Modifier
@@ -185,40 +187,6 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
             }
         }
         Text(
-            text = "Danh sách Nhóm tham gia:",
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.h2,
-            modifier = Modifier.padding(start = 5.dp)
-        )
-        LazyColumn(modifier = Modifier.weight(1f)){
-            if(listGroup.isNotEmpty()){
-                items(listGroup){
-                    if(it.members.any(predicate1)){
-                        Row(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.app_icon),
-                                contentDescription = "Ẩn danh",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .clip(CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = it.name,
-                                style = MaterialTheme.typography.subtitle2,
-                                fontSize = 20.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Text(
             text = "Danh sách Nhóm quản lý:",
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -233,6 +201,8 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(5.dp)
+                                .clickable {
+                                }
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.app_icon),
@@ -259,5 +229,5 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String){
 @Composable
 @Preview
 fun Preview1(){
-    GroupManager(groupManagerViewModel = GroupManagerViewModel(), "")
+    //GroupManager(groupManagerViewModel = GroupManagerViewModel(), "")
 }

@@ -185,6 +185,7 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
                 .align(Alignment.CenterHorizontally)
                 .weight(0.4f)
                 .offset(y = (-50).dp)
+                .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
         )
     }
 }

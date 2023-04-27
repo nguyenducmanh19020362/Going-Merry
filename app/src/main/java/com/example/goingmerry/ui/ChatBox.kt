@@ -38,16 +38,22 @@ import com.example.goingmerry.R
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import java.lang.reflect.Member
 
 @Composable
-fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String){
+fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String, token: String){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
-    val messages by rememberSaveable {
-        mutableStateOf(conversation.messages)
+
+    var messages by rememberSaveable {
+        mutableStateOf(conversation.latestMessages)
+    }
+
+    var beforeMessage by rememberSaveable {
+        mutableStateOf(listOf<BeforeMessageQuery.BeforeMessage>())
     }
 
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
@@ -57,12 +63,23 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     var nameUser by rememberSaveable {
         mutableStateOf("")
     }
+
+    val progressBar by chatBoxViewModel.progressBar.collectAsState()
+
     Column {
         for(member in conversation.members){
             if(member.id != id){
                 TopBar(member)
             }else{
                 nameUser = member.name
+            }
+        }
+        if(progressBar){
+            Column (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                CircularProgressIndicator()
             }
         }
         LazyColumn(
@@ -96,6 +113,37 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                     }
                 }
                 MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+            }
+            items(beforeMessage.sortedBy {
+                it.sendAt
+            }.asReversed()){
+                    message->
+                var avatar = "";
+                for(member in conversation.members){
+                    if(message.sender!!.id == member.id){
+                        avatar = member.avatar.toString()
+                        break;
+                    }
+                }
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+            }
+            item{
+                LaunchedEffect(key1 = null) {
+                    var idMessage: String = messages.last().id
+                    if(beforeMessage.isNotEmpty()){
+                        idMessage = beforeMessage.last().id
+                        Log.e("IdMessage", idMessage)
+                    }
+                    if(!progressBar){
+                        chatBoxViewModel.setProgressBar(true)
+                        chatBoxViewModel.getBeforeMessage(token, conversation.id, idMessage)
+                    }
+                    if(chatBoxViewModel.beforeMessages.value.isNotEmpty()){
+                        beforeMessage = beforeMessage + chatBoxViewModel.beforeMessages.value
+                        chatBoxViewModel.resetBeforeMessage()
+                        chatBoxViewModel.setProgressBar(false)
+                    }
+                }
             }
         }
         Row(
@@ -157,6 +205,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         chatBoxViewModel.conversationId.value = conversation.id.toLong()
                         chatBoxViewModel.contentSendMessage.value = messageTyping
                         chatBoxViewModel.flag.value = true
+                        messageTyping = ""
                     }
                 },
                 modifier = Modifier
@@ -216,10 +265,8 @@ fun TopBar(member: AccountQuery.Member){
 @Composable
 fun MessageCard(msg: Message, url: String, id: String) {
     val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
     val imageLoader = ImageLoader(LocalContext.current)
-    Log.e("sosanh", msg.idMember + " " + msg.author + " " + msg.content + " " + id)
     Row(
         modifier = Modifier
             .padding(all = 8.dp)
