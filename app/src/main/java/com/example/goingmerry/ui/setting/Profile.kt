@@ -40,7 +40,6 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
     var showDialog by rememberSaveable {
         mutableStateOf(false)
     }
-    Log.e("ProfileScreen", "$id $token")
     profileViewModel.matchProfiles(id, token)
     Column(
         modifier = Modifier.fillMaxSize()
@@ -113,7 +112,7 @@ fun TopBar() {
 @Composable
 fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Unit) {
     val imageLoader = ImageLoader(context = LocalContext.current)
-    var sizeColumn  = 240.dp
+    var sizeColumn  = 200.dp
     var sizeImageProfile = 100.dp
     var fonts = 30.sp
     if(ScreenSizes.type() == TypeScreen.Compat){
@@ -141,12 +140,6 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
             )
-
-            /*Icon(
-                imageVector = Icons.Default.People,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp)
-            )*/
 
             Icon(
                 imageVector = if(isFriend) Icons.Default.PersonRemoveAlt1 else Icons.Default.People,
@@ -183,14 +176,6 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
 
         }
 
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .weight(0.1f)
-//                .align(Alignment.CenterHorizontally)
-//        ) {
-//        }
-
         AsyncImage(
             model = linkImage,
             imageLoader = imageLoader,
@@ -200,6 +185,7 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
                 .align(Alignment.CenterHorizontally)
                 .weight(0.4f)
                 .offset(y = (-50).dp)
+                .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
         )
     }
 }
@@ -224,7 +210,7 @@ fun RoundImage(
             )
         }
 
-        Box(
+        /*Box(
             modifier = Modifier
                 .size(30.dp)
                 .clip(CircleShape)
@@ -245,17 +231,7 @@ fun RoundImage(
                     .size(24.dp)
                     .align(Alignment.Center)
             )
-        }
-
-
-//        Box() {
-//            Image(
-//                painter = painterResource(id = R.drawable.app_icon),
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//        }
-
+        }*/
     }
 }
 
@@ -263,175 +239,188 @@ fun RoundImage(
 fun BodyProfile(
     profileViewModel: ProfileViewModel
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-            .background(MaterialTheme.colors.primary)
-    ) {
-        var size  = 40.dp
-        var fontsName = 30.sp
-        var fontsDescribe = 20.sp
-        var fontsContent = 18.sp
-        if(ScreenSizes.type() == TypeScreen.Compat){
-            size = 30.dp
-            fontsName = 20.sp
-            fontsDescribe = 17.sp
-            fontsContent = 18.sp
+    Column() {
+        Button(
+            onClick = { /*TODO*/ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(MaterialTheme.colors.primary)
+        ){
+            Text(text = "Thêm bạn")
         }
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = profileViewModel.name.value,
-            fontSize = fontsName,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Text(
-            text = "GIỚI THIỆU VỀ TÔI",
-            fontWeight = FontWeight.Bold,
-            fontSize = fontsDescribe,
-            color = Color.LightGray,
-        )
-
         Spacer(modifier = Modifier.height(5.dp))
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .border(
-                    width = 2.dp,
-                    color = Color.LightGray
-                )
-                .clip(RoundedCornerShape(20.dp))
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                 .background(MaterialTheme.colors.primary)
         ) {
-            Card(
-                elevation = 4.dp,
-                backgroundColor = MaterialTheme.colors.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.age_ic),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(size)
-                    )
-
-                    Spacer(modifier = Modifier.width(25.dp))
-
-                    Text(
-                        text = profileViewModel.age.value,
-                        fontSize = fontsContent,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
-                }
+            var size  = 40.dp
+            var fontsName = 30.sp
+            var fontsDescribe = 20.sp
+            var fontsContent = 18.sp
+            if(ScreenSizes.type() == TypeScreen.Compat){
+                size = 30.dp
+                fontsName = 20.sp
+                fontsDescribe = 17.sp
+                fontsContent = 18.sp
             }
-            Card(
-                elevation = 4.dp,
-                backgroundColor = MaterialTheme.colors.primary,
+            Text(
+                text = profileViewModel.name.value,
+                fontSize = fontsName,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(
+                text = "GIỚI THIỆU VỀ TÔI",
+                fontWeight = FontWeight.Bold,
+                fontSize = fontsDescribe,
+                color = Color.LightGray,
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .border(
+                        width = 2.dp,
+                        color = Color.LightGray
+                    )
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colors.primary)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                Card(
+                    elevation = 4.dp,
+                    backgroundColor = MaterialTheme.colors.primary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable._job_ic),
-                        contentDescription = null,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .size(size)
-                    )
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.age_ic),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(size)
+                        )
 
-                    Spacer(modifier = Modifier.width(25.dp))
+                        Spacer(modifier = Modifier.width(25.dp))
 
-                    Text(
-                        text = profileViewModel.job.value,
-                        fontSize = fontsContent,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
+                        Text(
+                            text = profileViewModel.age.value,
+                            fontSize = fontsContent,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                    }
                 }
-            }
-
-            Card(
-                elevation = 4.dp,
-                backgroundColor = MaterialTheme.colors.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                Card(
+                    elevation = 4.dp,
+                    backgroundColor = MaterialTheme.colors.primary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.address_ic),
-                        contentDescription = null,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .size(size)
-                    )
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable._job_ic),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(size)
+                        )
 
-                    Spacer(modifier = Modifier.width(25.dp))
+                        Spacer(modifier = Modifier.width(25.dp))
 
-                    Text(
-                        text = profileViewModel.address.value,
-                        fontSize = fontsContent,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
+                        Text(
+                            text = profileViewModel.job.value,
+                            fontSize = fontsContent,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                    }
                 }
-            }
 
-            Card(
-                elevation = 4.dp,
-                backgroundColor = MaterialTheme.colors.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                Card(
+                    elevation = 4.dp,
+                    backgroundColor = MaterialTheme.colors.primary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.hobby_ic),
-                        contentDescription = null,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .size(size)
-                    )
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.address_ic),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(size)
+                        )
 
-                    Spacer(modifier = Modifier.width(25.dp))
+                        Spacer(modifier = Modifier.width(25.dp))
 
-                    Text(
-                        text = profileViewModel.favorites.value,
-                        fontSize = fontsContent,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
+                        Text(
+                            text = profileViewModel.address.value,
+                            fontSize = fontsContent,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                    }
+                }
+
+                Card(
+                    elevation = 4.dp,
+                    backgroundColor = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.hobby_ic),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(size)
+                        )
+
+                        Spacer(modifier = Modifier.width(25.dp))
+
+                        Text(
+                            text = profileViewModel.favorites.value,
+                            fontSize = fontsContent,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+
 

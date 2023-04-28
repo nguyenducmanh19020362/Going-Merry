@@ -15,6 +15,7 @@ import com.example.goingmerry.DataStore
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.ChatBoxGroup
 import com.example.goingmerry.ui.home.BodyScreen
+import com.example.goingmerry.ui.home.ListFriends
 import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
@@ -23,8 +24,10 @@ import com.example.goingmerry.ui.home.SettingScreen
 import com.example.goingmerry.ui.setting.ListRequestAddFriends
 import com.example.goingmerry.ui.setting.ProfileScreen
 import com.example.goingmerry.ui.setting.UserInfoScreen
+import com.example.goingmerry.ui.setting.GroupManager
 import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.*
+import type.UserRole
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -39,8 +42,20 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
             val idMember = navBackTrackEntry.arguments?.getString("idConversation")
             idMember?.let {
-                Log.e("it", "${it.toInt()}")
-                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value)
+                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,
+                loginViewModel.token.value)
+            }
+        }
+
+        composable(Routes.GroupMember.route + "/{idConversation}"){navBackTrackEntry->
+            val idConversation = navBackTrackEntry.arguments?.getString("idConversation")
+            idConversation?.let {
+                for(conversation in homeViewModel.conversations.value){
+                    if(idConversation == conversation.id){
+                        ListMembers(members = conversation.members)
+                        break;
+                    }
+                }
             }
         }
 
@@ -48,14 +63,15 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
             val idMember = navBackTrackEntry.arguments?.getString("idConversation")
             idMember?.let {
                 Log.e("it", "${it.toInt()}")
-                ChatBoxGroup(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value)
+                ChatBoxGroup(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,
+                navController, loginViewModel.token.value)
             }
 
         }
 
         composable(Routes.Setting.route){
             SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value, data, loginViewModel)
+            homeViewModel.idAccount.value, data, chatBoxViewModel)
         }
 
         composable(Routes.UserInfo.route){
@@ -103,9 +119,9 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.SignIn.route){
+            chatBoxViewModel.stateSockets.value = "OFF"
             if(loginViewModel.isSuccessLogin.value == 2){
                 LaunchedEffect(key1 = Unit){
-                    chatBoxViewModel.stateSockets.value = "OFF"
                     navController.navigate(route = Routes.Home.route){
                         popUpTo(route = Routes.SignIn.route) {
                             inclusive = true
@@ -126,6 +142,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.Home.route){
+            chatBoxViewModel.resetListReceiverMessage()
             ScreenHome(loginViewModel, chatBoxViewModel = chatBoxViewModel, homeViewModel = homeViewModel, navController)
         }
 

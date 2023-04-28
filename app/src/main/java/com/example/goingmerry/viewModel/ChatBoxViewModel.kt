@@ -1,12 +1,18 @@
 package com.example.goingmerry.viewModel
 
 import AccountQuery
+import BeforeMessageQuery
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo.ApolloCall
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Response
+import com.apollographql.apollo.exception.ApolloException
+import com.example.goingmerry.URL
 import com.google.gson.Gson
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -26,20 +32,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import type.MessageState
+import okhttp3.OkHttpClient
 import java.time.Instant
-import java.util.List
 
 
 class ChatBoxViewModel: ViewModel() {
     var stateSockets = mutableStateOf("OFF")
     var conversationId = mutableStateOf(0L)
+
+    private var _progressBar = MutableStateFlow(false)
+    var progressBar = _progressBar.asStateFlow()
+
     private val _listReceiverMessage = MutableStateFlow(listOf<DirectMessage>())
     val listReceiverMessage = _listReceiverMessage.asStateFlow()
+
+    private val _beforeMessages = MutableStateFlow(listOf<BeforeMessageQuery.BeforeMessage>())
+    val beforeMessages = _beforeMessages.asStateFlow()
+
     var contentSendMessage = mutableStateOf("")
     var flag = mutableStateOf(false)
     var jobReceiver: Job? = null
     var sendJob: Job? = null
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun receiverMessages(loginViewModel: LoginViewModel, homeViewModel: HomeViewModel){
         stateSockets.value = "ON"
@@ -69,14 +83,12 @@ class ChatBoxViewModel: ViewModel() {
                         add(bearerAuthMetadata)
                         add(routeMetadata)
                     }
-                    Log.e("time", Instant.now().toString())
                     data(Instant.now().epochSecond.toString())
                 }
             )
             stream.collect { payload: Payload ->
                 val json = payload.data.readText()
                 val receiverMessage = gson.fromJson(json, ReceiverMessage::class.java)
-                Log.e("hi", receiverMessage.toString())
                 for(item in homeViewModel.conversations.value){
                     if(item.id.toLong() == receiverMessage.conversationId){
                         var name = ""
@@ -144,7 +156,6 @@ class ChatBoxViewModel: ViewModel() {
                             val gsonSendMessage = gson.toJson(sendMessage)
                             emitOrClose(
                                 buildPayload {
-                                    Log.e("gsonMessage", gsonSendMessage)
                                     compositeMetadata {
                                         add(bearerAuthMetadata)
                                         add(routeMetadata)
@@ -159,6 +170,51 @@ class ChatBoxViewModel: ViewModel() {
                 }
             ).collect()
         }
+    }
+
+    fun getBeforeMessage(token: String, conversationId: String, messageId: String){
+        viewModelScope.launch(Dispatchers.IO){
+            try {
+                val okHttp = OkHttpClient.Builder()
+                    .addInterceptor{chain ->
+                        val original = chain.request()
+                        val builder = original.newBuilder().method("POST", original.body)
+                        builder.addHeader("Authorization", "Bearer $token")
+                        builder.addHeader("Content-Type","application/json")
+                        chain.proceed(builder.build())
+                    }.build()
+                val apolloClient = ApolloClient.builder()
+                    .serverUrl("${URL.urlServer}/graphql")
+                    .okHttpClient(okHttp)
+                    .build()
+                val users = apolloClient.query(BeforeMessageQuery(conversationId, messageId))
+                users.enqueue(object: ApolloCall.Callback<BeforeMessageQuery.Data>(){
+                    override fun onResponse(response: Response<BeforeMessageQuery.Data>) {
+                        _beforeMessages.tryEmit(response.data!!.beforeMessage.orEmpty())
+                        if(response.data!!.beforeMessage!!.isEmpty()){
+                            setProgressBar(false)
+                        }
+                        Log.e("response", beforeMessages.value.toString())
+                    }
+
+                    override fun onFailure(e: ApolloException) {
+                        Log.e("Todo", e.toString())
+                    }
+                })
+            }catch (e: Exception){
+                Log.e("error", e.toString())
+            }
+        }
+    }
+
+    fun setProgressBar(boolean: Boolean){
+        _progressBar.tryEmit(boolean)
+    }
+    fun resetBeforeMessage(){
+        _beforeMessages.tryEmit(listOf())
+    }
+    fun resetListReceiverMessage(){
+        _listReceiverMessage.tryEmit(listOf())
     }
 }
 data class ReceiverMessage(

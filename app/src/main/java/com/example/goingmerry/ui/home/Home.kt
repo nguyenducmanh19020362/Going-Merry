@@ -160,10 +160,8 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             horizontalArrangement = Arrangement.Center
         ){
             var size  = 40.dp
-            var fonts = 30.sp
             if(ScreenSizes.type() == TypeScreen.Compat){
                 size = 30.dp
-                fonts = 20.sp
             }
             Button(
                 onClick = {changeTypeList("Friend")},
@@ -286,9 +284,14 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
     }
 
     if(listConversation.isNotEmpty()){
-        Log.e("messages", listConversation[0].messages.toString())
         LazyColumn(modifier = Modifier.fillMaxHeight()){
-            items(listConversation){conversion->
+            items(listConversation.sortedBy {
+                if(it.latestMessages.isNotEmpty()){
+                    it.latestMessages.first().sendAt
+                }else{
+                    -1000
+                }
+            }.asReversed()){conversion->
                 if(conversion.members.size == 2){
                     for(member in conversion.members){
                         //Log.e("id", member.id + " " + idAccount)
@@ -327,12 +330,12 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     var len = 0
-                                    if(conversion.messages.isNotEmpty()) {
-                                        len = conversion.messages.first().content.toString().length;
+                                    if(conversion.latestMessages.isNotEmpty()) {
+                                        len = conversion.latestMessages.first().content.toString().length;
                                         if(len >= 20){
                                             len = 20;
                                         }
-                                        str = conversion.messages.first().content.toString().subSequence(0, len).toString()
+                                        str = conversion.latestMessages.first().content.toString().subSequence(0, len).toString()
                                     }else{
                                         str = ""
                                     }
@@ -364,9 +367,14 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
     }
 
     if(listConversation.isNotEmpty()){
-        Log.e("messages", listConversation[0].messages.toString())
         LazyColumn(modifier = Modifier.fillMaxHeight()){
-            items(listConversation){conversion->
+            items(listConversation.sortedBy {
+                if(it.latestMessages.isNotEmpty()){
+                    it.latestMessages.first().sendAt
+                }else{
+                    -1000
+                }
+            }.reversed()){conversion->
                 if(conversion.members.size > 2){
                         //Log.e("id", member.id + " " + idAccount)
                     Row(modifier = Modifier
@@ -401,12 +409,12 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             var len = 0
-                            if(conversion.messages.isNotEmpty()) {
-                                len = conversion.messages.first().content.toString().length;
+                            if(conversion.latestMessages.isNotEmpty()) {
+                                len = conversion.latestMessages.first().content.toString().length;
                                 if(len >= 20){
                                     len = 20;
                                 }
-                                str = conversion.messages.first().content.toString().subSequence(0, len).toString()
+                                str = conversion.latestMessages.first().content.toString().subSequence(0, len).toString()
                             }else{
                                 str = ""
                             }
