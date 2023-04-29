@@ -129,19 +129,21 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             }
             item{
                 LaunchedEffect(key1 = null) {
-                    var idMessage: String = messages.last().id
-                    if(beforeMessage.isNotEmpty()){
-                        idMessage = beforeMessage.last().id
-                        Log.e("IdMessage", idMessage)
-                    }
-                    if(!progressBar){
-                        chatBoxViewModel.setProgressBar(true)
-                        chatBoxViewModel.getBeforeMessage(token, conversation.id, idMessage)
-                    }
-                    if(chatBoxViewModel.beforeMessages.value.isNotEmpty()){
-                        beforeMessage = beforeMessage + chatBoxViewModel.beforeMessages.value
-                        chatBoxViewModel.resetBeforeMessage()
-                        chatBoxViewModel.setProgressBar(false)
+                    if(messages.isNotEmpty()){
+                        var idMessage: String = messages.last().id
+                        if(beforeMessage.isNotEmpty()){
+                            idMessage = beforeMessage.last().id
+                            Log.e("IdMessage", idMessage)
+                        }
+                        if(!progressBar){
+                            chatBoxViewModel.setProgressBar(true)
+                            chatBoxViewModel.getBeforeMessage(token, conversation.id, idMessage)
+                        }
+                        if(chatBoxViewModel.beforeMessages.value.isNotEmpty()){
+                            beforeMessage = beforeMessage + chatBoxViewModel.beforeMessages.value
+                            chatBoxViewModel.resetBeforeMessage()
+                            chatBoxViewModel.setProgressBar(false)
+                        }
                     }
                 }
             }

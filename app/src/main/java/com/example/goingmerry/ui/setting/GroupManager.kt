@@ -179,7 +179,7 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
                                     Input.fromNullable(UserRole.MANAGER)
                                 )
                                 list = list + member
-                                groupManagerViewModel.createGroups(token, list, nameGroup)
+                                groupManagerViewModel.createGroups(token, list, nameGroup, "")
                             },
                         fontSize = 20.sp,
                     )
@@ -202,6 +202,11 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
                                 .fillMaxWidth()
                                 .padding(5.dp)
                                 .clickable {
+                                    nav.navigate(Routes.GroupMemberManager.route + "/${
+                                            it.id
+                                    }") {
+                                        launchSingleTop = true
+                                    }
                                 }
                         ) {
                             Image(
