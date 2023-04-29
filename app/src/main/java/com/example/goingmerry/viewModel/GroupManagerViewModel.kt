@@ -3,6 +3,7 @@ package com.example.goingmerry.viewModel
 import AddGroupMutation
 import GetGroupsQuery
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo.ApolloCall
@@ -21,6 +22,7 @@ import type.GroupInput
 import type.GroupMemberInput
 
 class GroupManagerViewModel: ViewModel() {
+    var state = mutableStateOf(false)
     private val _listGroups = MutableStateFlow(listOf<GetGroupsQuery.Group>())
     val listGroups = _listGroups.asStateFlow()
 
@@ -53,7 +55,7 @@ class GroupManagerViewModel: ViewModel() {
                     override fun onResponse(response: Response<GetGroupsQuery.Data>) {
                         _listGroups.tryEmit(response.data!!.account.groups)
                         _listFriends.tryEmit(response.data!!.account.friends)
-                        _listChecks.tryEmit(List<Boolean>(response.data!!.account.friends.size){false})
+                        _listChecks.tryEmit(List(response.data!!.account.friends.size){false})
                         _idAccount.tryEmit(response.data!!.account.id)
                         Log.e("data", response.data.toString())
                     }
@@ -67,7 +69,7 @@ class GroupManagerViewModel: ViewModel() {
             }
         }
     }
-    fun createGroups(token: String, listPeople: List<GroupMemberInput>, nameGroup: String){
+    fun createGroups(token: String, listPeople: List<GroupMemberInput>, nameGroup: String, idGroup: String){
         viewModelScope.launch(Dispatchers.IO){
             try {
                 val okHttp = OkHttpClient.Builder()
@@ -83,7 +85,10 @@ class GroupManagerViewModel: ViewModel() {
                     .okHttpClient(okHttp)
                     .build()
                 Log.e("group", AddGroupMutation(Input.fromNullable(GroupInput(Input.absent(), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))).toString())
-                val users = apolloClient.mutate(AddGroupMutation(Input.fromNullable(GroupInput(Input.absent(), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))))
+                var users = apolloClient.mutate(AddGroupMutation(Input.fromNullable(GroupInput(Input.absent(), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))))
+                if(idGroup != ""){
+                    users = apolloClient.mutate(AddGroupMutation(Input.fromNullable(GroupInput(Input.fromNullable(idGroup), Input.fromNullable(nameGroup), Input.fromNullable(listPeople)))))
+                }
                 users.enqueue(object: ApolloCall.Callback<AddGroupMutation.Data>(){
                     override fun onResponse(response: Response<AddGroupMutation.Data>) {
                         Log.e("data", response.data.toString())
@@ -105,6 +110,23 @@ class GroupManagerViewModel: ViewModel() {
                 list[index] = !list[index]
                 _listChecks.emit(list.toList())
             }
+        }
+    }
+    fun checkMember(listMembers: List<GetGroupsQuery.Member>){
+        viewModelScope.launch(Dispatchers.IO){
+            val list = listChecks.value.toMutableList()
+            if(list.isNotEmpty()){
+                for(member in listMembers){
+                    for(fri in listFriend.value){
+                        if(member.user?.id == fri.id){
+                            list[listFriend.value.indexOf(fri)] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            _listChecks.emit(list.toList())
+            state.value = true
         }
     }
 }

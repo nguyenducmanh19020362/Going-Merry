@@ -21,10 +21,7 @@ import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
 import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
 import com.example.goingmerry.ui.home.SettingScreen
-import com.example.goingmerry.ui.setting.ListRequestAddFriends
-import com.example.goingmerry.ui.setting.ProfileScreen
-import com.example.goingmerry.ui.setting.UserInfoScreen
-import com.example.goingmerry.ui.setting.GroupManager
+import com.example.goingmerry.ui.setting.*
 import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.*
 import type.UserRole
@@ -165,7 +162,27 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
         }
 
         composable(Routes.GroupManager.route){
-            GroupManager(groupManagerViewModel, loginViewModel.token.value)
+            GroupManager(groupManagerViewModel, loginViewModel.token.value, navController)
+        }
+
+        composable(Routes.GroupMemberManager.route + "/{idGroup}"){
+                navBackTrackEntry->
+            val idGroup = navBackTrackEntry.arguments?.getString("idGroup")
+            idGroup.let {
+                for(group in groupManagerViewModel.listGroups.value){
+                    if(group.id == idGroup){
+                        groupManagerViewModel.state.value = false
+                        MemberGroupManager(
+                            listMembers = group.members,
+                            groupManagerViewModel = groupManagerViewModel,
+                            idGroup = idGroup,
+                            nameGroup = group.name,
+                            token = loginViewModel.token.value
+                        )
+                        break;
+                    }
+                }
+            }
         }
     }
 }

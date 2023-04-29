@@ -91,6 +91,7 @@ query GetGroups{
                 user{
                     id
                     name
+                    avatar
                 }
                 role
             }
