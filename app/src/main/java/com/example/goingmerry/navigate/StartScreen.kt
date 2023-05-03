@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 
 import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.DataStore
+import com.example.goingmerry.ui.AnonymousChat
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.ChatBoxGroup
 import com.example.goingmerry.ui.home.BodyScreen
@@ -32,7 +33,8 @@ import type.UserRole
 fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
                 chatBoxViewModel: ChatBoxViewModel, profileViewModel: ProfileViewModel,
                 listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,
-                fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel, data: DataStore
+                fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel,
+                anonymousChatViewModel: AnonymousChatViewModel, data: DataStore
 ){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
@@ -68,7 +70,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
 
         composable(Routes.Setting.route){
             SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value, data, chatBoxViewModel)
+            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel)
         }
 
         composable(Routes.UserInfo.route){
@@ -183,6 +185,9 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
                     }
                 }
             }
+        }
+        composable(Routes.AnonymousChat.route){
+            AnonymousChat(loginViewModel, anonymousChatViewModel, homeViewModel.stateIncognito.value)
         }
     }
 }

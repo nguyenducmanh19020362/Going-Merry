@@ -75,7 +75,7 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "10.0.2.2", port = 8080)
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.1.15", port = 8080)
 
             val stream: Flow<Payload> = rSocket.requestStream(
                 buildPayload {
@@ -118,7 +118,6 @@ class ChatBoxViewModel: ViewModel() {
         }
     }
     fun sendMessages(loginViewModel: LoginViewModel){
-        Log.e("send", "sendMessage")
         stateSockets.value = "ON"
         val bearerAuthMetadata = BearerAuthMetadata(loginViewModel.token.value)
         val routeMetadata = RoutingMetadata("api.v1.messages.stream")
@@ -138,7 +137,7 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "10.0.2.2", port = 8080)
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.1.15", port = 8080)
 
             rSocket.requestChannel(
                 buildPayload {
@@ -194,7 +193,7 @@ class ChatBoxViewModel: ViewModel() {
                         if(response.data!!.beforeMessage!!.isEmpty()){
                             setProgressBar(false)
                         }
-                        Log.e("response", beforeMessages.value.toString())
+                        Log.e("response1", beforeMessages.value.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {

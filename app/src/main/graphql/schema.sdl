@@ -87,6 +87,7 @@ type Account {
 	friendRequests: [FriendRequest!]!
 	blacklist: [User!]!
 	myRequests: [FriendRequest!]!
+	incognito: Boolean
 }
 
 type Schema {

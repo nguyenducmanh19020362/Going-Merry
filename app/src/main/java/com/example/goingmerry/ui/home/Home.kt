@@ -210,9 +210,14 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
                 .fillMaxWidth()
                 .border(1.dp, color = MaterialTheme.colors.onBackground)
                 .padding(3.dp)
+                .clickable {
+                    nav.navigate(
+                        Routes.AnonymousChat.route
+                    )
+                }
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.app_icon),
+                    painter = painterResource(id = R.drawable._unknown_person),
                     contentDescription = "Ẩn danh",
                     modifier = Modifier
                         .size(size)

@@ -6,3 +6,8 @@ data class DataSignInDto (
     @SerializedName("data")
     val dataSignInDto: String
 )
+
+data class DataControlAnonymousChat(
+    @SerializedName("data")
+    val dataControlAnonymousChat: Boolean
+)

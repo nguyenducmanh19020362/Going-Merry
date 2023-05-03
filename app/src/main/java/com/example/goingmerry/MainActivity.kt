@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
     private val groupManagerViewModel: GroupManagerViewModel by viewModels()
     private val fillInfoViewModel: FillInfoViewModel by viewModels()
     private val startScreenViewModel: StartScreenViewModel by viewModels()
+    private val anonymousChatViewModel: AnonymousChatViewModel by viewModels()
     private val Context.dataStore by preferencesDataStore(
         name = "token"
     )
@@ -41,7 +42,8 @@ class MainActivity : ComponentActivity() {
                 Log.e("size", "${ScreenSizes.weight()} ${ScreenSizes.height()}")
                 val navController = rememberNavController()
                 ScreenStart(loginViewModel, signUpViewModel,homeViewModel, chatBoxViewModel,
-                    profileViewModel, listRAFViewModel, groupManagerViewModel, fillInfoViewModel, startScreenViewModel,  data)
+                    profileViewModel, listRAFViewModel, groupManagerViewModel, fillInfoViewModel, startScreenViewModel,
+                    anonymousChatViewModel, data)
 //              VerificationScreen(navController = navController, titlee = "Nhập mã đi")
             }
         }

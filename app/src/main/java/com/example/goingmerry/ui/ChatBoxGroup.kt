@@ -48,6 +48,7 @@ import java.lang.reflect.Member
 @Composable
 fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String,
                  navController: NavController, token: String){
+    Log.e("idConversation", conversation.id)
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by rememberSaveable {
@@ -128,20 +129,22 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
             }
             item{
                 LaunchedEffect(true) {
-                    var idMessage: String = messages.last().id
-                    if(beforeMessage.isNotEmpty()){
-                        Log.e("IdMessage", idMessage)
-                        idMessage = beforeMessage.last().id
-                    }
-                    if(!progressBar){
-                        chatBoxViewModel.setProgressBar(true)
-                        chatBoxViewModel.getBeforeMessage(token, conversation.id, idMessage)
-                    }
-                    if(chatBoxViewModel.beforeMessages.value.isNotEmpty()){
-                        beforeMessage = beforeMessage + chatBoxViewModel.beforeMessages.value
-                        Log.e("error", beforeMessage.size.toString())
-                        chatBoxViewModel.resetBeforeMessage()
-                        chatBoxViewModel.setProgressBar(false)
+                    if(messages.isNotEmpty()){
+                        var idMessage: String = messages.last().id
+                        if(beforeMessage.isNotEmpty()){
+                            Log.e("IdMessage", idMessage)
+                            idMessage = beforeMessage.last().id
+                        }
+                        if(!progressBar){
+                            chatBoxViewModel.setProgressBar(true)
+                            chatBoxViewModel.getBeforeMessage(token, conversation.id, idMessage)
+                        }
+                        if(chatBoxViewModel.beforeMessages.value.isNotEmpty()){
+                            beforeMessage = beforeMessage + chatBoxViewModel.beforeMessages.value
+                            Log.e("error", beforeMessage.size.toString())
+                            chatBoxViewModel.resetBeforeMessage()
+                            chatBoxViewModel.setProgressBar(false)
+                        }
                     }
                 }
             }
