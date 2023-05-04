@@ -75,7 +75,7 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.1.15", port = 8080)
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.57.102", port = 8080)
 
             val stream: Flow<Payload> = rSocket.requestStream(
                 buildPayload {
@@ -137,7 +137,7 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.1.15", port = 8080)
+            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = "192.168.57.102", port = 8080)
 
             rSocket.requestChannel(
                 buildPayload {

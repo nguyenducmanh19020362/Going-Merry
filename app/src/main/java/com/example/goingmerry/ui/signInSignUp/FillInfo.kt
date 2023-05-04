@@ -1,10 +1,21 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import android.content.ContentResolver
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.provider.MediaStore
+import android.util.Base64
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -16,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -24,11 +37,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.ImageLoader
+import coil.compose.rememberAsyncImagePainter
 import com.apollographql.apollo.api.Input
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.FillInfoViewModel
 import type.AccountInput
 import type.Gender
+import java.io.ByteArrayOutputStream
 
 @Composable
 fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {
@@ -69,6 +85,40 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
     val selectedGender = remember { mutableStateOf("") }
     var job by rememberSaveable { mutableStateOf("") }
     var hobby by rememberSaveable { mutableStateOf("") }
+    var uri by rememberSaveable {
+        mutableStateOf(Uri.EMPTY)
+    }
+    var clickComplete by rememberSaveable {
+        mutableStateOf(false)
+    }
+    if(clickComplete){
+        if(uri != Uri.EMPTY){
+            val fileName = getNameFile(uri = uri)
+            val lenFileName = getLenNameFile(fileName)
+            val encodeFile = encodeFile(uri = uri)
+            val avatar = "$lenFileName$fileName;${encodeFile(uri)}"
+            Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
+            var render = Gender.MALE
+            if(selectedGender.value == "Nữ"){
+                render = Gender.FEMALE
+            }
+            if(selectedGender.value == "Khác"){
+                render = Gender.OTHER
+            }
+            if(birthDate != ""){
+                val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(job),
+                    Input.fromNullable(render), Input.fromNullable(address),Input.fromNullable(avatar), Input.fromNullable(hobby))
+                fillInfoViewModel.updateAccount(token, input)
+            }
+            clickComplete = false
+        }
+    }
+    val galleryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
+           if(uriList.isNotEmpty()){
+               uri = uriList[0]
+           }
+        }
     if(fillInfoViewModel.idAccountUpdate.value != ""){
         navController.navigate(Routes.Home.route){
             launchSingleTop = true
@@ -82,6 +132,19 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
+            Image(
+                painter = rememberAsyncImagePainter(uri, ImageLoader(context = LocalContext.current)),
+                contentScale = ContentScale.Crop,
+                contentDescription = "thêm ảnh",
+                modifier = Modifier
+                    .padding(16.dp, 8.dp)
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+                    .clickable {
+                        galleryLauncher.launch("image/*")
+                    }
+            )
             Text(
                 text = "Tên tài khoản",
                 fontSize = 15.sp,
@@ -119,9 +182,6 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
             TextField(
                 value = birthDate,
                 onValueChange = { birthDate = it },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                ),
                 singleLine = true,
                 placeholder = { Text("yyyy-MM-dd") },
                 modifier = Modifier
@@ -210,17 +270,7 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
 
             Button(
                 onClick = {
-                    Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
-                    var render = Gender.MALE
-                    if(selectedGender.value == "Nữ"){
-                        render = Gender.FEMALE
-                    }
-                    if(selectedGender.value == "Khác"){
-                        render = Gender.OTHER
-                    }
-                    val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(address),
-                                    Input.fromNullable(render), Input.fromNullable(job), Input.fromNullable(hobby))
-                    fillInfoViewModel.updateAccount(token, input)
+                    clickComplete = true
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
                 shape = RoundedCornerShape(10.dp),
@@ -251,7 +301,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
                 .height(60.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row() {
+            Row {
                 RadioButton(
                     selected = selectedGender.value == "Nam",
                     onClick = { selectedGender.value = "Nam" },
@@ -259,7 +309,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
                 Text(text = "Nam", modifier = Modifier.padding(start = 8.dp))
             }
 
-            Row() {
+            Row {
                 RadioButton(
                     selected = selectedGender.value == "Nữ",
                     onClick = { selectedGender.value = "Nữ" },
@@ -267,7 +317,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
                 Text(text = "Nữ", modifier = Modifier.padding(start = 8.dp))
             }
 
-            Row() {
+            Row {
                 RadioButton(
                     selected = selectedGender.value == "Khác",
                     onClick = { selectedGender.value = "Khác" },
@@ -377,6 +427,35 @@ fun DropBoxFill(changeAddress: (String) -> Unit) {
             }
         }
     }
+}
+
+@Composable
+fun encodeFile(uri: Uri): String{
+    val context = LocalContext.current
+    var ct = ""
+    context.contentResolver.openInputStream(uri)?.use {
+        ct = java.util.Base64.getEncoder().encodeToString(
+            it.readBytes()
+        )
+    }
+    return ct
+}
+
+@Composable
+fun getNameFile(uri: Uri): String {
+    var realFileName = "";
+    val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+    val cr: ContentResolver = LocalContext.current.contentResolver
+    cr.query(uri, projection, null, null, null)?.use { metaCursor ->
+        if (metaCursor.moveToFirst()) {
+            realFileName = metaCursor.getString(0)
+        }
+    }
+    return realFileName
+}
+fun getLenNameFile(realFileName: String):String{
+    val len = realFileName.length
+    return String.format("%03d", len)
 }
 
 

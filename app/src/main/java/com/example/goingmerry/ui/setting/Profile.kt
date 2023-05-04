@@ -30,9 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.TypeScreen
+import com.example.goingmerry.URL
 import com.example.goingmerry.viewModel.ProfileViewModel
 
 @Composable
@@ -68,7 +70,7 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
         }
         TopBar()
 
-        ChangeImage(profileViewModel.avatar.value, isFriend, changeShowDialog = {showDialog = true})
+        ChangeImage(profileViewModel.avatar.value, isFriend, changeShowDialog = {showDialog = true}, token)
 
         BodyProfile(profileViewModel)
 
@@ -110,7 +112,7 @@ fun TopBar() {
 }
 
 @Composable
-fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Unit) {
+fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Unit, token: String) {
     val imageLoader = ImageLoader(context = LocalContext.current)
     var sizeColumn  = 200.dp
     var sizeImageProfile = 100.dp
@@ -177,7 +179,9 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
         }
 
         AsyncImage(
-            model = linkImage,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("${URL.urlServer}${linkImage}")
+                .setHeader("Authorization", "Bearer $token").build(),
             imageLoader = imageLoader,
             contentDescription = "",
             modifier = Modifier
