@@ -26,4 +26,5 @@ sealed class Routes (val route: String) {
     object GroupMember: Routes("groupMember")
 
     object GroupMemberManager: Routes("groupMemberManager")
+    object AnonymousChat: Routes("anonymousChat")
 }

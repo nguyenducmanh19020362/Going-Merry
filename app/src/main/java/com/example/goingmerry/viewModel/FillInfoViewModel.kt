@@ -37,7 +37,7 @@ class FillInfoViewModel: ViewModel() {
                 Log.e("input", input.toString())
                 users.enqueue(object: ApolloCall.Callback<UpdateAccountMutation.Data>(){
                     override fun onResponse(response: Response<UpdateAccountMutation.Data>) {
-                        idAccountUpdate.value = response.data!!.updateAccount!!.id
+                        idAccountUpdate.value = response.data?.updateAccount?.id.toString()
                         Log.e("data", response.data.toString())
                     }
 

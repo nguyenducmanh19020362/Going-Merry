@@ -1,11 +1,9 @@
 package com.example.goingmerry.repository
 
-import com.example.goingmerry.dataTransferObjects.DataSignInDto
-import com.example.goingmerry.dataTransferObjects.LoginDto
-import com.example.goingmerry.dataTransferObjects.SignUpDto
-import com.example.goingmerry.dataTransferObjects.TokenDto
+import com.example.goingmerry.dataTransferObjects.*
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthApiService {
@@ -15,4 +13,7 @@ interface AuthApiService {
 
     @POST("/signup")
     suspend fun getSignUp(@Body signUpDto: SignUpDto): Response<DataSignInDto>
+
+    @POST("/incognito")
+    suspend fun controlChat(@Header("Authorization") token: String): Response<DataControlAnonymousChat>
 }

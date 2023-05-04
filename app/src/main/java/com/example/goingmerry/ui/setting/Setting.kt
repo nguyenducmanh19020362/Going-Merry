@@ -35,12 +35,14 @@ import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore, chatBoxViewModel: ChatBoxViewModel) {
+fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore,
+                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -71,7 +73,8 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 }
             },
             data,
-            chatBoxViewModel
+            chatBoxViewModel,
+            anonymousChatViewModel
         )
     }
 
@@ -189,7 +192,8 @@ fun BodyScreen(
     onNavigateToListAddFriend: () -> Unit,
     onNavigateToGroupManager: () -> Unit,
     data: DataStore,
-    chatBoxViewModel: ChatBoxViewModel
+    chatBoxViewModel: ChatBoxViewModel,
+    anonymousChatViewModel: AnonymousChatViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -368,7 +372,8 @@ fun BodyScreen(
                 }
             },
             data,
-            chatBoxViewModel
+            chatBoxViewModel,
+            anonymousChatViewModel
         )
     }
 }
@@ -377,7 +382,8 @@ fun BodyScreen(
 fun LogoutCard(
     onNavigateToWelcome: () -> Unit,
     data: DataStore,
-    chatBoxViewModel: ChatBoxViewModel
+    chatBoxViewModel: ChatBoxViewModel,
+    anonymousChatViewModel: AnonymousChatViewModel
 ) {
     val showDialog = remember { mutableStateOf(false) }
     var clickOk by rememberSaveable{ mutableStateOf(false) }
@@ -385,6 +391,8 @@ fun LogoutCard(
         LaunchedEffect(key1 = Unit){
             chatBoxViewModel.jobReceiver?.cancel()
             chatBoxViewModel.sendJob?.cancel()
+            anonymousChatViewModel.jobSend?.cancel()
+            anonymousChatViewModel.jobReceiver?.cancel()
             data.saveToken("", 0L)
             clickOk = false
         }
