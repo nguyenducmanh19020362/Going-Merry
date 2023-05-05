@@ -1,5 +1,7 @@
 package com.example.goingmerry.repository
 
+import ForgotPasswordDto
+import ResetPassword
 import com.example.goingmerry.dataTransferObjects.*
 import retrofit2.Response
 import retrofit2.http.Body
@@ -16,4 +18,19 @@ interface AuthApiService {
 
     @POST("/incognito")
     suspend fun controlChat(@Header("Authorization") token: String): Response<DataControlAnonymousChat>
+
+    @POST("/verify-account")
+    suspend fun verifyAccount(@Body body: VerifyAccountDto): Response<Unit>
+
+    @POST("/exchange-token")
+    suspend fun exchangeToken(@Body body: ExchangeToken): Response<Unit>
+
+    @POST("/re-token")
+    suspend fun reToken(@Body body: ReTokenDto): Response<Unit>
+
+    @POST("/forgot-password")
+    suspend fun forgotPass(@Body body: ForgotPasswordDto): Response<Unit>
+
+    @POST("/reset-password")
+    suspend fun resetPassword(@Body body: ResetPassword): Response<Unit>
 }

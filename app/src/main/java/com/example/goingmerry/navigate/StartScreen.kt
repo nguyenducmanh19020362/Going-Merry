@@ -1,13 +1,13 @@
 package com.example.goingmerry.navigate
 
-import AccountQuery
+import com.example.goingmerry.viewModel.VerifyViewModel
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 
 import androidx.navigation.compose.rememberNavController
@@ -15,8 +15,6 @@ import com.example.goingmerry.DataStore
 import com.example.goingmerry.ui.AnonymousChat
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.ChatBoxGroup
-import com.example.goingmerry.ui.home.BodyScreen
-import com.example.goingmerry.ui.home.ListFriends
 import com.example.goingmerry.ui.home.ScreenHome
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
@@ -25,16 +23,17 @@ import com.example.goingmerry.ui.home.SettingScreen
 import com.example.goingmerry.ui.setting.*
 import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.*
-import type.UserRole
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,
-                chatBoxViewModel: ChatBoxViewModel, profileViewModel: ProfileViewModel,
-                listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,
-                fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel,
-                anonymousChatViewModel: AnonymousChatViewModel, data: DataStore
+fun ScreenStart(
+    loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,
+    verifyViewModel: VerifyViewModel, homeViewModel: HomeViewModel,
+    chatBoxViewModel: ChatBoxViewModel, profileViewModel: ProfileViewModel,
+    listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,
+    fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel,
+    anonymousChatViewModel: AnonymousChatViewModel, data: DataStore
 ){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Welcome.route){
@@ -107,8 +106,10 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
             ForgotPasswordScreen(navController = navController)
         }
 
-        composable(Routes.Verification.route){
-            VerificationScreen(navController = navController, titlee = "")
+        composable(Routes.Verification.route + "/{email}"){
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val email = navBackStackEntry?.arguments?.getString("email")
+            VerificationScreen(navController = navController, verifyViewModel = verifyViewModel, email = email)
         }
 
         composable(Routes.Welcome.route){

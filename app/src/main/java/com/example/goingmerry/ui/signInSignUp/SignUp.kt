@@ -36,6 +36,7 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var rePassword by rememberSaveable { mutableStateOf("") }
+    val token by rememberSaveable { mutableStateOf("") }
 
     var buttonOnClick by rememberSaveable {
         mutableStateOf(false)
@@ -46,27 +47,29 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
     ) {
         LogoApp()
 
-        Spacer(modifier = Modifier.height(25.dp))
-
-        Text(
-            text = "Tạo tài khoản của riêng bạn!",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(bottom = 20.dp)
-                .width(300.dp)
-        )
-
         Column(
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "Tạo tài khoản của riêng bạn!",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(top = 15.dp, bottom = 20.dp)
+            )
+
             Text(
                 text = "Thông tin tài khoản",
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 10.dp)
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .offset(x = (-75).dp)
             )
 
 
@@ -84,27 +87,7 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
                 )
             }
 
-            Row(
-                modifier = Modifier.padding(bottom = 10.dp)
-            ) {
-                Text(
-                    text = "Đã có tài khoản?",
-                    color = Color.Black
-                )
-
-                Spacer(modifier = Modifier.width(5.dp))
-
-                Text(
-                    text = "Đăng nhập",
-                    color = MaterialTheme.colors.error,
-                    modifier = Modifier
-                        .clickable(onClick = {
-                            navController.navigate(Routes.SignIn.route){
-                                launchSingleTop = true
-                            }
-                        })
-                )
-            }
+            Spacer(modifier = Modifier.height(10.dp))
 
             Button(
                 onClick = {
@@ -112,13 +95,18 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
                         invalidPasswordNotification = true;
                     } else {
                         invalidPasswordNotification = false;
-                        signUpViewModel.signUp(email = email, password = password)
+                        signUpViewModel.signUp(inputEmail = email, password = password)
                         navController.navigate(
-                            route = Routes.Verification.route + "/${email}",
+//                            route = Routes.Verification.route + "?email=${email}",
+//                            builder = {
+//                                launchSingleTop = true
+//                            }
+                            route = Routes.Verification.route + "/$email"  ,
                             builder = {
                                 launchSingleTop = true
                             }
-                        ) }
+                        )
+                    }
                 },
                 colors = ButtonDefaults
                     .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),
@@ -128,6 +116,30 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
 
             ) {
                 Text(text = "Đăng ký")
+            }
+
+            Row(
+                modifier = Modifier.padding(top = 10.dp)
+            ) {
+                Text(
+                    text = "Đã có tài khoản? ",
+                    textAlign = TextAlign.Left,
+                    color = Color.Black,
+                    modifier = Modifier.offset(x = (-40).dp)
+                )
+
+                Text(
+                    text = " Đăng nhập",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colors.primaryVariant,
+                    modifier = Modifier
+                        .offset(x = (-37).dp)
+                        .clickable(onClick = {
+                            navController.navigate(Routes.SignIn.route) {
+                                launchSingleTop = true
+                            }
+                        })
+                )
             }
         }
     }

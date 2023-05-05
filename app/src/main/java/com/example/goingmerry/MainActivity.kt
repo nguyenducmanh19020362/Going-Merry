@@ -1,5 +1,6 @@
 package com.example.goingmerry
 
+import com.example.goingmerry.viewModel.VerifyViewModel
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
     private val listRAFViewModel: ListRAFViewModel by viewModels()
     private val groupManagerViewModel: GroupManagerViewModel by viewModels()
     private val fillInfoViewModel: FillInfoViewModel by viewModels()
+    private val verifyViewModel: VerifyViewModel by viewModels()
     private val startScreenViewModel: StartScreenViewModel by viewModels()
     private val anonymousChatViewModel: AnonymousChatViewModel by viewModels()
     private val Context.dataStore by preferencesDataStore(
@@ -41,10 +43,9 @@ class MainActivity : ComponentActivity() {
             NewGoingMerryTheme(true) {
                 Log.e("size", "${ScreenSizes.weight()} ${ScreenSizes.height()}")
                 val navController = rememberNavController()
-                ScreenStart(loginViewModel, signUpViewModel,homeViewModel, chatBoxViewModel,
+                ScreenStart(loginViewModel, signUpViewModel,verifyViewModel, homeViewModel, chatBoxViewModel,
                     profileViewModel, listRAFViewModel, groupManagerViewModel, fillInfoViewModel, startScreenViewModel,
                     anonymousChatViewModel, data)
-//              VerificationScreen(navController = navController, titlee = "Nhập mã đi")
             }
         }
     }
