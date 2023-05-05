@@ -434,9 +434,9 @@ fun encodeFile(uri: Uri): String{
     val context = LocalContext.current
     var ct = ""
     context.contentResolver.openInputStream(uri)?.use {
-        ct = java.util.Base64.getEncoder().encodeToString(
-            it.readBytes()
-        )
+//        ct = java.util.Base64.getEncoder().encodeToString(
+//            it.readBytes()
+//        )
     }
     return ct
 }

@@ -47,17 +47,18 @@ import com.example.goingmerry.DataStore
 fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, data: DataStore) {
     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("")}
+    var password by rememberSaveable { mutableStateOf("") }
     var buttonOnClick by rememberSaveable {
         mutableStateOf(false)
     }
-    if(buttonOnClick){
+    if (buttonOnClick) {
         loginViewModel.login(email, password, data)
         buttonOnClick = false
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LogoApp()
@@ -72,23 +73,25 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
             modifier = Modifier.padding(bottom = 50.dp)
         )
 
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .weight(8f),
-            verticalArrangement = Arrangement.Center
-                ){
+                .padding(horizontal = 25.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = "Thông tin tài khoản",
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 10.dp)
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .offset(x = (-75).dp)
             )
 
 
-            InputTextField(email, onValueChange = {email = it})
+            InputTextField(email, onValueChange = { email = it })
 
 
-            InputPasswordField(password, onValueChange = {password = it})
+            InputPasswordField(password, onValueChange = { password = it })
 
             if (invalidEmailNotification) {
                 Text(
@@ -98,7 +101,7 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
                 )
             }
 
-            if(loginViewModel.isSuccessLogin.value == 1){
+            if (loginViewModel.isSuccessLogin.value == 1) {
                 Text(
                     text = "Đăng nhập thất bại, xin hãy thử lại",
                     modifier = Modifier.padding(bottom = 10.dp),
@@ -108,10 +111,13 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
 
             Text(
                 text = "Quên mật khẩu?",
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colors.primaryVariant,
                 modifier = Modifier
+                    .offset(x = (-85).dp)
+                    .padding(bottom = 10.dp)
                     .clickable(onClick = {
-                        navController.navigate(Routes.ForgotPassword.route){
+                        navController.navigate(Routes.ForgotPassword.route) {
                             launchSingleTop = true
                         }
                     })
@@ -145,7 +151,7 @@ fun PreviewScreenSignIn() {
 
 @Composable
 
-fun InputPasswordField(password: String, onValueChange: (String) -> Unit){
+fun InputPasswordField(password: String, onValueChange: (String) -> Unit) {
 
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -237,7 +243,7 @@ fun LogoApp() {
             painter = painterResource(R.drawable.app_icon),
             contentDescription = "",
             modifier = Modifier
-                .size(48.dp)
+                .size(53.dp)
                 .clip(CircleShape)
         )
 
