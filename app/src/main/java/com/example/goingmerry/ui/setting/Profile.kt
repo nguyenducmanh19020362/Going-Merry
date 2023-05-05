@@ -137,7 +137,7 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                painter = painterResource(id = R.drawable.age_ic),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
