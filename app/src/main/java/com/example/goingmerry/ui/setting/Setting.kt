@@ -30,10 +30,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import com.example.goingmerry.DataStore
+import coil.request.ImageRequest
+import com.example.goingmerry.*
 import com.example.goingmerry.R
-import com.example.goingmerry.ScreenSizes
-import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
@@ -42,13 +41,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore,
-                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel) {
+                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel, token: String) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TopBar(name = name, avatar = avatar)
+        TopBar(name = name, avatar = avatar, token)
 
         BodyScreen(
             navController = navController,
@@ -90,7 +89,8 @@ fun PreviewSetting() {
 @Composable
 fun TopBar(
     name: String,
-    avatar: String
+    avatar: String,
+    token: String
 ) {
     var sizeBar = 300.dp
     var fonts = 25.sp
@@ -143,7 +143,9 @@ fun TopBar(
         }
         val imageLoader = ImageLoader(context = LocalContext.current)
         AsyncImage(
-            model = avatar,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("${URL.urlServer}${avatar}")
+                .setHeader("Authorization", "Bearer $token").build(),
             imageLoader = imageLoader,
             contentDescription = "",
             contentScale = ContentScale.Crop,
@@ -161,7 +163,7 @@ fun TopBar(
 @Composable
 @Preview
 fun PreviewTopBar() {
-    TopBar(name = "Lisa", avatar = "0007")
+    TopBar(name = "Lisa", avatar = "0007", token = "")
 }
 
 @Composable

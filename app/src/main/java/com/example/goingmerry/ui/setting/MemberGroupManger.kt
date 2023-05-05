@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.apollographql.apollo.api.Input
+import com.example.goingmerry.URL
 import com.example.goingmerry.viewModel.GroupManagerViewModel
 import type.GroupMemberInput
 import type.UserRole
@@ -90,7 +92,9 @@ fun MemberGroupManager(listMembers: List<GetGroupsQuery.Member>, groupManagerVie
                             }
                         )
                         AsyncImage(
-                            model = member.avatar,
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data("${URL.urlServer}${member.avatar}")
+                                .setHeader("Authorization", "Bearer $token").build(),
                             imageLoader = imageLoader,
                             contentDescription = "Ẩn danh",
                             contentScale = ContentScale.Crop,

@@ -183,6 +183,7 @@ fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Un
                 .data("${URL.urlServer}${linkImage}")
                 .setHeader("Authorization", "Bearer $token").build(),
             imageLoader = imageLoader,
+            contentScale = ContentScale.Crop,
             contentDescription = "",
             modifier = Modifier
                 .size(sizeImageProfile)

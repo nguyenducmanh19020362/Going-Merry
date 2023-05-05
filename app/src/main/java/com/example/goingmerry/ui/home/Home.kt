@@ -37,10 +37,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.composable
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.TypeScreen
+import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.viewModel.ChatBoxViewModel
@@ -135,16 +136,17 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
         if(wordSearch == ""){
             BodyHome(conversations, nav, homeViewModel.idAccount.value,typeList, changeTypeList = {type: String ->
                 typeList = type
-            })
+            }, model.token.value)
         }else{
             homeViewModel.findPeoples(wordSearch, model)
-            ListPeople(listPeople, nav)
+            ListPeople(listPeople, nav, model.token.value)
         }
     }
 }
 
 @Composable
-fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController, idAccount: String, typeList: String,  changeTypeList: (type: String) -> Unit){
+fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController, idAccount: String, typeList: String,
+             changeTypeList: (type: String) -> Unit, token: String){
     val flag by rememberSaveable {
         mutableStateOf(true)
     }
@@ -236,7 +238,7 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             }
             Spacer(modifier = Modifier.height(10.dp))
             if(typeList == "Friend") {
-                ListFriends(conversations, nav, idAccount)
+                ListFriends(conversations, nav, idAccount, token)
             }else{
                 ListGroups(listConversation = conversations, nav = nav, idAccount = idAccount)
             }
@@ -282,7 +284,7 @@ fun ReviewSearchForm(){
 }*/
 
 @Composable
-fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
+fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String, token: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     var str by rememberSaveable {
         mutableStateOf("")
@@ -324,7 +326,9 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
                                     fonts1 = 12.sp
                                 }
                                 AsyncImage(
-                                    model = mode,
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data("${URL.urlServer}${mode}")
+                                        .setHeader("Authorization", "Bearer $token").build(),
                                     imageLoader = imageLoader,
                                     contentDescription = "Ẩn danh",
                                     contentScale = ContentScale.Crop,
@@ -442,7 +446,7 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
 }
 
 @Composable
-fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController){
+fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController, token: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     if(listPeople.isNotEmpty()){
         LazyColumn(modifier = Modifier.fillMaxHeight()){
@@ -464,7 +468,9 @@ fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController){
                         fonts = 15.sp
                     }
                     AsyncImage(
-                        model = mode,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data("${URL.urlServer}${mode}")
+                            .setHeader("Authorization", "Bearer $token").build(),
                         imageLoader = imageLoader,
                         contentDescription = "Ẩn danh",
                         contentScale = ContentScale.Crop,

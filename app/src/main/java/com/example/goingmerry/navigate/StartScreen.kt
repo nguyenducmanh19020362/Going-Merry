@@ -51,7 +51,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
             idConversation?.let {
                 for(conversation in homeViewModel.conversations.value){
                     if(idConversation == conversation.id){
-                        ListMembers(members = conversation.members)
+                        ListMembers(members = conversation.members, loginViewModel.token.value)
                         break;
                     }
                 }
@@ -70,7 +70,7 @@ fun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel
 
         composable(Routes.Setting.route){
             SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel)
+            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel, loginViewModel.token.value)
         }
 
         composable(Routes.UserInfo.route){

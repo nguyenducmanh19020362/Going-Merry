@@ -29,8 +29,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.apollographql.apollo.api.Input
 import com.example.goingmerry.R
+import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.GroupManagerViewModel
 import type.GroupMemberInput
@@ -127,7 +129,9 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
                                 }
                             )
                             AsyncImage(
-                                model = friend.avatar,
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data("${URL.urlServer}${friend.avatar}")
+                                    .setHeader("Authorization", "Bearer $token").build(),
                                 imageLoader = imageLoader,
                                 contentDescription = "Ẩn danh",
                                 contentScale = ContentScale.Crop,
