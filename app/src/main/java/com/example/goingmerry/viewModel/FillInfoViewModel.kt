@@ -18,6 +18,7 @@ import type.ConversationInput
 
 class FillInfoViewModel: ViewModel() {
     var idAccountUpdate = mutableStateOf("")
+    var state = mutableStateOf(0)
     fun updateAccount(token: String, input: AccountInput){
         viewModelScope.launch(Dispatchers.IO){
             try {
@@ -38,10 +39,14 @@ class FillInfoViewModel: ViewModel() {
                 users.enqueue(object: ApolloCall.Callback<UpdateAccountMutation.Data>(){
                     override fun onResponse(response: Response<UpdateAccountMutation.Data>) {
                         idAccountUpdate.value = response.data?.updateAccount?.id.toString()
+                        if(idAccountUpdate.value.isEmpty()){
+                            state.value = 1;
+                        }
                         Log.e("data", response.data.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {
+                        state.value = 1
                         Log.e("Todo", e.toString())
                     }
                 })

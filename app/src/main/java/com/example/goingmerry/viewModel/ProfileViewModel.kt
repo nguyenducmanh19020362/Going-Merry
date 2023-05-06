@@ -1,6 +1,7 @@
 package com.example.goingmerry.viewModel
 
 import AddFriendMutation
+import DeleteFriendMutation
 import UserProfileQuery
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,8 @@ class ProfileViewModel: ViewModel(){
     var address = mutableStateOf("")
     var avatar = mutableStateOf("")
     var favorites = mutableStateOf("")
+
+    var idDeleteFriend = mutableStateOf("");
     fun matchProfiles(id: String, token: String){
         viewModelScope.launch (Dispatchers.IO){
             try {
@@ -80,6 +83,37 @@ class ProfileViewModel: ViewModel(){
                 val users = apolloClient.mutate(AddFriendMutation(id))
                 users.enqueue(object: ApolloCall.Callback<AddFriendMutation.Data>(){
                     override fun onResponse(response: Response<AddFriendMutation.Data>) {
+                        Log.e("data", response.data.toString())
+                    }
+                    override fun onFailure(e: ApolloException) {
+                        Log.e("Todo", e.toString())
+                    }
+                })
+            }catch (e: Exception){
+                Log.d("error", e.toString())
+            }
+        }
+    }
+
+    fun deleteFriend(id: String, token: String){
+        viewModelScope.launch (Dispatchers.IO){
+            try {
+                val okHttp = OkHttpClient.Builder()
+                    .addInterceptor{chain ->
+                        val original = chain.request()
+                        val builder = original.newBuilder().method("POST", original.body)
+                        builder.addHeader("Authorization", "Bearer $token")
+                        builder.addHeader("Content-Type","application/json")
+                        chain.proceed(builder.build())
+                    }.build()
+                val apolloClient = ApolloClient.builder()
+                    .serverUrl("${URL.urlServer}/graphql")
+                    .okHttpClient(okHttp)
+                    .build()
+                val users = apolloClient.mutate(DeleteFriendMutation(id))
+                users.enqueue(object: ApolloCall.Callback<DeleteFriendMutation.Data>(){
+                    override fun onResponse(response: Response<DeleteFriendMutation.Data>) {
+                        idDeleteFriend.value = response.data?.unfriend?.id.toString()
                         Log.e("data", response.data.toString())
                     }
                     override fun onFailure(e: ApolloException) {

@@ -79,22 +79,27 @@ fun ScreenStart(
         composable(Routes.Profile.route + "/{idUser}"){navBackTrackEntry->
             val idUser = navBackTrackEntry.arguments?.getString("idUser")
             idUser?.let {
-                var isFriend: Boolean = false;
-                if(homeViewModel.conversations.value.isNotEmpty()){
-                    for(conversation in homeViewModel.conversations.value){
-                        if(conversation.members.size == 2){
-                            if(conversation.members[0].id == idUser){
-                                isFriend = true;
-                                break;
-                            }
-                            if(conversation.members[1].id == idUser){
-                                isFriend = true;
-                                break;
+                var isFriend: String = "Sửa thông tin";
+                if(idUser != homeViewModel.idAccount.value) {
+                    if(homeViewModel.conversations.value.isNotEmpty()){
+                        for(conversation in homeViewModel.conversations.value){
+                            if(conversation.members.size == 2){
+                                if(conversation.members[0].id == idUser){
+                                    isFriend = "Xóa bạn";
+                                    break;
+                                }
+                                if(conversation.members[1].id == idUser){
+                                    isFriend = "Xóa bạn";
+                                    break;
+                                }
                             }
                         }
                     }
+                    if(isFriend != "Xóa bạn"){
+                        isFriend = "Thêm bạn";
+                    }
                 }
-                ProfileScreen(idUser.orEmpty(), loginViewModel.token.value, profileViewModel, isFriend)
+                ProfileScreen(idUser, loginViewModel.token.value, profileViewModel, isFriend, navController)
             }
         }
 

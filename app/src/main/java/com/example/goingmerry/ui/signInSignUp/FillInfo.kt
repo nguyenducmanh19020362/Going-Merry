@@ -91,11 +91,11 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
     var clickComplete by rememberSaveable {
         mutableStateOf(false)
     }
+
     if(clickComplete){
         if(uri != Uri.EMPTY){
             val fileName = getNameFile(uri = uri)
             val lenFileName = getLenNameFile(fileName)
-            val encodeFile = encodeFile(uri = uri)
             val avatar = "$lenFileName$fileName;${encodeFile(uri)}"
             Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
             var render = Gender.MALE
@@ -109,9 +109,11 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(job),
                     Input.fromNullable(render), Input.fromNullable(address),Input.fromNullable(avatar), Input.fromNullable(hobby))
                 fillInfoViewModel.updateAccount(token, input)
+            }else{
+                fillInfoViewModel.state.value = 1
             }
-            clickComplete = false
         }
+        clickComplete = false
     }
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
@@ -119,11 +121,28 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                uri = uriList[0]
            }
         }
-    if(fillInfoViewModel.idAccountUpdate.value != ""){
+    if(fillInfoViewModel.idAccountUpdate.value != "" && fillInfoViewModel.idAccountUpdate.value.isNotEmpty()){
         navController.navigate(Routes.Home.route){
-            launchSingleTop = true
+            popUpTo(Routes.FillInfo.route){
+                inclusive = true
+            }
         }
         fillInfoViewModel.idAccountUpdate.value = ""
+    }
+
+    if(fillInfoViewModel.state.value == 1){
+        AlertDialog(
+            onDismissRequest = { fillInfoViewModel.state.value = 0 },
+            title = { Text(text = "Thông báo") },
+            text = { Text(text = "Cập nhật thất bại. Bạn hãy thử lại") },
+            confirmButton = {
+                TextButton(onClick = {
+                    fillInfoViewModel.state.value = 0
+                }) {
+                    Text("OK")
+                }
+            }
+        )
     }
     LazyColumn(
         modifier = Modifier

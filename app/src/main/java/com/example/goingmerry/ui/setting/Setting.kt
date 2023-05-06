@@ -370,7 +370,9 @@ fun BodyScreen(
         LogoutCard(
             onNavigateToWelcome = {
                 navController.navigate("welcome") {
-                    launchSingleTop = true
+                    popUpTo(Routes.Setting.route){
+                        inclusive = true
+                    }
                 }
             },
             data,
