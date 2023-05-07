@@ -25,7 +25,6 @@ import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.*
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreenStart(
     loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,

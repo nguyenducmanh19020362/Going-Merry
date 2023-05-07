@@ -46,6 +46,7 @@ import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.viewModel.DirectMessage
 import com.example.goingmerry.viewModel.HomeViewModel
 import com.example.goingmerry.viewModel.LoginViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,6 +72,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
     }
 
     val conversations by homeViewModel.conversations.collectAsState()
+    val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
 
     Column (modifier = Modifier.fillMaxHeight()){
         Column(
@@ -135,7 +137,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
             }
         }
         if(wordSearch == ""){
-            BodyHome(conversations, nav, homeViewModel.idAccount.value,typeList, changeTypeList = {type: String ->
+            BodyHome(conversations, directMessages, nav, homeViewModel.idAccount.value,typeList, changeTypeList = {type: String ->
                 typeList = type
             }, model.token.value)
         }else{
@@ -146,7 +148,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
 }
 
 @Composable
-fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController, idAccount: String, typeList: String,
+fun BodyHome(conversations: List<AccountQuery.Conversation>, directMessages: List<DirectMessage>, nav: NavController, idAccount: String, typeList: String,
              changeTypeList: (type: String) -> Unit, token: String){
     val flag by rememberSaveable {
         mutableStateOf(true)
@@ -239,9 +241,9 @@ fun BodyHome(conversations: List<AccountQuery.Conversation>, nav: NavController,
             }
             Spacer(modifier = Modifier.height(10.dp))
             if(typeList == "Friend") {
-                ListFriends(conversations, nav, idAccount, token)
+                ListFriends(conversations, directMessages, nav, idAccount, token)
             }else{
-                ListGroups(listConversation = conversations, nav = nav, idAccount = idAccount)
+                ListGroups(conversations, directMessages, nav, idAccount)
             }
         }
     }
@@ -285,7 +287,7 @@ fun ReviewSearchForm(){
 }*/
 
 @Composable
-fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String, token: String){
+fun ListFriends(listConversation: List<AccountQuery.Conversation>, directMessages: List<DirectMessage>, nav: NavController, idAccount: String, token: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     var str by rememberSaveable {
         mutableStateOf("")
@@ -294,11 +296,7 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
     LazyColumn(modifier = Modifier.fillMaxHeight()){
         if(listConversation.isNotEmpty()){
             items(listConversation.sortedBy {
-                if(it.latestMessages.isNotEmpty()){
-                    it.latestMessages.first().sendAt
-                }else{
-                    -1000
-                }
+                compare(directMessages, it)
             }.asReversed()){conversion->
                 if(conversion.members.size == 2){
                     for(member in conversion.members){
@@ -340,14 +338,13 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     var len = 0
-                                    if(conversion.latestMessages.isNotEmpty()) {
-                                        len = conversion.latestMessages.first().content.toString().length;
+                                    str = getLastMessage(directMessages, conversion)
+                                    if(str != "") {
+                                        len = str.length;
                                         if(len >= 20){
                                             len = 20;
                                         }
-                                        str = conversion.latestMessages.first().content.toString().subSequence(0, len).toString()
-                                    }else{
-                                        str = ""
+                                        str = str.subSequence(0, len).toString()
                                     }
                                     Text(
                                         text = member.name,
@@ -371,7 +368,7 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
 }
 
 @Composable
-fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavController, idAccount: String){
+fun ListGroups(listConversation: List<AccountQuery.Conversation>, directMessages: List<DirectMessage>, nav: NavController, idAccount: String){
     var str by rememberSaveable {
         mutableStateOf("")
     }
@@ -379,11 +376,7 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
     if(listConversation.isNotEmpty()){
         LazyColumn(modifier = Modifier.fillMaxHeight()){
             items(listConversation.sortedBy {
-                if(it.latestMessages.isNotEmpty()){
-                    it.latestMessages.first().sendAt
-                }else{
-                    -1000
-                }
+                compare(directMessages, it)
             }.reversed()){conversion->
                 if(conversion.members.size > 2){
                         //Log.e("id", member.id + " " + idAccount)
@@ -419,14 +412,13 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, nav: NavContro
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             var len = 0
-                            if(conversion.latestMessages.isNotEmpty()) {
-                                len = conversion.latestMessages.first().content.toString().length;
+                            str = getLastMessage(directMessages, conversion)
+                            if(str != "") {
+                                len = str.length;
                                 if(len >= 20){
                                     len = 20;
                                 }
-                                str = conversion.latestMessages.first().content.toString().subSequence(0, len).toString()
-                            }else{
-                                str = ""
+                                str = str.subSequence(0, len).toString()
                             }
                             Text(
                                 text = conversion.name,
@@ -491,4 +483,31 @@ fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController, to
             }
         }
     }
+}
+
+fun compare(directMessages: List<DirectMessage>, conversation: AccountQuery.Conversation): Int{
+    if(directMessages.isNotEmpty()){
+        for(item in directMessages.reversed()){
+            if(item.idConversation == conversation.id){
+                return item.sendAt
+            }
+        }
+    }else if(conversation.latestMessages.isNotEmpty()){
+        return conversation.latestMessages.first().sendAt
+    }
+    return -1000
+}
+
+fun getLastMessage(directMessages: List<DirectMessage>, conversation: AccountQuery.Conversation): String{
+    if(directMessages.isNotEmpty()){
+        for(item in directMessages.reversed()){
+            if(item.idConversation == conversation.id){
+                return item.messageContent
+            }
+        }
+    }
+    if(conversation.latestMessages.isNotEmpty()){
+        return conversation.latestMessages.first().content.toString()
+    }
+    return ""
 }
