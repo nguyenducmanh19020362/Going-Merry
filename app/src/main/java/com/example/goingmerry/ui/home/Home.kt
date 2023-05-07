@@ -291,8 +291,8 @@ fun ListFriends(listConversation: List<AccountQuery.Conversation>, nav: NavContr
         mutableStateOf("")
     }
 
-    if(listConversation.isNotEmpty()){
-        LazyColumn(modifier = Modifier.fillMaxHeight()){
+    LazyColumn(modifier = Modifier.fillMaxHeight()){
+        if(listConversation.isNotEmpty()){
             items(listConversation.sortedBy {
                 if(it.latestMessages.isNotEmpty()){
                     it.latestMessages.first().sendAt

@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -51,12 +52,13 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
                 inclusive = true
             }
         }
+        profileViewModel.idDeleteFriend.value = ""
     }
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         if(showDialog){
-            var str: String = "Bạn có muốn gửi yêu cầu kết bạn"
+            var str = "Bạn có muốn gửi yêu cầu kết bạn"
             if(isFriend == "Xóa bạn"){
                 str = "Bạn có muốn xóa bạn này"
             }
@@ -95,12 +97,6 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
     }
 }
 
-/*@Composable
-@Preview
-fun PreviewProfile() {
-    ProfileScreen("","", profileViewModel = ProfileViewModel(), true)
-}*/
-
 @Composable
 fun TopBar() {
     Row(
@@ -132,59 +128,14 @@ fun TopBar() {
 @Composable
 fun ChangeImage(linkImage: String, token: String) {
     val imageLoader = ImageLoader(context = LocalContext.current)
-    var sizeColumn  = 200.dp
     var sizeImageProfile = 100.dp
-    var fonts = 30.sp
     if(ScreenSizes.type() == TypeScreen.Compat){
-        sizeColumn = 180.dp
-        fonts = 20.sp
         sizeImageProfile = 80.dp
     }
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(sizeColumn),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth(),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.6f)
-                .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                .background(MaterialTheme.colors.primary)
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.age_ic),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(color = Color.Black)
-                    .border(
-                        width = 1.dp,
-                        color = Color.Black,
-                        shape = CircleShape
-                    )
-                    .align(Alignment.BottomEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null,
-                    tint = Color.LightGray,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.Center)
-                )
-            }
-
-        }
-
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data("${URL.urlServer}${linkImage}")
@@ -193,11 +144,10 @@ fun ChangeImage(linkImage: String, token: String) {
             contentScale = ContentScale.Crop,
             contentDescription = "",
             modifier = Modifier
+                .padding(top = 5.dp, bottom = 5.dp)
                 .size(sizeImageProfile)
                 .clip(CircleShape)
                 .align(Alignment.CenterHorizontally)
-                .weight(0.4f)
-                .offset(y = (-50).dp)
                 .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
         )
     }
@@ -256,7 +206,9 @@ fun BodyProfile(
     token: String,
     nav: NavController
 ) {
-    Column() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Button(
             onClick = {
                 if(isFriend != "Sửa thông tin"){
@@ -268,7 +220,6 @@ fun BodyProfile(
                 }
             },
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(5.dp))
                 .background(MaterialTheme.colors.primary)

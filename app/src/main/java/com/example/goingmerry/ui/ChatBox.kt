@@ -34,7 +34,9 @@ import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.goingmerry.R
+import com.example.goingmerry.URL
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
@@ -98,7 +100,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                             break;
                         }
                     }
-                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id)
+                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id, token)
                 }
             }
             items(messages.sortedBy {
@@ -112,7 +114,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
             }
             items(beforeMessage.sortedBy {
                 it.sendAt
@@ -125,7 +127,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
             }
             item{
                 LaunchedEffect(key1 = null) {
@@ -235,7 +237,7 @@ fun TopBar(member: AccountQuery.Member){
         backgroundColor = MaterialTheme.colors.secondaryVariant,
         title = {
             AsyncImage(
-                model = member.avatar,
+                model = "${URL.urlServer}${member.avatar}",
                 imageLoader = imageLoader,
                 contentDescription = "Friend",
                 contentScale = ContentScale.Crop,
@@ -265,7 +267,7 @@ fun TopBar(member: AccountQuery.Member){
 }
 
 @Composable
-fun MessageCard(msg: Message, url: String, id: String) {
+fun MessageCard(msg: Message, url: String, id: String, token: String) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val imageLoader = ImageLoader(LocalContext.current)
@@ -277,7 +279,9 @@ fun MessageCard(msg: Message, url: String, id: String) {
     ) {
         if(id != msg.idMember){
             AsyncImage(
-                model = url,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${URL.urlServer}${url}")
+                    .setHeader("Authorization", "Bearer $token").build(),
                 imageLoader = imageLoader,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,

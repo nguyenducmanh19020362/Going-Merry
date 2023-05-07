@@ -1,7 +1,5 @@
 package com.example.goingmerry.ui.home
 
-import AccountQuery
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
@@ -36,8 +33,6 @@ import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
-import com.example.goingmerry.viewModel.LoginViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore,
@@ -114,7 +109,7 @@ fun TopBar(
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                painter = painterResource(id = R.drawable._backgroud),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
@@ -311,7 +306,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable._list_friend),
+                        painter = painterResource(id = R.drawable._add_friend),
                         contentDescription = null,
                         modifier = Modifier
                             .size(size)
@@ -348,7 +343,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable._manage_group),
                         contentDescription = null,
                         modifier = Modifier
                             .size(size)

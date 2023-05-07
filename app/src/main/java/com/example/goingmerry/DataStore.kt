@@ -41,4 +41,7 @@ class DataStore(
             }
         return exampleCounterFlow.first()
     }
+
+    suspend fun clear(): Unit{
+    }
 }
