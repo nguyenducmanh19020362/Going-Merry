@@ -98,7 +98,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                             break;
                         }
                     }
-                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id)
+                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id, token)
                 }
             }
             items(messages.sortedBy {
@@ -112,7 +112,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
             }
             items(beforeMessage.sortedBy {
                 it.sendAt
@@ -125,7 +125,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id)
+                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
             }
             item{
                 LaunchedEffect(true) {
@@ -247,7 +247,11 @@ fun TopBarGroup(nameGroup: String, navController: NavController, idConversation:
         },
         navigationIcon = {
             val image = Icons.Filled.ArrowBack
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                navController.navigate(Routes.Home.route){
+                    launchSingleTop = true
+                }
+            }) {
                 Icon(image, contentDescription = "Back to Home")
             }
         },

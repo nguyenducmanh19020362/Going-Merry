@@ -1,6 +1,7 @@
 package com.example.goingmerry.viewModel
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,9 +18,11 @@ class StartScreenViewModel: ViewModel() {
     @RequiresApi(Build.VERSION_CODES.O)
     fun setLogin(data: DataStore, loginViewModel: LoginViewModel){
         viewModelScope.launch(Dispatchers.IO){
+            Log.d("errorLogin", "1")
             val currentTime = Instant.now().epochSecond
             val expiredToken = data.readExpired()
             val token = data.readToken()
+            Log.d("errorLogin", "2")
             if(expiredToken > currentTime){
                 loginViewModel.token.value = token
                 loginViewModel.expiredToken.value = Instant.ofEpochSecond(expiredToken).toString()

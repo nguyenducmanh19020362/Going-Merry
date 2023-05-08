@@ -1,7 +1,5 @@
 package com.example.goingmerry.ui.home
 
-import AccountQuery
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,30 +23,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import com.example.goingmerry.DataStore
+import coil.request.ImageRequest
+import com.example.goingmerry.*
 import com.example.goingmerry.R
-import com.example.goingmerry.ScreenSizes
-import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
-import com.example.goingmerry.viewModel.LoginViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore,
-                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel) {
+                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel, token: String) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TopBar(name = name, avatar = avatar)
+        TopBar(name = name, avatar = avatar, token, navController)
 
         BodyScreen(
             navController = navController,
@@ -90,7 +84,9 @@ fun PreviewSetting() {
 @Composable
 fun TopBar(
     name: String,
-    avatar: String
+    avatar: String,
+    token: String,
+    nav: NavController
 ) {
     var sizeBar = 300.dp
     var fonts = 25.sp
@@ -114,7 +110,7 @@ fun TopBar(
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                painter = painterResource(id = R.drawable._backgroud),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth()
@@ -143,7 +139,9 @@ fun TopBar(
         }
         val imageLoader = ImageLoader(context = LocalContext.current)
         AsyncImage(
-            model = avatar,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("${URL.urlServer}${avatar}")
+                .setHeader("Authorization", "Bearer $token").build(),
             imageLoader = imageLoader,
             contentDescription = "",
             contentScale = ContentScale.Crop,
@@ -153,6 +151,13 @@ fun TopBar(
                 .offset(x = (-110).dp, y = (-130).dp)
                 .clip(CircleShape)
                 .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+                .clickable{
+                    nav.navigate(Routes.Home.route){
+                        popUpTo(Routes.Setting.route){
+                            inclusive = true
+                        }
+                    }
+                }
         )
     }
 }
@@ -161,7 +166,7 @@ fun TopBar(
 @Composable
 @Preview
 fun PreviewTopBar() {
-    TopBar(name = "Lisa", avatar = "0007")
+    TopBar(name = "Lisa", avatar = "0007", token = "", nav = NavController(LocalContext.current))
 }
 
 @Composable
@@ -309,7 +314,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable._list_friend),
+                        painter = painterResource(id = R.drawable._add_friend),
                         contentDescription = null,
                         modifier = Modifier
                             .size(size)
@@ -346,7 +351,7 @@ fun BodyScreen(
             ) {
                 Row() {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable._manage_group),
                         contentDescription = null,
                         modifier = Modifier
                             .size(size)
@@ -368,7 +373,9 @@ fun BodyScreen(
         LogoutCard(
             onNavigateToWelcome = {
                 navController.navigate("welcome") {
-                    launchSingleTop = true
+                    popUpTo(Routes.Setting.route){
+                        inclusive = true
+                    }
                 }
             },
             data,

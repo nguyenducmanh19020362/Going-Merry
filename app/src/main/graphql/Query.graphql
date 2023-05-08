@@ -58,14 +58,6 @@ query userProfile($userId: ID!){
     }
 }
 
-mutation AddFriend($userId: ID!){
-    request(userId: $userId){
-        sender{
-            id
-        }
-    }
-}
-
 mutation ReplyRequestAddFriend($userId: ID!, $reply: FriendRequestReply!){
     replyRequest(userId: $userId, reply: $reply){
         sender{
@@ -130,6 +122,21 @@ query BeforeMessage($conversationId: ID!, $messageId: ID!){
         type
         sendAt
         state
+    }
+}
+
+mutation DeleteFriend($userId: ID!){
+    unfriend(userId: $userId){
+        id
+        name
+    }
+}
+
+mutation AddFriend($userId: ID!){
+    request(userId: $userId){
+        sender{
+            id
+        }
     }
 }
 

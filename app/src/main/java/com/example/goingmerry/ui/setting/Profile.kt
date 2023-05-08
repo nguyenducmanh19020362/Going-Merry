@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -35,26 +37,44 @@ import com.example.goingmerry.R
 import com.example.goingmerry.ScreenSizes
 import com.example.goingmerry.TypeScreen
 import com.example.goingmerry.URL
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.ProfileViewModel
 
 @Composable
-fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel, isFriend: Boolean) {
+fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel, isFriend: String, nav: NavController) {
     var showDialog by rememberSaveable {
         mutableStateOf(false)
     }
     profileViewModel.matchProfiles(id, token)
+    if(profileViewModel.idDeleteFriend.value != ""){
+        nav.navigate(Routes.Home.route){
+            popUpTo(Routes.Profile.route){
+                inclusive = true
+            }
+        }
+        profileViewModel.idDeleteFriend.value = ""
+    }
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         if(showDialog){
+            var str = "Bạn có muốn gửi yêu cầu kết bạn"
+            if(isFriend == "Xóa bạn"){
+                str = "Bạn có muốn xóa bạn này"
+            }
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = { Text(text = "Xác nhận") },
-                text = { Text(text = "Bạn có muốn gửi yêu cầu kết bạn?") },
+                text = { Text(text = str) },
                 confirmButton = {
                     TextButton(onClick = {
                         showDialog = false
-                        profileViewModel.addFriend(id, token)
+                        if(isFriend == "Thêm bạn"){
+                            profileViewModel.addFriend(id, token)
+                        }
+                        if(isFriend == "Xóa bạn"){
+                            profileViewModel.deleteFriend(id, token)
+                        }
                     }) {
                         Text("OK")
                     }
@@ -68,23 +88,18 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
                 }
             )
         }
-        TopBar()
+        val content = "Hồ sơ"
+        TopBar(nav, content)
 
-        ChangeImage(profileViewModel.avatar.value, isFriend, changeShowDialog = {showDialog = true}, token)
+        ChangeImage(profileViewModel.avatar.value, token)
 
-        BodyProfile(profileViewModel)
+        BodyProfile(profileViewModel, isFriend, changeShowDialog = {showDialog = true}, token, nav)
 
     }
 }
 
 @Composable
-@Preview
-fun PreviewProfile() {
-    ProfileScreen("","", profileViewModel = ProfileViewModel(), true)
-}
-
-@Composable
-fun TopBar() {
+fun TopBar(nav: NavController, content: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -98,12 +113,17 @@ fun TopBar() {
             contentDescription = null,
             tint = Color.White,
             modifier = Modifier.size(24.dp)
+                .clickable {
+                    nav.navigate(Routes.Setting.route){
+                        launchSingleTop = true
+                    }
+                },
         )
 
         Spacer(modifier = Modifier.width(25.dp))
 
         Text(
-            text = "Hồ sơ",
+            text = content,
             fontWeight = FontWeight.Bold,
             fontSize = 30.sp,
             color = Color.White
@@ -112,83 +132,28 @@ fun TopBar() {
 }
 
 @Composable
-fun ChangeImage(linkImage: String, isFriend: Boolean, changeShowDialog: () -> Unit, token: String) {
+fun ChangeImage(linkImage: String, token: String) {
     val imageLoader = ImageLoader(context = LocalContext.current)
-    var sizeColumn  = 200.dp
     var sizeImageProfile = 100.dp
-    var fonts = 30.sp
     if(ScreenSizes.type() == TypeScreen.Compat){
-        sizeColumn = 180.dp
-        fonts = 20.sp
         sizeImageProfile = 80.dp
     }
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(sizeColumn),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth(),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.6f)
-                .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                .background(MaterialTheme.colors.primary)
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.age_ic),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Icon(
-                imageVector = if(isFriend) Icons.Default.PersonRemoveAlt1 else Icons.Default.People,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(10.dp)
-                    .clickable {
-                        changeShowDialog()
-                    }
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(color = Color.Black)
-                    .border(
-                        width = 1.dp,
-                        color = Color.Black,
-                        shape = CircleShape
-                    )
-                    .align(Alignment.BottomEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null,
-                    tint = Color.LightGray,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.Center)
-                )
-            }
-
-        }
-
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data("${URL.urlServer}${linkImage}")
                 .setHeader("Authorization", "Bearer $token").build(),
             imageLoader = imageLoader,
+            contentScale = ContentScale.Crop,
             contentDescription = "",
             modifier = Modifier
+                .padding(top = 5.dp, bottom = 5.dp)
                 .size(sizeImageProfile)
+                .clip(CircleShape)
                 .align(Alignment.CenterHorizontally)
-                .weight(0.4f)
-                .offset(y = (-50).dp)
                 .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
         )
     }
@@ -241,18 +206,31 @@ fun RoundImage(
 
 @Composable
 fun BodyProfile(
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    isFriend: String,
+    changeShowDialog: () -> Unit,
+    token: String,
+    nav: NavController
 ) {
-    Column() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                if(isFriend != "Sửa thông tin"){
+                    changeShowDialog()
+                }else{
+                    nav.navigate(Routes.FillInfo.route){
+                        launchSingleTop = true;
+                    }
+                }
+            },
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(5.dp))
                 .background(MaterialTheme.colors.primary)
         ){
-            Text(text = "Thêm bạn")
+            Text(text = isFriend)
         }
         Spacer(modifier = Modifier.height(5.dp))
         Column(

@@ -25,9 +25,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.example.goingmerry.R
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.theme.Teal200
 import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
@@ -36,7 +38,7 @@ import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: AnonymousChatViewModel, stateIncognito: Boolean){
+fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: AnonymousChatViewModel, nav: NavController, stateIncognito: Boolean){
     var messageTyping by rememberSaveable { mutableStateOf("") }
 
     val listIncognitoMessage by anonymousChatViewModel.listIncognitoMessage.collectAsState()
@@ -58,7 +60,7 @@ fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: Anonym
     }
 
     Column {
-        TopBarAnonymousChat(anonymousChatViewModel, loginViewModel, stateIncognito)
+        TopBarAnonymousChat(anonymousChatViewModel, loginViewModel, nav, stateIncognito)
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
@@ -149,7 +151,7 @@ fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: Anonym
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TopBarAnonymousChat(anonymousChatViewModel: AnonymousChatViewModel, loginViewModel: LoginViewModel, stateIncognito: Boolean){
+fun TopBarAnonymousChat(anonymousChatViewModel: AnonymousChatViewModel, loginViewModel: LoginViewModel, nav: NavController, stateIncognito: Boolean){
     var switchOn by rememberSaveable {
         mutableStateOf(stateIncognito)
     }
@@ -172,7 +174,11 @@ fun TopBarAnonymousChat(anonymousChatViewModel: AnonymousChatViewModel, loginVie
         },
         navigationIcon = {
             val image = Icons.Filled.ArrowBack
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                nav.navigate(Routes.Home.route){
+                    launchSingleTop = true
+                }
+            }) {
                 Icon(image, contentDescription = "Back to Home")
             }
         },

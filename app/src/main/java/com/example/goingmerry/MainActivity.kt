@@ -27,9 +27,11 @@ class MainActivity : ComponentActivity() {
     private val verifyViewModel: VerifyViewModel by viewModels()
     private val startScreenViewModel: StartScreenViewModel by viewModels()
     private val anonymousChatViewModel: AnonymousChatViewModel by viewModels()
-    private val Context.dataStore by preferencesDataStore(
-        name = "token"
-    )
+    companion object{
+        private val Context.dataStore by preferencesDataStore(
+            name = "token"
+        )
+    }
     private val data: DataStore by lazy {
         DataStore(
             applicationContext.getSharedPreferences("token", Context.MODE_PRIVATE),

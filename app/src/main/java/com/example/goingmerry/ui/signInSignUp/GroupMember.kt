@@ -18,9 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.goingmerry.URL
 
 @Composable
-fun ListMembers(members: List<AccountQuery.Member>){
+fun ListMembers(members: List<AccountQuery.Member>, token: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     Column (modifier = Modifier
         .fillMaxSize()
@@ -42,7 +44,9 @@ fun ListMembers(members: List<AccountQuery.Member>){
                         .padding(5.dp)
                     ) {
                         AsyncImage(
-                            model = it.avatar,
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data("${URL.urlServer}${it.avatar}")
+                                .setHeader("Authorization", "Bearer $token").build(),
                             imageLoader = imageLoader,
                             contentDescription = "avatar",
                             contentScale = ContentScale.Crop,
@@ -66,5 +70,5 @@ fun ListMembers(members: List<AccountQuery.Member>){
 @Composable
 @Preview
 fun PreviewListMember(){
-    ListMembers(listOf())
+    ListMembers(listOf(), "")
 }

@@ -38,7 +38,7 @@ fun ScreenStart(
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
             val idMember = navBackTrackEntry.arguments?.getString("idConversation")
             idMember?.let {
-                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,
+                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, navController, homeViewModel.idAccount.value,
                 loginViewModel.token.value)
             }
         }
@@ -48,7 +48,7 @@ fun ScreenStart(
             idConversation?.let {
                 for(conversation in homeViewModel.conversations.value){
                     if(idConversation == conversation.id){
-                        ListMembers(members = conversation.members)
+                        ListMembers(members = conversation.members, loginViewModel.token.value)
                         break;
                     }
                 }
@@ -67,7 +67,7 @@ fun ScreenStart(
 
         composable(Routes.Setting.route){
             SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel)
+            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel, loginViewModel.token.value)
         }
 
         composable(Routes.UserInfo.route){
@@ -77,27 +77,32 @@ fun ScreenStart(
         composable(Routes.Profile.route + "/{idUser}"){navBackTrackEntry->
             val idUser = navBackTrackEntry.arguments?.getString("idUser")
             idUser?.let {
-                var isFriend: Boolean = false;
-                if(homeViewModel.conversations.value.isNotEmpty()){
-                    for(conversation in homeViewModel.conversations.value){
-                        if(conversation.members.size == 2){
-                            if(conversation.members[0].id == idUser){
-                                isFriend = true;
-                                break;
-                            }
-                            if(conversation.members[1].id == idUser){
-                                isFriend = true;
-                                break;
+                var isFriend: String = "Sửa thông tin";
+                if(idUser != homeViewModel.idAccount.value) {
+                    if(homeViewModel.conversations.value.isNotEmpty()){
+                        for(conversation in homeViewModel.conversations.value){
+                            if(conversation.members.size == 2){
+                                if(conversation.members[0].id == idUser){
+                                    isFriend = "Xóa bạn";
+                                    break;
+                                }
+                                if(conversation.members[1].id == idUser){
+                                    isFriend = "Xóa bạn";
+                                    break;
+                                }
                             }
                         }
                     }
+                    if(isFriend != "Xóa bạn"){
+                        isFriend = "Thêm bạn";
+                    }
                 }
-                ProfileScreen(idUser.orEmpty(), loginViewModel.token.value, profileViewModel, isFriend)
+                ProfileScreen(idUser, loginViewModel.token.value, profileViewModel, isFriend, navController)
             }
         }
 
         composable(Routes.FillInfo.route){
-            FillScreen(navController = navController, fillInfoViewModel, loginViewModel.token.value)
+            FillScreen(navController = navController, fillInfoViewModel, profileViewModel, loginViewModel.token.value)
         }
 
         composable(Routes.ForgotPassword.route){
@@ -167,7 +172,8 @@ fun ScreenStart(
         }
         composable(Routes.ListRequestAddFriend.route){
             val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()
-            ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel)
+            ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel,
+                        navController)
         }
 
         composable(Routes.GroupManager.route){
@@ -194,7 +200,7 @@ fun ScreenStart(
             }
         }
         composable(Routes.AnonymousChat.route){
-            AnonymousChat(loginViewModel, anonymousChatViewModel, homeViewModel.stateIncognito.value)
+            AnonymousChat(loginViewModel, anonymousChatViewModel, navController, homeViewModel.stateIncognito.value)
         }
     }
 }
