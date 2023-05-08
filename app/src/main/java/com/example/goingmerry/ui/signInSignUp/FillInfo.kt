@@ -38,8 +38,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.apollographql.apollo.api.Input
+import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.FillInfoViewModel
 import com.example.goingmerry.viewModel.ProfileViewModel
@@ -80,12 +83,15 @@ fun PreviewFill() {
 
 @Composable
 fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
-    var nameAccount by rememberSaveable { mutableStateOf("") }
-    var birthDate by rememberSaveable { mutableStateOf("") }
-    var address by rememberSaveable { mutableStateOf("An Giang") }
-    val selectedGender = remember { mutableStateOf("") }
-    var job by rememberSaveable { mutableStateOf("") }
-    var hobby by rememberSaveable { mutableStateOf("") }
+    var nameAccount by rememberSaveable { mutableStateOf(profileViewModel.name.value) }
+    var birthDate by rememberSaveable { mutableStateOf(profileViewModel.age.value) }
+    var address by rememberSaveable { mutableStateOf(profileViewModel.address.value) }
+    val selectedGender = remember { mutableStateOf(profileViewModel.gender.value) }
+    var job by rememberSaveable { mutableStateOf(profileViewModel.job.value) }
+    var hobby by rememberSaveable { mutableStateOf(profileViewModel.favorites.value) }
+    var avatar by rememberSaveable {
+        mutableStateOf(profileViewModel.avatar.value)
+    }
     var uri by rememberSaveable {
         mutableStateOf(Uri.EMPTY)
     }
@@ -94,21 +100,29 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
     }
 
     if(clickComplete){
+        var render = Gender.MALE
+        if(selectedGender.value == "Nữ"){
+            render = Gender.FEMALE
+        }
+        if(selectedGender.value == "Khác"){
+            render = Gender.OTHER
+        }
         if(uri != Uri.EMPTY){
             val fileName = getNameFile(uri = uri)
             val lenFileName = getLenNameFile(fileName)
-            val avatar = "$lenFileName$fileName;${encodeFile(uri)}"
+            val newAvatar = "$lenFileName$fileName;${encodeFile(uri)}"
             Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
-            var render = Gender.MALE
-            if(selectedGender.value == "Nữ"){
-                render = Gender.FEMALE
-            }
-            if(selectedGender.value == "Khác"){
-                render = Gender.OTHER
-            }
-            if(birthDate != ""){
+            if(birthDate != "" && nameAccount != ""){
                 val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(job),
-                    Input.fromNullable(render), Input.fromNullable(address),Input.fromNullable(avatar), Input.fromNullable(hobby))
+                    Input.fromNullable(render), Input.fromNullable(address),Input.fromNullable(newAvatar), Input.fromNullable(hobby))
+                fillInfoViewModel.updateAccount(token, input)
+            }else{
+                fillInfoViewModel.state.value = 1
+            }
+        }else{
+            if(birthDate != "" && nameAccount != ""){
+                val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(job),
+                    Input.fromNullable(render), Input.fromNullable(address),Input.absent(), Input.fromNullable(hobby))
                 fillInfoViewModel.updateAccount(token, input)
             }else{
                 fillInfoViewModel.state.value = 1
@@ -152,19 +166,39 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            Image(
-                painter = rememberAsyncImagePainter(uri, ImageLoader(context = LocalContext.current)),
-                contentScale = ContentScale.Crop,
-                contentDescription = "thêm ảnh",
-                modifier = Modifier
-                    .padding(16.dp, 8.dp)
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
-                    .clickable {
-                        galleryLauncher.launch("image/*")
-                    }
-            )
+            if(uri == Uri.EMPTY && avatar != ""){
+                val imageLoader = ImageLoader(context = LocalContext.current)
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("${URL.urlServer}${avatar}")
+                        .setHeader("Authorization", "Bearer $token").build(),
+                    imageLoader = imageLoader,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .padding(top = 5.dp, bottom = 5.dp)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+                        .clickable {
+                            galleryLauncher.launch("image/*")
+                        }
+                )
+            }else{
+                Image(
+                    painter = rememberAsyncImagePainter(uri, ImageLoader(context = LocalContext.current)),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "thêm ảnh",
+                    modifier = Modifier
+                        .padding(16.dp, 8.dp)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+                        .clickable {
+                            galleryLauncher.launch("image/*")
+                        }
+                )
+            }
             Text(
                 text = "Tên tài khoản",
                 fontSize = 15.sp,
@@ -181,12 +215,23 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 onValueChange = { nameAccount = it },
                 singleLine = true,
                 modifier = Modifier
-                    .padding(bottom = 15.dp)
+                    .padding(bottom = 5.dp)
                     .height(60.dp)
                     .width(295.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colors.secondaryVariant),
             )
+
+            if(nameAccount == ""){
+                Text(
+                    text = "Yêu cầu nhập trường bắt buộc",
+                    fontSize = 10.sp,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.width(295.dp)
+                )
+            }
 
             Text(
                 text = "Sinh nhật",
@@ -195,6 +240,7 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Left,
                 modifier = Modifier.width(295.dp)
+                    .padding(top = 10.dp)
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -205,12 +251,23 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 singleLine = true,
                 placeholder = { Text("yyyy-MM-dd") },
                 modifier = Modifier
-                    .padding(bottom = 15.dp)
+                    .padding(bottom = 5.dp)
                     .height(60.dp)
                     .width(295.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colors.secondaryVariant),
             )
+
+            if(birthDate == ""){
+                Text(
+                    text = "Yêu cầu nhập trường bắt buộc",
+                    fontSize = 10.sp,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.width(295.dp)
+                )
+            }
 
             Text(
                 text = "Giới tính",
@@ -219,6 +276,7 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Left,
                 modifier = Modifier.width(295.dp)
+                    .padding(top = 10.dp)
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -236,7 +294,7 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            DropBoxFill(changeAddress = {selectedProvince: String -> address = selectedProvince})
+            DropBoxFill(changeAddress = {selectedProvince: String -> address = selectedProvince}, address)
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -323,7 +381,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
         ) {
             Row {
                 RadioButton(
-                    selected = selectedGender.value == "Nam",
+                    selected = selectedGender.value == "Nam" || selectedGender.value == "MALE",
                     onClick = { selectedGender.value = "Nam" },
                 )
                 Text(text = "Nam", modifier = Modifier.padding(start = 8.dp))
@@ -331,7 +389,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
 
             Row {
                 RadioButton(
-                    selected = selectedGender.value == "Nữ",
+                    selected = selectedGender.value == "Nữ" || selectedGender.value == "FEMALE",
                     onClick = { selectedGender.value = "Nữ" },
                 )
                 Text(text = "Nữ", modifier = Modifier.padding(start = 8.dp))
@@ -339,7 +397,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
 
             Row {
                 RadioButton(
-                    selected = selectedGender.value == "Khác",
+                    selected = selectedGender.value == "Khác" || selectedGender.value == "OTHER",
                     onClick = { selectedGender.value = "Khác" },
                 )
                 Text(text = "Khác", modifier = Modifier.padding(start = 8.dp))
@@ -349,7 +407,7 @@ fun GenderSelection(selectedGender: MutableState<String>) {
 }
 
 @Composable
-fun DropBoxFill(changeAddress: (String) -> Unit) {
+fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
     Column {
         val provinceList = listOf(
             "An Giang",
@@ -392,8 +450,15 @@ fun DropBoxFill(changeAddress: (String) -> Unit) {
             "Lào Cai",
             "Long An"
         )
+        var index = 0
+        for(province in provinceList){
+            if(province == address){
+                index = provinceList.indexOf(province)
+                break;
+            }
+        }
         var expanded by remember { mutableStateOf(false) }
-        var selectedIndex by remember { mutableStateOf(0) }
+        var selectedIndex by remember { mutableStateOf(index) }
         var selectedProvince by remember { mutableStateOf(provinceList[selectedIndex]) }
 
         Box(
