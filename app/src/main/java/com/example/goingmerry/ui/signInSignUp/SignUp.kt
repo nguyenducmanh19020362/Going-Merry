@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +26,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
-import com.example.goingmerry.viewModel.LoginViewModel
 import com.example.goingmerry.viewModel.SignUpViewModel
 
 @Composable
@@ -36,11 +34,8 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var rePassword by rememberSaveable { mutableStateOf("") }
-    val token by rememberSaveable { mutableStateOf("") }
+    val typeToken = "verify-account"
 
-    var buttonOnClick by rememberSaveable {
-        mutableStateOf(false)
-    }
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -94,14 +89,9 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
                     if (password != rePassword) {
                         invalidPasswordNotification = true;
                     } else {
-                        invalidPasswordNotification = false;
                         signUpViewModel.signUp(inputEmail = email, password = password)
                         navController.navigate(
-//                            route = Routes.Verification.route + "?email=${email}",
-//                            builder = {
-//                                launchSingleTop = true
-//                            }
-                            route = Routes.Verification.route + "/$email"  ,
+                            route = Routes.Verification.route + "/$email/$typeToken",
                             builder = {
                                 launchSingleTop = true
                             }
@@ -152,39 +142,6 @@ fun PreviewScreenSignUp() {
     val signUpViewModel: SignUpViewModel = SignUpViewModel()
     ScreenSignUp(navController, signUpViewModel)
 }
-
-@Composable
-fun InputUserNameField(text: String, onValueChange: (String) -> Unit) {
-    TextField(
-        modifier = Modifier
-            .padding(bottom = 10.dp)
-            .height(60.dp)
-            .width(295.dp),
-        value = text,
-        onValueChange = onValueChange,
-        label = {
-            Text(
-                text = stringResource(id = R.string.label_userName),
-                color = MaterialTheme.colors.onSecondary
-            )
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = MaterialTheme.colors.secondaryVariant
-        ),
-        shape = RoundedCornerShape(10.dp),
-        maxLines = 1
-    )
-}
-
-/*
-@Composable
-@Preview
-fun ReviewInputUserNameField() {
-    var text by rememberSaveable { mutableStateOf("") }
-    InputUserNameField(text, onValueChange = { text = it })
-}
-*/
-
 
 @Composable
 fun InputRePasswordField(rePassword: String, onValueChange: (String) -> Unit) {

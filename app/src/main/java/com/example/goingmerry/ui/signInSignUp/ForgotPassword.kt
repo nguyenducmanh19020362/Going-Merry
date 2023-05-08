@@ -23,11 +23,16 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.viewModel.VerifyViewModel
 
 @Composable
-fun ForgotPasswordScreen(navController: NavController) {
+fun ForgotPasswordScreen(
+    navController: NavController,
+    verifyViewModel: VerifyViewModel
+) {
     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
+    val typeToken = "forgot-password"
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,8 +80,9 @@ fun ForgotPasswordScreen(navController: NavController) {
         Row() {
             Button(
                 onClick = {
+                    verifyViewModel.forgotPassword(email = email)
                     navController.navigate(
-                        route = Routes.Verification.route + "/${email}",
+                        route = Routes.Verification.route + "/$email/$typeToken",
                         builder = {
                             launchSingleTop = true
                         }
@@ -96,9 +102,9 @@ fun ForgotPasswordScreen(navController: NavController) {
 
             Button(
                 onClick = {
-//                navController.navigate(Routes.Home.route){
-//                    launchSingleTop = true
-//                }
+                navController.navigate(Routes.SignIn.route){
+                    launchSingleTop = true
+                }
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
                 shape = RoundedCornerShape(10.dp),

@@ -18,6 +18,8 @@ sealed class Routes (val route: String) {
     object ForgotPassword: Routes("forgotPassword")
 
     object Verification: Routes("verification")
+
+    object ChangePassword: Routes("changePassword")
     object ListRequestAddFriend: Routes("listRequestAddFriend")
 
     object ChatBoxGroup: Routes("chatBoxGroup")

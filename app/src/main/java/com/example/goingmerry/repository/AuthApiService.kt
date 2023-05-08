@@ -20,10 +20,10 @@ interface AuthApiService {
     suspend fun controlChat(@Header("Authorization") token: String): Response<DataControlAnonymousChat>
 
     @POST("/verify-account")
-    suspend fun verifyAccount(@Body body: VerifyAccountDto): Response<Unit>
+    suspend fun verifyAccount(@Body body: VerifyAccountDto): Response<ResponseStatus>
 
     @POST("/exchange-token")
-    suspend fun exchangeToken(@Body body: ExchangeToken): Response<Unit>
+    suspend fun exchangeToken(@Body body: ExchangeToken): Response<ResponseResetPasswordToken>
 
     @POST("/re-token")
     suspend fun reToken(@Body body: ReTokenDto): Response<Unit>

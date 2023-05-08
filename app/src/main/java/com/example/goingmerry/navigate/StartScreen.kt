@@ -1,9 +1,8 @@
 package com.example.goingmerry.navigate
 
+import ChangePasswordScreen
 import com.example.goingmerry.viewModel.VerifyViewModel
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,7 +24,6 @@ import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.*
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScreenStart(
     loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,
@@ -103,13 +101,21 @@ fun ScreenStart(
         }
 
         composable(Routes.ForgotPassword.route){
-            ForgotPasswordScreen(navController = navController)
+            ForgotPasswordScreen(navController = navController, verifyViewModel = VerifyViewModel())
         }
 
-        composable(Routes.Verification.route + "/{email}"){
+        composable(Routes.Verification.route + "/{email}/{typeToken}"){
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val email = navBackStackEntry?.arguments?.getString("email")
-            VerificationScreen(navController = navController, verifyViewModel = verifyViewModel, email = email)
+            val typeToken = navBackStackEntry?.arguments?.getString("typeToken")
+            VerificationScreen(navController = navController, verifyViewModel = verifyViewModel, email = email, typeToken = typeToken)
+        }
+
+        composable(Routes.ChangePassword.route + "/{verificationCode}") {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val verifyCode = navBackStackEntry?.arguments?.getString("verificationCode")
+            ChangePasswordScreen(navController = navController,
+                verifyViewModel = verifyViewModel, tokenResetPassword = verifyCode)
         }
 
         composable(Routes.Welcome.route){
