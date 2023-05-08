@@ -31,12 +31,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.goingmerry.R
 import com.example.goingmerry.URL
+import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
@@ -46,7 +48,7 @@ import kotlinx.coroutines.flow.asFlow
 import java.lang.reflect.Member
 
 @Composable
-fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String, token: String){
+fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, nav: NavController, id: String, token: String){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
 
@@ -71,7 +73,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     Column {
         for(member in conversation.members){
             if(member.id != id){
-                TopBar(member)
+                TopBar(member, nav)
             }else{
                 nameUser = member.name
             }
@@ -228,7 +230,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
 }
 
 @Composable
-fun TopBar(member: AccountQuery.Member){
+fun TopBar(member: AccountQuery.Member, nav: NavController){
     val imageLoader = ImageLoader(context = LocalContext.current)
     TopAppBar (
         modifier = Modifier
@@ -250,7 +252,11 @@ fun TopBar(member: AccountQuery.Member){
         },
         navigationIcon = {
             val image = Icons.Filled.ArrowBack
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                nav.navigate(Routes.Home.route){
+                    launchSingleTop = true
+                }
+            }) {
                 Icon(image, contentDescription = "Back to Home")
             }
         },
@@ -260,6 +266,11 @@ fun TopBar(member: AccountQuery.Member){
                     Icons.Filled.Person,
                     contentDescription = "To Profile",
                     modifier = Modifier.size(30.dp)
+                        .clickable {
+                            nav.navigate(Routes.Profile.route + "/${member.id}"){
+                                launchSingleTop = true
+                            }
+                        }
                 )
             }
         }

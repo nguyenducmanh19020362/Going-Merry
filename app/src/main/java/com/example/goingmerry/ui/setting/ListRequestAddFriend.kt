@@ -14,16 +14,18 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.apollographql.apollo.api.Input
 import com.example.goingmerry.viewModel.ListRAFViewModel
 import type.ConversationInput
 import type.FriendRequestReply
 
 @Composable
-fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.FriendRequest>, listRAFViewModel: ListRAFViewModel){
+fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.FriendRequest>, listRAFViewModel: ListRAFViewModel, nav: NavController){
     var newList by rememberSaveable {
         mutableStateOf(listFriendRequest.toMutableList())
     }
@@ -51,47 +53,55 @@ fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.Fr
         )
         listRAFViewModel.resetRes()
     }
-    LazyColumn{
-        items(newList){
-            Column() {
-                Text(text = "${it.sender!!.name} muốn trò chuyện với bạn")
-                Row (){
-                    Row(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(MaterialTheme.colors.secondaryVariant)
-                            .clickable {
-                                listRAFViewModel.replyRequestAddFriend(
-                                    token,
-                                    it.sender.id,
-                                    FriendRequestReply.ACCEPT
-                                )
-                                idSender = it.sender.id
-                                idReceiver = it.receiver!!.id
-                                newList.remove(it)
-                            }
-                    ){
-                        Text(text = "Đồng ý", modifier = Modifier.padding(2.dp))
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colors.secondary)
+    ) {
+        val content = "Danh sách yêu cầu kết bạn"
+        TopBar(nav, content)
+        Spacer(modifier = Modifier.height(10.dp))
+        LazyColumn(modifier = Modifier.weight(1f)){
+            items(newList){
+                Column(modifier = Modifier.padding(start = 5.dp)) {
+                    Text(text = "${it.sender!!.name} muốn trò chuyện với bạn")
+                    Row (){
+                        Row(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(MaterialTheme.colors.secondaryVariant)
+                                .clickable {
+                                    listRAFViewModel.replyRequestAddFriend(
+                                        token,
+                                        it.sender.id,
+                                        FriendRequestReply.ACCEPT
+                                    )
+                                    idSender = it.sender.id
+                                    idReceiver = it.receiver!!.id
+                                    newList.remove(it)
+                                }
+                        ){
+                            Text(text = "Đồng ý", modifier = Modifier.padding(2.dp))
+                        }
+                        Row(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(MaterialTheme.colors.secondaryVariant)
+                                .clickable {
+                                    listRAFViewModel.replyRequestAddFriend(
+                                        token,
+                                        it.sender.id,
+                                        FriendRequestReply.DENY
+                                    )
+                                    newList.remove(it)
+                                }
+                        ){
+                            Text(text = "Từ chối", modifier = Modifier.padding(2.dp))
+                        }
                     }
-                    Row(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(MaterialTheme.colors.secondaryVariant)
-                            .clickable {
-                                listRAFViewModel.replyRequestAddFriend(
-                                    token,
-                                    it.sender.id,
-                                    FriendRequestReply.DENY
-                                )
-                                newList.remove(it)
-                            }
-                    ){
-                        Text(text = "Từ chối", modifier = Modifier.padding(2.dp))
-                    }
+                    Spacer(modifier = Modifier.height(5.dp))
                 }
-                Spacer(modifier = Modifier.height(5.dp))
             }
         }
     }

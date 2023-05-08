@@ -42,12 +42,13 @@ import coil.compose.rememberAsyncImagePainter
 import com.apollographql.apollo.api.Input
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.viewModel.FillInfoViewModel
+import com.example.goingmerry.viewModel.ProfileViewModel
 import type.AccountInput
 import type.Gender
 import java.io.ByteArrayOutputStream
 
 @Composable
-fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {
+fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
     ) {
@@ -66,7 +67,7 @@ fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewMode
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        BodyFill(navController = navController, fillInfoViewModel, token)
+        BodyFill(navController = navController, fillInfoViewModel, profileViewModel, token)
     }
 }
 
@@ -78,7 +79,7 @@ fun PreviewFill() {
 }
 
 @Composable
-fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {
+fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
     var nameAccount by rememberSaveable { mutableStateOf("") }
     var birthDate by rememberSaveable { mutableStateOf("") }
     var address by rememberSaveable { mutableStateOf("An Giang") }

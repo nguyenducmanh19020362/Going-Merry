@@ -247,7 +247,11 @@ fun TopBarGroup(nameGroup: String, navController: NavController, idConversation:
         },
         navigationIcon = {
             val image = Icons.Filled.ArrowBack
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                navController.navigate(Routes.Home.route){
+                    launchSingleTop = true
+                }
+            }) {
                 Icon(image, contentDescription = "Back to Home")
             }
         },

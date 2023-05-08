@@ -373,13 +373,13 @@ fun ListGroups(listConversation: List<AccountQuery.Conversation>, directMessages
         mutableStateOf("")
     }
 
-    if(listConversation.isNotEmpty()){
-        LazyColumn(modifier = Modifier.fillMaxHeight()){
+    LazyColumn(modifier = Modifier.fillMaxHeight()){
+        if(listConversation.isNotEmpty()){
             items(listConversation.sortedBy {
                 compare(directMessages, it)
             }.reversed()){conversion->
                 if(conversion.members.size > 2){
-                        //Log.e("id", member.id + " " + idAccount)
+                    //Log.e("id", member.id + " " + idAccount)
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)

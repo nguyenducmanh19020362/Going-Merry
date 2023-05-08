@@ -39,7 +39,7 @@ fun ScreenStart(
         composable(Routes.ChatBox.route + "/{idConversation}"){navBackTrackEntry->
             val idMember = navBackTrackEntry.arguments?.getString("idConversation")
             idMember?.let {
-                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,
+                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, navController, homeViewModel.idAccount.value,
                 loginViewModel.token.value)
             }
         }
@@ -103,7 +103,7 @@ fun ScreenStart(
         }
 
         composable(Routes.FillInfo.route){
-            FillScreen(navController = navController, fillInfoViewModel, loginViewModel.token.value)
+            FillScreen(navController = navController, fillInfoViewModel, profileViewModel, loginViewModel.token.value)
         }
 
         composable(Routes.ForgotPassword.route){
@@ -165,7 +165,8 @@ fun ScreenStart(
         }
         composable(Routes.ListRequestAddFriend.route){
             val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()
-            ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel)
+            ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel,
+                        navController)
         }
 
         composable(Routes.GroupManager.route){
@@ -192,7 +193,7 @@ fun ScreenStart(
             }
         }
         composable(Routes.AnonymousChat.route){
-            AnonymousChat(loginViewModel, anonymousChatViewModel, homeViewModel.stateIncognito.value)
+            AnonymousChat(loginViewModel, anonymousChatViewModel, navController, homeViewModel.stateIncognito.value)
         }
     }
 }

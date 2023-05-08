@@ -42,7 +42,7 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TopBar(name = name, avatar = avatar, token)
+        TopBar(name = name, avatar = avatar, token, navController)
 
         BodyScreen(
             navController = navController,
@@ -85,7 +85,8 @@ fun PreviewSetting() {
 fun TopBar(
     name: String,
     avatar: String,
-    token: String
+    token: String,
+    nav: NavController
 ) {
     var sizeBar = 300.dp
     var fonts = 25.sp
@@ -150,6 +151,13 @@ fun TopBar(
                 .offset(x = (-110).dp, y = (-130).dp)
                 .clip(CircleShape)
                 .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+                .clickable{
+                    nav.navigate(Routes.Home.route){
+                        popUpTo(Routes.Setting.route){
+                            inclusive = true
+                        }
+                    }
+                }
         )
     }
 }
@@ -158,7 +166,7 @@ fun TopBar(
 @Composable
 @Preview
 fun PreviewTopBar() {
-    TopBar(name = "Lisa", avatar = "0007", token = "")
+    TopBar(name = "Lisa", avatar = "0007", token = "", nav = NavController(LocalContext.current))
 }
 
 @Composable

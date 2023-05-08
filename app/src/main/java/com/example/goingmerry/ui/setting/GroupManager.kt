@@ -63,6 +63,9 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
         .fillMaxSize()
         .background(MaterialTheme.colors.secondary)
     ) {
+        val contentScreen = "Quản lý nhóm"
+        TopBar(nav = nav, content = contentScreen)
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically
         ){
@@ -206,9 +209,11 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
                                 .fillMaxWidth()
                                 .padding(5.dp)
                                 .clickable {
-                                    nav.navigate(Routes.GroupMemberManager.route + "/${
+                                    nav.navigate(
+                                        Routes.GroupMemberManager.route + "/${
                                             it.id
-                                    }") {
+                                        }"
+                                    ) {
                                         launchSingleTop = true
                                     }
                                 }

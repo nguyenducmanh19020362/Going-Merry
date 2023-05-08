@@ -88,7 +88,8 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
                 }
             )
         }
-        TopBar()
+        val content = "Hồ sơ"
+        TopBar(nav, content)
 
         ChangeImage(profileViewModel.avatar.value, token)
 
@@ -98,7 +99,7 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(nav: NavController, content: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -112,12 +113,17 @@ fun TopBar() {
             contentDescription = null,
             tint = Color.White,
             modifier = Modifier.size(24.dp)
+                .clickable {
+                    nav.navigate(Routes.Setting.route){
+                        launchSingleTop = true
+                    }
+                },
         )
 
         Spacer(modifier = Modifier.width(25.dp))
 
         Text(
-            text = "Hồ sơ",
+            text = content,
             fontWeight = FontWeight.Bold,
             fontSize = 30.sp,
             color = Color.White
