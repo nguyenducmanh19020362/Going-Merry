@@ -109,20 +109,6 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
                 )
             }
 
-            Text(
-                text = "Quên mật khẩu?",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colors.primaryVariant,
-                modifier = Modifier
-                    .offset(x = (-85).dp)
-                    .padding(bottom = 10.dp)
-                    .clickable(onClick = {
-                        navController.navigate(Routes.ForgotPassword.route) {
-                            launchSingleTop = true
-                        }
-                    })
-            )
-
             Button(
                 onClick = {
                     invalidEmailNotification = !isValidEmail(email)
@@ -136,6 +122,20 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
             ) {
                 Text(text = "Đăng nhập")
             }
+
+            Text(
+                text = "Quên mật khẩu?",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colors.primaryVariant,
+                modifier = Modifier
+                    .offset(x = (-85).dp)
+                    .padding(top = 10.dp)
+                    .clickable(onClick = {
+                        navController.navigate(Routes.ForgotPassword.route) {
+                            launchSingleTop = true
+                        }
+                    })
+            )
         }
     }
 }

@@ -63,7 +63,7 @@ fun ChangePasswordScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Đặt lại mật khẩu $tokenResetPassword",
+            text = "Đặt lại mật khẩu",
             fontSize = 25.sp,
             color = Color.Black,
             fontWeight = FontWeight.Bold,

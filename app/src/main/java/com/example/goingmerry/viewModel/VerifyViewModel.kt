@@ -55,7 +55,7 @@ class VerifyViewModel : ViewModel() {
             if (responseService.isSuccessful) {
                 responseService.body()?.let {
                     resetPasswordToken = it.responseToken
-                    Log.e("tag", resetPasswordToken.toString())
+                    Log.e("tag", "verified successfully")
                 }
             }
         }
@@ -78,7 +78,6 @@ class VerifyViewModel : ViewModel() {
     // Đặt lại mật khẩu mới
     fun resetPassword(newPassword: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.e("tag", "Reset password ")
             if (resetPasswordToken == null) {
                 Log.e("tag", "Reset password token is not set")
                 return@launch
@@ -87,7 +86,6 @@ class VerifyViewModel : ViewModel() {
             val authService = Retrofit.getAuthService()
             Log.e("tag", resetPasswordToken.toString())
             val responseService = authService.resetPassword(ResetPassword(password = newPassword, token = resetPasswordToken!!))
-            Log.e("tag", "mm")
             if (responseService.isSuccessful) {
                 Log.e("tag", "Password changed successfully")
             }
