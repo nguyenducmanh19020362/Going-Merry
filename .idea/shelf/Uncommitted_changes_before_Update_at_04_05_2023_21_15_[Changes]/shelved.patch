@@ -1,0 +1,978 @@
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/FillInfo.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.ui.signInSignUp\r\n\r\nimport android.util.Log\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.lazy.LazyColumn\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.foundation.text.KeyboardOptions\r\nimport androidx.compose.material.*\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.ArrowDropDown\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.runtime.saveable.rememberSaveable\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.draw.clip\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.input.KeyboardType\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.navigation.NavController\r\nimport androidx.navigation.compose.rememberNavController\r\nimport com.apollographql.apollo.api.Input\r\nimport com.example.goingmerry.navigate.Routes\r\nimport com.example.goingmerry.viewModel.FillInfoViewModel\r\nimport type.AccountInput\r\nimport type.Gender\r\n\r\n@Composable\r\nfun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {\r\n    Column(\r\n        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()\r\n    ) {\r\n        LogoApp()\r\n\r\n        Spacer(modifier = Modifier.height(15.dp))\r\n\r\n        Text(\r\n            text = \"Điền thông tin để hoàn thành hồ sơ của bạn\",\r\n            fontSize = 25.sp,\r\n            color = Color.Black,\r\n            fontWeight = FontWeight.Bold,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier.width(320.dp)\r\n        )\r\n\r\n        Spacer(modifier = Modifier.height(15.dp))\r\n\r\n        BodyFill(navController = navController, fillInfoViewModel, token)\r\n    }\r\n}\r\n\r\n@Composable\r\n@Preview\r\nfun PreviewFill() {\r\n    val navController = rememberNavController()\r\n    //FillScreen(navController = navController)\r\n}\r\n\r\n@Composable\r\nfun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {\r\n    var nameAccount by rememberSaveable { mutableStateOf(\"\") }\r\n    var birthDate by rememberSaveable { mutableStateOf(\"\") }\r\n    var address by rememberSaveable { mutableStateOf(\"An Giang\") }\r\n    val selectedGender = remember { mutableStateOf(\"\") }\r\n    var job by rememberSaveable { mutableStateOf(\"\") }\r\n    var hobby by rememberSaveable { mutableStateOf(\"\") }\r\n    if(fillInfoViewModel.idAccountUpdate.value != \"\"){\r\n        navController.navigate(Routes.Home.route){\r\n            launchSingleTop = true\r\n        }\r\n        fillInfoViewModel.idAccountUpdate.value = \"\"\r\n    }\r\n    LazyColumn(\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .padding(horizontal = 25.dp),\r\n        horizontalAlignment = Alignment.CenterHorizontally,\r\n    ) {\r\n        item {\r\n            Text(\r\n                text = \"Tên tài khoản\",\r\n                fontSize = 15.sp,\r\n                color = Color.Black,\r\n                fontWeight = FontWeight.Bold,\r\n                textAlign = TextAlign.Left,\r\n                modifier = Modifier.width(295.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(5.dp))\r\n\r\n            TextField(\r\n                value = nameAccount,\r\n                onValueChange = { nameAccount = it },\r\n                singleLine = true,\r\n                modifier = Modifier\r\n                    .padding(bottom = 15.dp)\r\n                    .height(60.dp)\r\n                    .width(295.dp)\r\n                    .clip(RoundedCornerShape(10.dp))\r\n                    .background(MaterialTheme.colors.secondaryVariant),\r\n            )\r\n\r\n            Text(\r\n                text = \"Sinh nhật\",\r\n                fontSize = 15.sp,\r\n                color = Color.Black,\r\n                fontWeight = FontWeight.Bold,\r\n                textAlign = TextAlign.Left,\r\n                modifier = Modifier.width(295.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(5.dp))\r\n\r\n            TextField(\r\n                value = birthDate,\r\n                onValueChange = { birthDate = it },\r\n                keyboardOptions = KeyboardOptions(\r\n                    keyboardType = KeyboardType.Number\r\n                ),\r\n                singleLine = true,\r\n                placeholder = { Text(\"yyyy-MM-dd\") },\r\n                modifier = Modifier\r\n                    .padding(bottom = 15.dp)\r\n                    .height(60.dp)\r\n                    .width(295.dp)\r\n                    .clip(RoundedCornerShape(10.dp))\r\n                    .background(MaterialTheme.colors.secondaryVariant),\r\n            )\r\n\r\n            Text(\r\n                text = \"Giới tính\",\r\n                fontSize = 15.sp,\r\n                color = Color.Black,\r\n                fontWeight = FontWeight.Bold,\r\n                textAlign = TextAlign.Left,\r\n                modifier = Modifier.width(295.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(5.dp))\r\n\r\n            GenderSelection(selectedGender = selectedGender)\r\n\r\n            Text(\r\n                text = \"Nơi ở\",\r\n                fontSize = 15.sp,\r\n                color = Color.Black,\r\n                fontWeight = FontWeight.Bold,\r\n                textAlign = TextAlign.Left,\r\n                modifier = Modifier.width(295.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(5.dp))\r\n\r\n            DropBoxFill(changeAddress = {selectedProvince: String -> address = selectedProvince})\r\n\r\n            Spacer(modifier = Modifier.height(15.dp))\r\n\r\n            Text(\r\n                text = \"Công việc\",\r\n                fontSize = 15.sp,\r\n                color = Color.Black,\r\n                fontWeight = FontWeight.Bold,\r\n                textAlign = TextAlign.Left,\r\n                modifier = Modifier.width(295.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(5.dp))\r\n\r\n            TextField(\r\n                value = job,\r\n                onValueChange = { job = it },\r\n                singleLine = true,\r\n                modifier = Modifier\r\n                    .padding(bottom = 15.dp)\r\n                    .height(60.dp)\r\n                    .width(295.dp)\r\n                    .clip(RoundedCornerShape(10.dp))\r\n                    .background(MaterialTheme.colors.secondaryVariant),\r\n            )\r\n\r\n            Text(\r\n                text = \"Sở thích\",\r\n                fontSize = 15.sp,\r\n                color = Color.Black,\r\n                fontWeight = FontWeight.Bold,\r\n                textAlign = TextAlign.Left,\r\n                modifier = Modifier.width(295.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(5.dp))\r\n\r\n            TextField(\r\n                value = hobby,\r\n                onValueChange = { hobby = it },\r\n                modifier = Modifier\r\n                    .padding(bottom = 15.dp)\r\n                    .height(60.dp)\r\n                    .width(295.dp)\r\n                    .clip(RoundedCornerShape(10.dp))\r\n                    .background(MaterialTheme.colors.secondaryVariant),\r\n                shape = RoundedCornerShape(10.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(15.dp))\r\n\r\n            Button(\r\n                onClick = {\r\n                    Log.e(\"information\", \"$nameAccount $birthDate $address ${selectedGender.value} $job $hobby\")\r\n                    var render = Gender.MALE\r\n                    if(selectedGender.value == \"Nữ\"){\r\n                        render = Gender.FEMALE\r\n                    }\r\n                    if(selectedGender.value == \"Khác\"){\r\n                        render = Gender.OTHER\r\n                    }\r\n                    val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(address),\r\n                                    Input.fromNullable(render), Input.fromNullable(job), Input.fromNullable(hobby))\r\n                    fillInfoViewModel.updateAccount(token, input)\r\n                },\r\n                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),\r\n                shape = RoundedCornerShape(10.dp),\r\n                modifier = Modifier\r\n                    .height(60.dp)\r\n                    .width(120.dp)\r\n                    .padding(bottom = 10.dp)\r\n\r\n            ) {\r\n                Text(text = \"Hoàn thành\")\r\n            }\r\n\r\n            Spacer(modifier = Modifier.height(20.dp))\r\n        }\r\n    }\r\n\r\n}\r\n\r\n@Composable\r\nfun GenderSelection(selectedGender: MutableState<String>) {\r\n    Column(\r\n        horizontalAlignment = Alignment.CenterHorizontally,\r\n\r\n        ) {\r\n        Row(\r\n            modifier = Modifier\r\n                .width(295.dp)\r\n                .height(60.dp),\r\n            horizontalArrangement = Arrangement.SpaceBetween\r\n        ) {\r\n            Row() {\r\n                RadioButton(\r\n                    selected = selectedGender.value == \"Nam\",\r\n                    onClick = { selectedGender.value = \"Nam\" },\r\n                )\r\n                Text(text = \"Nam\", modifier = Modifier.padding(start = 8.dp))\r\n            }\r\n\r\n            Row() {\r\n                RadioButton(\r\n                    selected = selectedGender.value == \"Nữ\",\r\n                    onClick = { selectedGender.value = \"Nữ\" },\r\n                )\r\n                Text(text = \"Nữ\", modifier = Modifier.padding(start = 8.dp))\r\n            }\r\n\r\n            Row() {\r\n                RadioButton(\r\n                    selected = selectedGender.value == \"Khác\",\r\n                    onClick = { selectedGender.value = \"Khác\" },\r\n                )\r\n                Text(text = \"Khác\", modifier = Modifier.padding(start = 8.dp))\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun DropBoxFill(changeAddress: (String) -> Unit) {\r\n    Column {\r\n        val provinceList = listOf(\r\n            \"An Giang\",\r\n            \"Bà Rịa-Vũng Tàu\",\r\n            \"Bắc Giang\",\r\n            \"Bắc Kạn\",\r\n            \"Bạc Liêu\",\r\n            \"Bắc Ninh\",\r\n            \"Bến Tre\",\r\n            \"Bình Định\",\r\n            \"Bình Dương\",\r\n            \"Bình Phước\",\r\n            \"Bình Thuận\",\r\n            \"Cà Mau\",\r\n            \"Cần Thơ\",\r\n            \"Cao Bằng\",\r\n            \"Đà Nẵng\",\r\n            \"Đắk Lắk\",\r\n            \"Đắk Nông\",\r\n            \"Điện Biên\",\r\n            \"Đồng Nai\",\r\n            \"Đồng Tháp\",\r\n            \"Gia Lai\",\r\n            \"Hà Giang\",\r\n            \"Hà Nam\",\r\n            \"Hà Nội\",\r\n            \"Hà Tĩnh\",\r\n            \"Hải Dương\",\r\n            \"Hải Phòng\",\r\n            \"Hậu Giang\",\r\n            \"Hòa Bình\",\r\n            \"Hồ Chí Minh\",\r\n            \"Hưng Yên\",\r\n            \"Khánh Hòa\",\r\n            \"Kiên Giang\",\r\n            \"Kon Tum\",\r\n            \"Lai Châu\",\r\n            \"Lâm Đồng\",\r\n            \"Lạng Sơn\",\r\n            \"Lào Cai\",\r\n            \"Long An\"\r\n        )\r\n        var expanded by remember { mutableStateOf(false) }\r\n        var selectedIndex by remember { mutableStateOf(0) }\r\n        var selectedProvince by remember { mutableStateOf(provinceList[selectedIndex]) }\r\n\r\n        Box(\r\n            modifier = Modifier\r\n                .height(60.dp)\r\n                .width(295.dp)\r\n                .clip(RoundedCornerShape(10.dp))\r\n                .background(MaterialTheme.colors.secondaryVariant)\r\n                .clickable {\r\n                    expanded = true\r\n                }, contentAlignment = Alignment.CenterStart\r\n        ) {\r\n            Row(\r\n                verticalAlignment = Alignment.CenterVertically,\r\n                horizontalArrangement = Arrangement.SpaceBetween\r\n            ) {\r\n                Text(\r\n                    text = selectedProvince,\r\n                    fontSize = 20.sp,\r\n                    fontWeight = FontWeight.Bold,\r\n                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)\r\n                )\r\n\r\n                Icon(\r\n                    imageVector = Icons.Default.ArrowDropDown,\r\n                    contentDescription = null,\r\n                    tint = Color.Black,\r\n                    modifier = Modifier.size(24.dp)\r\n                )\r\n            }\r\n\r\n        }\r\n\r\n        DropdownMenu(\r\n            expanded = expanded,\r\n            onDismissRequest = { expanded = false },\r\n            modifier = Modifier.fillMaxWidth()\r\n        ) {\r\n            provinceList.forEachIndexed { index, province ->\r\n                DropdownMenuItem(onClick = {\r\n                    selectedProvince = province\r\n                    changeAddress(selectedProvince)\r\n                    selectedIndex = index\r\n                    expanded = false\r\n                }) {\r\n                    Text(\r\n                        text = province,\r\n                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)\r\n                    )\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/FillInfo.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/FillInfo.kt
+--- a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/FillInfo.kt	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/FillInfo.kt	
+@@ -1,10 +1,17 @@
+ package com.example.goingmerry.ui.signInSignUp
+ 
++import android.app.DatePickerDialog
++import android.content.Context
++import android.icu.util.Calendar
++import android.os.Build
+ import android.util.Log
++import androidx.annotation.RequiresApi
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.clickable
+ import androidx.compose.foundation.layout.*
++//import androidx.compose.foundation.layout.BoxScopeInstance.align
+ import androidx.compose.foundation.lazy.LazyColumn
++import androidx.compose.foundation.lazy.items
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.foundation.text.KeyboardOptions
+ import androidx.compose.material.*
+@@ -15,7 +22,9 @@
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
++import androidx.compose.ui.focus.onFocusChanged
+ import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.platform.LocalContext
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.input.KeyboardType
+ import androidx.compose.ui.text.style.TextAlign
+@@ -29,11 +38,14 @@
+ import com.example.goingmerry.viewModel.FillInfoViewModel
+ import type.AccountInput
+ import type.Gender
++import java.text.SimpleDateFormat
++import java.util.*
+ 
+ @Composable
+ fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, token: String) {
+     Column(
+-        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
++        horizontalAlignment = Alignment.CenterHorizontally,
++        modifier = Modifier.fillMaxSize()
+     ) {
+         LogoApp()
+ 
+@@ -69,17 +81,23 @@
+     val selectedGender = remember { mutableStateOf("") }
+     var job by rememberSaveable { mutableStateOf("") }
+     var hobby by rememberSaveable { mutableStateOf("") }
+-    if(fillInfoViewModel.idAccountUpdate.value != ""){
+-        navController.navigate(Routes.Home.route){
++    val selectedHobbies = remember { mutableStateListOf<String>() }
++    val context = LocalContext.current
++
++
++
++    if (fillInfoViewModel.idAccountUpdate.value != "") {
++        navController.navigate(Routes.Home.route) {
+             launchSingleTop = true
+         }
+         fillInfoViewModel.idAccountUpdate.value = ""
+     }
++
+     LazyColumn(
+         modifier = Modifier
+             .fillMaxWidth()
+             .padding(horizontal = 25.dp),
+-        horizontalAlignment = Alignment.CenterHorizontally,
++        horizontalAlignment = Alignment.CenterHorizontally
+     ) {
+         item {
+             Text(
+@@ -88,7 +106,7 @@
+                 color = Color.Black,
+                 fontWeight = FontWeight.Bold,
+                 textAlign = TextAlign.Left,
+-                modifier = Modifier.width(295.dp)
++                modifier = Modifier.width(295.dp).padding(top = 10.dp)
+             )
+ 
+             Spacer(modifier = Modifier.height(5.dp))
+@@ -116,21 +134,7 @@
+ 
+             Spacer(modifier = Modifier.height(5.dp))
+ 
+-            TextField(
+-                value = birthDate,
+-                onValueChange = { birthDate = it },
+-                keyboardOptions = KeyboardOptions(
+-                    keyboardType = KeyboardType.Number
+-                ),
+-                singleLine = true,
+-                placeholder = { Text("yyyy-MM-dd") },
+-                modifier = Modifier
+-                    .padding(bottom = 15.dp)
+-                    .height(60.dp)
+-                    .width(295.dp)
+-                    .clip(RoundedCornerShape(10.dp))
+-                    .background(MaterialTheme.colors.secondaryVariant),
+-            )
++            DatePickerFill(context = context, birthDay = birthDate)
+ 
+             Text(
+                 text = "Giới tính",
+@@ -156,7 +160,7 @@
+ 
+             Spacer(modifier = Modifier.height(5.dp))
+ 
+-            DropBoxFill(changeAddress = {selectedProvince: String -> address = selectedProvince})
++            DropBoxFill(changeAddress = { selectedProvince: String -> address = selectedProvince })
+ 
+             Spacer(modifier = Modifier.height(15.dp))
+ 
+@@ -171,6 +175,8 @@
+ 
+             Spacer(modifier = Modifier.height(5.dp))
+ 
++//                HobbyList(selectedHobbies = selectedHobbies )
++
+             TextField(
+                 value = job,
+                 onValueChange = { job = it },
+@@ -194,32 +200,31 @@
+ 
+             Spacer(modifier = Modifier.height(5.dp))
+ 
+-            TextField(
+-                value = hobby,
+-                onValueChange = { hobby = it },
+-                modifier = Modifier
+-                    .padding(bottom = 15.dp)
+-                    .height(60.dp)
+-                    .width(295.dp)
+-                    .clip(RoundedCornerShape(10.dp))
+-                    .background(MaterialTheme.colors.secondaryVariant),
+-                shape = RoundedCornerShape(10.dp)
+-            )
++            HobbyList(selectedHobbies = selectedHobbies)
+ 
+             Spacer(modifier = Modifier.height(15.dp))
+ 
+             Button(
+                 onClick = {
+-                    Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
++                    Log.e(
++                        "information",
++                        "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby"
++                    )
+                     var render = Gender.MALE
+-                    if(selectedGender.value == "Nữ"){
++                    if (selectedGender.value == "Nữ") {
+                         render = Gender.FEMALE
+                     }
+-                    if(selectedGender.value == "Khác"){
++                    if (selectedGender.value == "Khác") {
+                         render = Gender.OTHER
+                     }
+-                    val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(address),
+-                                    Input.fromNullable(render), Input.fromNullable(job), Input.fromNullable(hobby))
++                    val input = AccountInput(
++                        Input.fromNullable(nameAccount),
++                        Input.fromNullable(birthDate),
++                        Input.fromNullable(address),
++                        Input.fromNullable(render),
++                        Input.fromNullable(job),
++                        Input.fromNullable(hobby)
++                    )
+                     fillInfoViewModel.updateAccount(token, input)
+                 },
+                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
+@@ -228,6 +233,7 @@
+                     .height(60.dp)
+                     .width(120.dp)
+                     .padding(bottom = 10.dp)
++                    .offset(x = 85.dp)
+ 
+             ) {
+                 Text(text = "Hoàn thành")
+@@ -236,7 +242,76 @@
+             Spacer(modifier = Modifier.height(20.dp))
+         }
+     }
++}
++
++
++@Composable
++fun DatePickerFill(
++    context: Context,
++    birthDay: String
++) {
++    val year: Int
++    val month: Int
++    val day: Int
++
++
++    val calendar = java.util.Calendar.getInstance()
++    year = calendar.get(Calendar.YEAR)
++    month = calendar.get(Calendar.MONTH)
++    day = calendar.get(Calendar.DAY_OF_MONTH)
++    calendar.time = Date()
++
++    val date = remember { mutableStateOf("") }
++    val datePickerDialog = DatePickerDialog(
++        context,
++        { _, year: Int, month: Int, dayOfMonth: Int ->
++            date.value = "$year - $month - $dayOfMonth"
++        }, year, month, day
++    )
++
++    Column(
++        horizontalAlignment = Alignment.CenterHorizontally,
++        modifier = Modifier.padding(horizontal = 25.dp)
++    ) {
++        Row(
++            horizontalArrangement = Arrangement.SpaceEvenly,
++            verticalAlignment = Alignment.CenterVertically
++        ) {
++            Box(
++                modifier = Modifier
++                    .padding(bottom = 15.dp)
++                    .height(60.dp)
++                    .width(220.dp)
++                    .clip(RoundedCornerShape(10.dp))
++                    .background(MaterialTheme.colors.secondaryVariant),
++
++            ) {
++                Text(
++                    text = date.value,
++                    color = Color.Black,
++                    fontWeight = FontWeight.Bold,
++                    textAlign = TextAlign.Center,
++                    modifier = Modifier
++                        .offset(x = 15.dp, y = 18.dp)
++                )
++            }
+ 
++            Spacer(modifier = Modifier.width(10.dp))
++
++            Button(
++                colors = ButtonDefaults
++                    .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),
++                modifier = Modifier
++                    .padding(bottom = 15.dp)
++                    .height(60.dp)
++                    .clip(RoundedCornerShape(10.dp)),
++                onClick = {
++                    datePickerDialog.show()
++                }) {
++                Text(text = "Chọn")
++            }
++        }
++    }
+ }
+ 
+ @Composable
+@@ -360,7 +435,9 @@
+         DropdownMenu(
+             expanded = expanded,
+             onDismissRequest = { expanded = false },
+-            modifier = Modifier.fillMaxWidth()
++            modifier = Modifier
++                .width(295.dp)
++                .height(480.dp)
+         ) {
+             provinceList.forEachIndexed { index, province ->
+                 DropdownMenuItem(onClick = {
+@@ -371,6 +448,7 @@
+                 }) {
+                     Text(
+                         text = province,
++                        fontWeight = FontWeight.Bold,
+                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                     )
+                 }
+@@ -379,6 +457,57 @@
+     }
+ }
+ 
++@Composable
++fun HobbyList(selectedHobbies: MutableList<String>) {
++    val hobbies = listOf(
++        "Reading",
++        "Playing games",
++        "Watching movies",
++        "Traveling",
++        "Cooking",
++        "Sports",
++        "Photography",
++        "Music",
++        "Drawing",
++        "Writing"
++    )
++
++    Column(
++        horizontalAlignment = Alignment.CenterHorizontally,
++        modifier = Modifier.padding(horizontal = 25.dp)
++    ) {
++        for (hobby in hobbies) {
++            val isChecked = remember { mutableStateOf(false) }
++            Row(
++                modifier = Modifier
++                    .fillMaxWidth()
++                    .padding(horizontal = 16.dp, vertical = 8.dp),
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Checkbox(
++                    checked = selectedHobbies.contains(hobby),
++                    onCheckedChange = { isChecked ->
++                        if (isChecked) {
++                            selectedHobbies.add(hobby)
++                        } else {
++                            selectedHobbies.remove(hobby)
++                        }
++                    }
++                )
++
++                Text(
++                    text = hobby,
++                    style = MaterialTheme.typography.body1,
++                    modifier = Modifier.padding(start = 16.dp)
++                )
++            }
++        }
++    }
++}
++
++
++
++
+ 
+ 
+ 
+Index: app/src/main/java/com/example/goingmerry/repository/AuthApiService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.repository\r\n\r\nimport com.example.goingmerry.dataTransferObjects.DataSignInDto\r\nimport com.example.goingmerry.dataTransferObjects.LoginDto\r\nimport com.example.goingmerry.dataTransferObjects.SignUpDto\r\nimport com.example.goingmerry.dataTransferObjects.TokenDto\r\nimport retrofit2.Response\r\nimport retrofit2.http.Body\r\nimport retrofit2.http.POST\r\n\r\ninterface AuthApiService {\r\n\r\n    @POST(\"/login\")\r\n    suspend fun getLogin(@Body loginDto: LoginDto) : Response<TokenDto>\r\n\r\n    @POST(\"/signup\")\r\n    suspend fun getSignUp(@Body signUpDto: SignUpDto): Response<DataSignInDto>\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/repository/AuthApiService.kt b/app/src/main/java/com/example/goingmerry/repository/AuthApiService.kt
+--- a/app/src/main/java/com/example/goingmerry/repository/AuthApiService.kt	
++++ b/app/src/main/java/com/example/goingmerry/repository/AuthApiService.kt	
+@@ -1,9 +1,6 @@
+ package com.example.goingmerry.repository
+ 
+-import com.example.goingmerry.dataTransferObjects.DataSignInDto
+-import com.example.goingmerry.dataTransferObjects.LoginDto
+-import com.example.goingmerry.dataTransferObjects.SignUpDto
+-import com.example.goingmerry.dataTransferObjects.TokenDto
++import com.example.goingmerry.dataTransferObjects.*
+ import retrofit2.Response
+ import retrofit2.http.Body
+ import retrofit2.http.POST
+@@ -15,4 +12,9 @@
+ 
+     @POST("/signup")
+     suspend fun getSignUp(@Body signUpDto: SignUpDto): Response<DataSignInDto>
++    @POST("/verify-account")
++    suspend fun verifyAccount(@Body body: VerifyAccountDto): Response<Unit>
++
++    @POST("/forgot-password")
++    suspend fun forgotPassword(@Body body: ForgotPasswordDto): Response<Unit>
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/viewModel/SignUpViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.viewModel\r\n\r\nimport android.util.Log\r\nimport androidx.compose.runtime.mutableStateOf\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.lifecycle.viewModelScope\r\nimport com.example.goingmerry.dataTransferObjects.SignUpDto\r\nimport com.example.goingmerry.repository.Retrofit\r\nimport kotlinx.coroutines.Dispatchers\r\nimport kotlinx.coroutines.launch\r\n\r\nclass SignUpViewModel: ViewModel(){\r\n    val isSuccessSignUp = mutableStateOf(value = 1)\r\n    fun signUp(email: String, password: String){\r\n        viewModelScope.launch(Dispatchers.IO) {\r\n            val authService = Retrofit.getAuthService()\r\n            val responseService = authService.getSignUp(SignUpDto(email = email, password = password))\r\n            Log.e(\"body\", responseService.body().toString())\r\n            if(responseService.isSuccessful){\r\n                isSuccessSignUp.value = 2\r\n                Log.e(\"tag\",\"true\")\r\n            }else{\r\n                isSuccessSignUp.value = 1\r\n                Log.e(\"tag\",\"false\")\r\n            }\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/viewModel/SignUpViewModel.kt b/app/src/main/java/com/example/goingmerry/viewModel/SignUpViewModel.kt
+--- a/app/src/main/java/com/example/goingmerry/viewModel/SignUpViewModel.kt	
++++ b/app/src/main/java/com/example/goingmerry/viewModel/SignUpViewModel.kt	
+@@ -5,24 +5,60 @@
+ import androidx.lifecycle.ViewModel
+ import androidx.lifecycle.viewModelScope
+ import com.example.goingmerry.dataTransferObjects.SignUpDto
++import com.example.goingmerry.dataTransferObjects.VerificationCodeDto
++import com.example.goingmerry.dataTransferObjects.VerifyAccountDto
+ import com.example.goingmerry.repository.Retrofit
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+ 
+ class SignUpViewModel: ViewModel(){
+     val isSuccessSignUp = mutableStateOf(value = 1)
+-    fun signUp(email: String, password: String){
++    val verificationCode = mutableStateOf("")
++    var email = mutableStateOf("")
++    fun signUp(inputEmail: String, password: String, token: String){
++        email.value = inputEmail
+         viewModelScope.launch(Dispatchers.IO) {
+             val authService = Retrofit.getAuthService()
+-            val responseService = authService.getSignUp(SignUpDto(email = email, password = password))
++            val responseService = authService.getSignUp(SignUpDto(email = inputEmail, password = password))
+             Log.e("body", responseService.body().toString())
+             if(responseService.isSuccessful){
+-                isSuccessSignUp.value = 2
++//                isSuccessSignUp.value = 2
+                 Log.e("tag","true")
+             }else{
+-                isSuccessSignUp.value = 1
++//                isSuccessSignUp.value = 1
+                 Log.e("tag","false")
+             }
+         }
+     }
++
++    // Gửi mã xác thực tài khoản
++    fun verifyAccount(token: String) {
++        viewModelScope.launch(Dispatchers.IO) {
++            val authService = Retrofit.getAuthService()
++            val responseService = authService.verifyAccount(VerifyAccountDto(email = email.value, token = token))
++            if (responseService.isSuccessful) {
++                Log.e("tag", "Account verified")
++            } else {
++                Log.e("tag", "Account verification failed")
++            }
++        }
++    }
++
++    //Gửi mã người dùng nhập lên server để kiểm tra
++//    fun sendVerificationCode(verificationCode: String) {
++//        viewModelScope.launch(Dispatchers.IO) {
++//            val authService = Retrofit.getAuthService()
++//            val isSuccessVerify = mutableStateOf(value = 0)
++//            val responseService = authService.verifyAccountCode(VerificationCodeDto(verificationCode))
++//            if (responseService.isSuccessful) {
++//                // Xác thực thành công, chuyển hướng đến màn hình Welcome
++//                isSuccessVerify.value = 1
++//                Log.e("tag", "Tạo tài khoản thành công")
++//            } else {
++//                // Hiển thị thông báo lỗi và yêu cầu người dùng nhập lại
++//                Log.e("tag", "Mã xác thực không đúng")
++//            }
++//        }
++//    }
++
+ }
+\ No newline at end of file
+Index: .idea/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+deleted file mode 100644
+--- a/.idea/.gitignore	
++++ /dev/null	
+@@ -1,3 +0,0 @@
+-# Default ignored files
+-/shelf/
+-/workspace.xml
+Index: .idea/deploymentTargetDropDown.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetDropDown.xml b/.idea/deploymentTargetDropDown.xml
+deleted file mode 100644
+--- a/.idea/deploymentTargetDropDown.xml	
++++ /dev/null	
+@@ -1,17 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="deploymentTargetDropDown">
+-    <targetSelectedWithDropDown>
+-      <Target>
+-        <type value="QUICK_BOOT_TARGET" />
+-        <deviceKey>
+-          <Key>
+-            <type value="VIRTUAL_DEVICE_PATH" />
+-            <value value="D:\Android_Virtual\.android\avd\Pixel_5_API_31_2.avd" />
+-          </Key>
+-        </deviceKey>
+-      </Target>
+-    </targetSelectedWithDropDown>
+-    <timeTargetWasSelectedWithDropDown value="2023-04-25T16:35:26.727997700Z" />
+-  </component>
+-</project>
+\ No newline at end of file
+Index: app/src/androidTest/java/com/example/goingmerry/ExampleInstrumentedTest.kt
+===================================================================
+diff --git a/app/src/androidTest/java/com/example/goingmerry/ExampleInstrumentedTest.kt b/app/src/androidTest/java/com/example/goingmerry/ExampleInstrumentedTest.kt
+deleted file mode 100644
+--- a/app/src/androidTest/java/com/example/goingmerry/ExampleInstrumentedTest.kt	
++++ /dev/null	
+@@ -1,24 +0,0 @@
+-package com.example.goingmerry
+-
+-import androidx.test.platform.app.InstrumentationRegistry
+-import androidx.test.ext.junit.runners.AndroidJUnit4
+-
+-import org.junit.Test
+-import org.junit.runner.RunWith
+-
+-import org.junit.Assert.*
+-
+-/**
+- * Instrumented test, which will execute on an Android device.
+- *
+- * See [testing documentation](http://d.android.com/tools/testing).
+- */
+-@RunWith(AndroidJUnit4::class)
+-class ExampleInstrumentedTest {
+-    @Test
+-    fun useAppContext() {
+-        // Context of the app under test.
+-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+-        assertEquals("com.example.goingmerry", appContext.packageName)
+-    }
+-}
+\ No newline at end of file
+Index: app/src/test/java/com/example/goingmerry/ExampleUnitTest.kt
+===================================================================
+diff --git a/app/src/test/java/com/example/goingmerry/ExampleUnitTest.kt b/app/src/test/java/com/example/goingmerry/ExampleUnitTest.kt
+deleted file mode 100644
+--- a/app/src/test/java/com/example/goingmerry/ExampleUnitTest.kt	
++++ /dev/null	
+@@ -1,17 +0,0 @@
+-package com.example.goingmerry
+-
+-import org.junit.Test
+-
+-import org.junit.Assert.*
+-
+-/**
+- * Example local unit test, which will execute on the development machine (host).
+- *
+- * See [testing documentation](http://d.android.com/tools/testing).
+- */
+-class ExampleUnitTest {
+-    @Test
+-    fun addition_isCorrect() {
+-        assertEquals(4, 2 + 2)
+-    }
+-}
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/dataTransferObjects/VerificationCodeDto.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/dataTransferObjects/VerificationCodeDto.kt b/app/src/main/java/com/example/goingmerry/dataTransferObjects/VerificationCodeDto.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/example/goingmerry/dataTransferObjects/VerificationCodeDto.kt	
+@@ -0,0 +1,5 @@
++package com.example.goingmerry.dataTransferObjects
++
++data class VerificationCodeDto(
++    val verificationCode: String
++)
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/dataTransferObjects/ForgotPasswordDto.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/dataTransferObjects/ForgotPasswordDto.kt b/app/src/main/java/com/example/goingmerry/dataTransferObjects/ForgotPasswordDto.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/example/goingmerry/dataTransferObjects/ForgotPasswordDto.kt	
+@@ -0,0 +1,12 @@
++package com.example.goingmerry.dataTransferObjects
++
++import com.google.gson.annotations.SerializedName
++
++class ForgotPasswordDto {
++    data class ForgotPasswordDto(
++        @SerializedName("email")
++        val email: String,
++        @SerializedName("token")
++        val token: String
++    )
++}
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"VcsDirectoryMappings\">\r\n    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+--- a/.idea/vcs.xml	
++++ b/.idea/vcs.xml	
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="VcsDirectoryMappings">
+-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++    <mapping directory="" vcs="Git" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/ChangePassword.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ChangePassword.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ChangePassword.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ChangePassword.kt	
+@@ -0,0 +1,105 @@
++package com.example.goingmerry.ui.signInSignUp
++
++import androidx.compose.foundation.layout.*
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material.Button
++import androidx.compose.material.ButtonDefaults
++import androidx.compose.material.MaterialTheme
++import androidx.compose.material.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.saveable.rememberSaveable
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.text.style.TextAlign
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++import androidx.navigation.NavController
++import com.example.goingmerry.navigate.Routes
++
++@Composable
++fun ChangePassword(navController: NavController) {
++    var invalidPasswordNotification by rememberSaveable { mutableStateOf(false) }
++    var password by rememberSaveable { mutableStateOf("") }
++    var rePassword by rememberSaveable { mutableStateOf("") }
++
++    Column(
++        horizontalAlignment = Alignment.CenterHorizontally,
++        modifier = Modifier
++            .fillMaxSize()
++    ) {
++        LogoApp()
++
++        Spacer(modifier = Modifier.height(15.dp))
++
++        Text(
++            text = "Thay đổi mật khẩu",
++            fontSize = 25.sp,
++            color = Color.Black,
++            fontWeight = FontWeight.Bold,
++            textAlign = TextAlign.Center,
++            modifier = Modifier
++                .width(320.dp)
++                .padding(bottom = 15.dp)
++        )
++
++        InputPasswordField(password, onValueChange = { password = it })
++
++        InputRePasswordField(rePassword, onValueChange = { rePassword = it })
++
++        if (invalidPasswordNotification) {
++            Text(
++                text = "Password nhập lại không đúng",
++                modifier = Modifier.padding(bottom = 10.dp),
++                color = MaterialTheme.colors.error
++            )
++        }
++
++        Spacer(modifier = Modifier.height(15.dp))
++
++        Row() {
++            Button(
++                onClick = {
++//                    navController.navigate(
++//                        route = Routes.Verification.route + "/${email}",
++//                        builder = {
++//                            launchSingleTop = true
++//                        }
++//                    )
++                },
++                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
++                shape = RoundedCornerShape(10.dp),
++                modifier = Modifier
++                    .height(60.dp)
++                    .width(140.dp)
++
++            ) {
++                Text(text = "Xác nhận")
++            }
++
++            Spacer(modifier = Modifier.width(15.dp))
++
++            Button(
++                onClick = {
++                navController.navigate(Routes.Welcome.route){
++                    launchSingleTop = true
++                }
++                },
++                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
++                shape = RoundedCornerShape(10.dp),
++                modifier = Modifier
++                    .height(60.dp)
++                    .width(140.dp)
++            ) {
++                Text(
++                    text = "Hủy",
++                    color = Color.Black
++                )
++            }
++        }
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/Welcome.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.ui.signInSignUp\r\n\r\nimport android.os.Build\r\nimport android.util.Log\r\nimport androidx.annotation.RequiresApi\r\nimport androidx.compose.foundation.Image\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material.Button\r\nimport androidx.compose.material.ButtonDefaults\r\nimport androidx.compose.material.MaterialTheme\r\nimport androidx.compose.material.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.collectAsState\r\nimport androidx.compose.runtime.getValue\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.draw.clip\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.res.painterResource\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport androidx.navigation.NavController\r\nimport com.example.goingmerry.DataStore\r\nimport com.example.goingmerry.R\r\nimport com.example.goingmerry.navigate.Routes\r\nimport com.example.goingmerry.viewModel.LoginViewModel\r\nimport com.example.goingmerry.viewModel.SignUpViewModel\r\nimport com.example.goingmerry.viewModel.StartScreenViewModel\r\nimport java.time.Instant\r\nimport java.time.LocalDateTime\r\nimport java.time.ZoneId\r\nimport java.time.format.DateTimeFormatter\r\n\r\n@RequiresApi(Build.VERSION_CODES.O)\r\n@Composable\r\nfun WelcomeScreen(navController: NavController, loginViewModel: LoginViewModel,\r\n                  signupViewModel: SignUpViewModel, startScreenViewModel: StartScreenViewModel, dataStore: DataStore\r\n) {\r\n    Column(\r\n        modifier = Modifier.fillMaxSize(),\r\n        horizontalAlignment = Alignment.CenterHorizontally\r\n    ) {\r\n        Banner()\r\n\r\n        Spacer(modifier = Modifier.height(25.dp))\r\n\r\n        Button(\r\n            colors = ButtonDefaults\r\n                .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),\r\n            modifier = Modifier\r\n                .height(50.dp)\r\n                .width(280.dp),\r\n            onClick = {\r\n                signupViewModel.isSuccessSignUp.value = 1;\r\n                navController.navigate(Routes.SignUp.route){\r\n                    launchSingleTop = true\r\n                }\r\n            },\r\n        ) {\r\n            Text(text = \"Đăng ký\")\r\n        }\r\n\r\n        Spacer(modifier = Modifier.height(15.dp))\r\n\r\n        Button(\r\n            colors = ButtonDefaults\r\n                .buttonColors(backgroundColor = MaterialTheme.colors.primary),\r\n            modifier = Modifier\r\n                .height(50.dp)\r\n                .width(280.dp),\r\n            onClick = {\r\n                startScreenViewModel.setLogin(dataStore, loginViewModel)\r\n                navController.navigate(Routes.SignIn.route) {\r\n                    launchSingleTop = true\r\n                }\r\n            },\r\n\r\n            ) {\r\n            Text(text = \"Đăng nhập\")\r\n        }\r\n    }\r\n}\r\n\r\n\r\n@Composable\r\nfun Banner() {\r\n    Column(\r\n        modifier = Modifier\r\n            .height(480.dp)\r\n            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))\r\n            .background(MaterialTheme.colors.secondary),\r\n        horizontalAlignment = Alignment.CenterHorizontally\r\n    ) {\r\n        LogoApp()\r\n\r\n        Row {\r\n            Image(\r\n                painter = painterResource(R.drawable.party1),\r\n                contentDescription = \"\",\r\n                modifier = Modifier\r\n                    .size(160.dp)\r\n                    .clip(CircleShape)\r\n            )\r\n\r\n            Column {\r\n                Image(\r\n                    painter = painterResource(R.drawable.party2),\r\n                    contentDescription = \"\",\r\n                    modifier = Modifier\r\n                        .size(80.dp)\r\n                        .clip(CircleShape)\r\n                )\r\n\r\n                Image(\r\n                    painter = painterResource(R.drawable.party3),\r\n                    contentDescription = \"\",\r\n                    modifier = Modifier\r\n                        .size(80.dp)\r\n                        .clip(CircleShape)\r\n                )\r\n            }\r\n        }\r\n\r\n        Text(\r\n            text = \"Chào mừng bạn đến với Going Merry!\",\r\n            fontSize = 30.sp,\r\n            fontWeight = FontWeight.Bold,\r\n            color = Color.Black,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier\r\n                .padding(bottom = 15.dp)\r\n                .width(320.dp)\r\n        )\r\n\r\n        Text(\r\n            text = \"Nơi chia sẻ, trò chuyện, tán gẫu cùng bạn bè, người thân và gia đình!\",\r\n            fontSize = 20.sp,\r\n            color = Color.Black,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier\r\n                .padding(bottom = 50.dp)\r\n                .width(320.dp)\r\n        )\r\n    }\r\n}\r\n\r\n/*\r\n@Preview\r\n@Composable\r\nfun ReviewWelcomeScreen(){\r\n    var navController = rememberNavController()\r\n    WelcomeScreen(navController = navController)\r\n}*/\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Welcome.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Welcome.kt
+--- a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Welcome.kt	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Welcome.kt	
+@@ -54,8 +54,8 @@
+             colors = ButtonDefaults
+                 .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),
+             modifier = Modifier
+-                .height(50.dp)
+-                .width(280.dp),
++                .height(60.dp)
++                .width(295.dp),
+             onClick = {
+                 signupViewModel.isSuccessSignUp.value = 1;
+                 navController.navigate(Routes.SignUp.route){
+@@ -72,8 +72,8 @@
+             colors = ButtonDefaults
+                 .buttonColors(backgroundColor = MaterialTheme.colors.primary),
+             modifier = Modifier
+-                .height(50.dp)
+-                .width(280.dp),
++                .height(60.dp)
++                .width(295.dp),
+             onClick = {
+                 startScreenViewModel.setLogin(dataStore, loginViewModel)
+                 navController.navigate(Routes.SignIn.route) {
+@@ -92,7 +92,7 @@
+ fun Banner() {
+     Column(
+         modifier = Modifier
+-            .height(480.dp)
++            .height(560.dp)
+             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+             .background(MaterialTheme.colors.secondary),
+         horizontalAlignment = Alignment.CenterHorizontally
+@@ -104,7 +104,7 @@
+                 painter = painterResource(R.drawable.party1),
+                 contentDescription = "",
+                 modifier = Modifier
+-                    .size(160.dp)
++                    .size(240.dp)
+                     .clip(CircleShape)
+             )
+ 
+@@ -113,7 +113,7 @@
+                     painter = painterResource(R.drawable.party2),
+                     contentDescription = "",
+                     modifier = Modifier
+-                        .size(80.dp)
++                        .size(120.dp)
+                         .clip(CircleShape)
+                 )
+ 
+@@ -121,7 +121,7 @@
+                     painter = painterResource(R.drawable.party3),
+                     contentDescription = "",
+                     modifier = Modifier
+-                        .size(80.dp)
++                        .size(120.dp)
+                         .clip(CircleShape)
+                 )
+             }
+Index: app/src/main/java/com/example/goingmerry/navigate/StartScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.navigate\r\n\r\nimport AccountQuery\r\nimport android.os.Build\r\nimport android.util.Log\r\nimport androidx.annotation.RequiresApi\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.runtime.saveable.rememberSaveable\r\nimport androidx.navigation.compose.NavHost\r\nimport androidx.navigation.compose.composable\r\n\r\n\r\nimport androidx.navigation.compose.rememberNavController\r\nimport com.example.goingmerry.DataStore\r\nimport com.example.goingmerry.ui.ChatBox\r\nimport com.example.goingmerry.ui.ChatBoxGroup\r\nimport com.example.goingmerry.ui.home.BodyScreen\r\nimport com.example.goingmerry.ui.home.ListFriends\r\nimport com.example.goingmerry.ui.home.ScreenHome\r\nimport com.example.goingmerry.ui.signInSignUp.ScreenSignIn\r\nimport com.example.goingmerry.ui.signInSignUp.ScreenSignUp\r\nimport com.example.goingmerry.ui.signInSignUp.WelcomeScreen\r\nimport com.example.goingmerry.ui.home.SettingScreen\r\nimport com.example.goingmerry.ui.setting.*\r\nimport com.example.goingmerry.ui.signInSignUp.*\r\nimport com.example.goingmerry.viewModel.*\r\nimport type.UserRole\r\n\r\n\r\n@RequiresApi(Build.VERSION_CODES.O)\r\n@Composable\r\nfun ScreenStart(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel, homeViewModel: HomeViewModel,\r\n                chatBoxViewModel: ChatBoxViewModel, profileViewModel: ProfileViewModel,\r\n                listRAFViewModel: ListRAFViewModel, groupManagerViewModel: GroupManagerViewModel,\r\n                fillInfoViewModel: FillInfoViewModel, startScreenViewModel: StartScreenViewModel, data: DataStore\r\n){\r\n    val navController = rememberNavController()\r\n    NavHost(navController = navController, startDestination = Routes.Welcome.route){\r\n        composable(Routes.ChatBox.route + \"/{idConversation}\"){navBackTrackEntry->\r\n            val idMember = navBackTrackEntry.arguments?.getString(\"idConversation\")\r\n            idMember?.let {\r\n                ChatBox(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,\r\n                loginViewModel.token.value)\r\n            }\r\n        }\r\n\r\n        composable(Routes.GroupMember.route + \"/{idConversation}\"){navBackTrackEntry->\r\n            val idConversation = navBackTrackEntry.arguments?.getString(\"idConversation\")\r\n            idConversation?.let {\r\n                for(conversation in homeViewModel.conversations.value){\r\n                    if(idConversation == conversation.id){\r\n                        ListMembers(members = conversation.members)\r\n                        break;\r\n                    }\r\n                }\r\n            }\r\n        }\r\n\r\n        composable(Routes.ChatBoxGroup.route + \"/{idConversation}\"){navBackTrackEntry->\r\n            val idMember = navBackTrackEntry.arguments?.getString(\"idConversation\")\r\n            idMember?.let {\r\n                Log.e(\"it\", \"${it.toInt()}\")\r\n                ChatBoxGroup(homeViewModel.conversations.value[it.toInt()], chatBoxViewModel, homeViewModel.idAccount.value,\r\n                navController, loginViewModel.token.value)\r\n            }\r\n\r\n        }\r\n\r\n        composable(Routes.Setting.route){\r\n            SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,\r\n            homeViewModel.idAccount.value, data, chatBoxViewModel)\r\n        }\r\n\r\n        composable(Routes.UserInfo.route){\r\n            UserInfoScreen()\r\n        }\r\n\r\n        composable(Routes.Profile.route + \"/{idUser}\"){navBackTrackEntry->\r\n            val idUser = navBackTrackEntry.arguments?.getString(\"idUser\")\r\n            idUser?.let {\r\n                var isFriend: Boolean = false;\r\n                if(homeViewModel.conversations.value.isNotEmpty()){\r\n                    for(conversation in homeViewModel.conversations.value){\r\n                        if(conversation.members.size == 2){\r\n                            if(conversation.members[0].id == idUser){\r\n                                isFriend = true;\r\n                                break;\r\n                            }\r\n                            if(conversation.members[1].id == idUser){\r\n                                isFriend = true;\r\n                                break;\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n                ProfileScreen(idUser.orEmpty(), loginViewModel.token.value, profileViewModel, isFriend)\r\n            }\r\n        }\r\n\r\n        composable(Routes.FillInfo.route){\r\n            FillScreen(navController = navController, fillInfoViewModel, loginViewModel.token.value)\r\n        }\r\n\r\n        composable(Routes.ForgotPassword.route){\r\n            ForgotPasswordScreen(navController = navController)\r\n        }\r\n\r\n        composable(Routes.Verification.route){\r\n            VerificationScreen(navController = navController, titlee = \"\")\r\n        }\r\n\r\n        composable(Routes.Welcome.route){\r\n            WelcomeScreen(navController = navController,\r\n                signupViewModel = signUpViewModel, loginViewModel = loginViewModel,\r\n                startScreenViewModel = startScreenViewModel, dataStore = data)\r\n        }\r\n\r\n        composable(Routes.SignIn.route){\r\n            chatBoxViewModel.stateSockets.value = \"OFF\"\r\n            if(loginViewModel.isSuccessLogin.value == 2){\r\n                LaunchedEffect(key1 = Unit){\r\n                    navController.navigate(route = Routes.Home.route){\r\n                        popUpTo(route = Routes.SignIn.route) {\r\n                            inclusive = true\r\n                        }\r\n                    }\r\n                }\r\n            }else if(loginViewModel.isSuccessLogin.value == 3){\r\n                LaunchedEffect(key1 = Unit){\r\n                    navController.navigate(route = Routes.FillInfo.route){\r\n                        popUpTo(route = Routes.SignIn.route){\r\n                            inclusive = true\r\n                        }\r\n                    }\r\n                }\r\n            }else{\r\n                ScreenSignIn(navController = navController, loginViewModel = loginViewModel, data = data)\r\n            }\r\n        }\r\n\r\n        composable(Routes.Home.route){\r\n            chatBoxViewModel.resetListReceiverMessage()\r\n            ScreenHome(loginViewModel, chatBoxViewModel = chatBoxViewModel, homeViewModel = homeViewModel, navController)\r\n        }\r\n\r\n        composable(Routes.SignUp.route){\r\n            if(signUpViewModel.isSuccessSignUp.value == 2) {\r\n                LaunchedEffect(key1 = Unit) {\r\n                    navController.navigate(route = Routes.Welcome.route) {\r\n                        popUpTo(route = Routes.SignIn.route) {\r\n                            inclusive = true;\r\n                        }\r\n                    }\r\n                }\r\n            }else{\r\n                ScreenSignUp(navController = navController, signUpViewModel = signUpViewModel)\r\n            }\r\n        }\r\n        composable(Routes.ListRequestAddFriend.route){\r\n            val listRequestAddFriend = homeViewModel.listRequestAddFriend.collectAsState()\r\n            ListRequestAddFriends(token = loginViewModel.token.value, listFriendRequest = listRequestAddFriend.value, listRAFViewModel = listRAFViewModel)\r\n        }\r\n\r\n        composable(Routes.GroupManager.route){\r\n            GroupManager(groupManagerViewModel, loginViewModel.token.value, navController)\r\n        }\r\n\r\n        composable(Routes.GroupMemberManager.route + \"/{idGroup}\"){\r\n                navBackTrackEntry->\r\n            val idGroup = navBackTrackEntry.arguments?.getString(\"idGroup\")\r\n            idGroup.let {\r\n                for(group in groupManagerViewModel.listGroups.value){\r\n                    if(group.id == idGroup){\r\n                        groupManagerViewModel.state.value = false\r\n                        MemberGroupManager(\r\n                            listMembers = group.members,\r\n                            groupManagerViewModel = groupManagerViewModel,\r\n                            idGroup = idGroup,\r\n                            nameGroup = group.name,\r\n                            token = loginViewModel.token.value\r\n                        )\r\n                        break;\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/navigate/StartScreen.kt b/app/src/main/java/com/example/goingmerry/navigate/StartScreen.kt
+--- a/app/src/main/java/com/example/goingmerry/navigate/StartScreen.kt	
++++ b/app/src/main/java/com/example/goingmerry/navigate/StartScreen.kt	
+@@ -21,7 +21,10 @@
+ import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
+ import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
+ import com.example.goingmerry.ui.home.SettingScreen
+-import com.example.goingmerry.ui.setting.*
++import com.example.goingmerry.ui.setting.ListRequestAddFriends
++import com.example.goingmerry.ui.setting.ProfileScreen
++import com.example.goingmerry.ui.setting.UserInfoScreen
++import com.example.goingmerry.ui.setting.GroupManager
+ import com.example.goingmerry.ui.signInSignUp.*
+ import com.example.goingmerry.viewModel.*
+ import type.UserRole
+@@ -106,7 +109,7 @@
+         }
+ 
+         composable(Routes.Verification.route){
+-            VerificationScreen(navController = navController, titlee = "")
++            VerificationScreen(navController = navController, signUpViewModel)
+         }
+ 
+         composable(Routes.Welcome.route){
+@@ -162,27 +165,7 @@
+         }
+ 
+         composable(Routes.GroupManager.route){
+-            GroupManager(groupManagerViewModel, loginViewModel.token.value, navController)
+-        }
+-
+-        composable(Routes.GroupMemberManager.route + "/{idGroup}"){
+-                navBackTrackEntry->
+-            val idGroup = navBackTrackEntry.arguments?.getString("idGroup")
+-            idGroup.let {
+-                for(group in groupManagerViewModel.listGroups.value){
+-                    if(group.id == idGroup){
+-                        groupManagerViewModel.state.value = false
+-                        MemberGroupManager(
+-                            listMembers = group.members,
+-                            groupManagerViewModel = groupManagerViewModel,
+-                            idGroup = idGroup,
+-                            nameGroup = group.name,
+-                            token = loginViewModel.token.value
+-                        )
+-                        break;
+-                    }
+-                }
+-            }
++            GroupManager(groupManagerViewModel, loginViewModel.token.value, nav = navController)
+         }
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/dataTransferObjects/VerifyAccountDto.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/dataTransferObjects/VerifyAccountDto.kt b/app/src/main/java/com/example/goingmerry/dataTransferObjects/VerifyAccountDto.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/example/goingmerry/dataTransferObjects/VerifyAccountDto.kt	
+@@ -0,0 +1,10 @@
++package com.example.goingmerry.dataTransferObjects
++
++import com.google.gson.annotations.SerializedName
++
++data class VerifyAccountDto(
++    @SerializedName("email")
++    val email: String,
++    @SerializedName("token")
++    val token: String
++)
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/ForgotPassword.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.ui.signInSignUp\r\n\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material.Button\r\nimport androidx.compose.material.ButtonDefaults\r\nimport androidx.compose.material.MaterialTheme\r\nimport androidx.compose.material.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.getValue\r\nimport androidx.compose.runtime.mutableStateOf\r\nimport androidx.compose.runtime.saveable.rememberSaveable\r\nimport androidx.compose.runtime.setValue\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.core.os.bundleOf\r\nimport androidx.navigation.NavController\r\nimport androidx.navigation.NavOptionsBuilder\r\nimport com.example.goingmerry.navigate.Routes\r\n\r\n@Composable\r\nfun ForgotPasswordScreen(navController: NavController) {\r\n    var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }\r\n    var email by rememberSaveable { mutableStateOf(\"\") }\r\n\r\n    Column(\r\n        horizontalAlignment = Alignment.CenterHorizontally,\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n    ) {\r\n        LogoApp()\r\n\r\n        Spacer(modifier = Modifier.height(15.dp))\r\n\r\n        Text(\r\n            text = \"Lấy lại mật khẩu\",\r\n            fontSize = 25.sp,\r\n            color = Color.Black,\r\n            fontWeight = FontWeight.Bold,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier\r\n                .width(320.dp)\r\n                .padding(bottom = 15.dp)\r\n        )\r\n\r\n        Text(\r\n            text = \"Nhập email tài khoản của bạn\",\r\n            fontSize = 15.sp,\r\n            color = Color.LightGray,\r\n            fontWeight = FontWeight.Bold,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier\r\n                .width(320.dp)\r\n                .padding(bottom = 15.dp)\r\n        )\r\n\r\n        InputTextField(email, onValueChange = { email = it })\r\n\r\n        if (invalidEmailNotification) {\r\n            Text(\r\n                text = \"Email không hợp lệ\",\r\n                modifier = Modifier.padding(bottom = 10.dp),\r\n                color = MaterialTheme.colors.error\r\n            )\r\n        }\r\n\r\n        Spacer(modifier = Modifier.height(15.dp))\r\n\r\n        Row() {\r\n            Button(\r\n                onClick = {\r\n                    navController.navigate(\r\n                        route = Routes.Verification.route + \"/${email}\",\r\n                        builder = {\r\n                            launchSingleTop = true\r\n                        }\r\n                    )\r\n                },\r\n                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),\r\n                shape = RoundedCornerShape(10.dp),\r\n                modifier = Modifier\r\n                    .height(60.dp)\r\n                    .width(140.dp)\r\n\r\n            ) {\r\n                Text(text = \"Gửi mã \")\r\n            }\r\n\r\n            Spacer(modifier = Modifier.width(15.dp))\r\n\r\n            Button(\r\n                onClick = {\r\n//                navController.navigate(Routes.Home.route){\r\n//                    launchSingleTop = true\r\n//                }\r\n                },\r\n                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),\r\n                shape = RoundedCornerShape(10.dp),\r\n                modifier = Modifier\r\n                    .height(60.dp)\r\n                    .width(140.dp)\r\n            ) {\r\n                Text(\r\n                    text = \"Hủy\",\r\n                    color = Color.Black\r\n                )\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n//@Composable\r\n//@Preview\r\n//fun PreviewForgot() {\r\n//    ForgotPasswordScreen()\r\n//}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ForgotPassword.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ForgotPassword.kt
+--- a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ForgotPassword.kt	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/ForgotPassword.kt	
+@@ -52,7 +52,7 @@
+         Text(
+             text = "Nhập email tài khoản của bạn",
+             fontSize = 15.sp,
+-            color = Color.LightGray,
++            color = MaterialTheme.colors.primaryVariant,
+             fontWeight = FontWeight.Bold,
+             textAlign = TextAlign.Center,
+             modifier = Modifier
+@@ -76,7 +76,7 @@
+             Button(
+                 onClick = {
+                     navController.navigate(
+-                        route = Routes.Verification.route + "/${email}",
++                        route = Routes.Verification.route + "?email=$email&isForgotPassword=true",
+                         builder = {
+                             launchSingleTop = true
+                         }
+Index: app/src/main/java/com/example/goingmerry/viewModel/ChangePasswordViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/viewModel/ChangePasswordViewModel.kt b/app/src/main/java/com/example/goingmerry/viewModel/ChangePasswordViewModel.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/example/goingmerry/viewModel/ChangePasswordViewModel.kt	
+@@ -0,0 +1,27 @@
++package com.example.goingmerry.viewModel
++
++//import androidx.compose.runtime.saveable.autoSaver
++//import androidx.lifecycle.ViewModel
++//import androidx.lifecycle.viewModelScope
++//import com.example.goingmerry.dataTransferObjects.ForgotPasswordDto
++//import com.example.goingmerry.repository.Retrofit
++//import kotlinx.coroutines.Dispatchers
++//import kotlinx.coroutines.launch
++//
++//class ChangePasswordViewModel: ViewModel() {
++//    fun forgotPassword(email: String, token: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
++//        viewModelScope.launch(Dispatchers.IO) {
++//            val authService = Retrofit.getAuthService()
++//            try {
++//                val response = authService.forgotPassword(ForgotPasswordDto(email = email))
++//                if (response.isSuccessful) {
++//                    onSuccess()
++//                } else {
++//                    onError("Không thể đặt lại mật khẩu")
++//                }
++//            } catch (e: Exception) {
++//                onError("Không thể đặt lại mật khẩu: ${e.message}")
++//            }
++//        }
++//    }
++//}
+\ No newline at end of file
+Index: app/src/main/java/com/example/goingmerry/viewModel/VerificationViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/viewModel/VerificationViewModel.kt b/app/src/main/java/com/example/goingmerry/viewModel/VerificationViewModel.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/example/goingmerry/viewModel/VerificationViewModel.kt	
+@@ -0,0 +1,7 @@
++package com.example.goingmerry.viewModel
++
++import androidx.lifecycle.ViewModel
++
++class VerificationViewModel: ViewModel() {
++
++}
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"DesignSurface\">\r\n    <option name=\"filePathToZoomLevelMap\">\r\n      <map>\r\n        <entry key=\"..\\:/Documents/appAndroid/Going-Merry/app/src/main/res/drawable/ic_bvisibility_off.xml\" value=\"0.121\" />\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_11\" project-jdk-name=\"1.8\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	
++++ b/.idea/misc.xml	
+@@ -1,12 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="DesignSurface">
+-    <option name="filePathToZoomLevelMap">
+-      <map>
+-        <entry key="..\:/Documents/appAndroid/Going-Merry/app/src/main/res/drawable/ic_bvisibility_off.xml" value="0.121" />
+-      </map>
+-    </option>
+-  </component>
++  <component name="ExternalStorageConfigurationManager" enabled="true" />
+   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+   </component>

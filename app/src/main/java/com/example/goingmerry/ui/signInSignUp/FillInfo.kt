@@ -4,11 +4,13 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,6 +52,7 @@ import type.AccountInput
 import type.Gender
 import java.io.ByteArrayOutputStream
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
     Column(
@@ -81,6 +84,7 @@ fun PreviewFill() {
     //FillScreen(navController = navController)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
     var nameAccount by rememberSaveable { mutableStateOf(profileViewModel.name.value) }
@@ -514,6 +518,7 @@ fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun encodeFile(uri: Uri): String{
     val context = LocalContext.current

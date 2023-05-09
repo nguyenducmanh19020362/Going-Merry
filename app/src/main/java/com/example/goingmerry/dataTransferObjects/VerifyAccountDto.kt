@@ -15,3 +15,11 @@ data class ReTokenDto(
     @SerializedName("email") val email: String,
     @SerializedName("permission") val permission: String
 )
+
+data class ResponseStatus(
+    @SerializedName("status") val status: String
+)
+
+data class ResponseResetPasswordToken(
+    @SerializedName("data") val responseToken: String
+)

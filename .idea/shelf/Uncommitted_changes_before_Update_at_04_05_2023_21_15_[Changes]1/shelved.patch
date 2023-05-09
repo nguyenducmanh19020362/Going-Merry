@@ -1,0 +1,387 @@
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignIn.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.ui.signInSignUp\r\n\r\nimport android.os.Build\r\nimport android.text.TextUtils\r\nimport android.util.Log\r\nimport android.util.Patterns\r\nimport androidx.annotation.RequiresApi\r\nimport androidx.compose.foundation.Image\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.foundation.text.KeyboardOptions\r\nimport androidx.compose.material.*\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.Visibility\r\nimport androidx.compose.material.icons.filled.VisibilityOff\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.runtime.saveable.rememberSaveable\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.draw.clip\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.res.painterResource\r\nimport androidx.compose.ui.res.stringResource\r\nimport androidx.compose.ui.text.font.FontFamily\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.input.KeyboardType\r\nimport androidx.compose.ui.text.input.PasswordVisualTransformation\r\nimport androidx.compose.ui.text.input.VisualTransformation\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.navigation.NavController\r\nimport com.example.goingmerry.R\r\nimport com.example.goingmerry.navigate.Routes\r\nimport com.example.goingmerry.viewModel.LoginViewModel\r\nimport androidx.navigation.compose.composable\r\nimport androidx.navigation.compose.rememberNavController\r\nimport com.example.goingmerry.DataStore\r\n\r\n\r\n@RequiresApi(Build.VERSION_CODES.O)\r\n@Composable\r\nfun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, data: DataStore) {\r\n    var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }\r\n    var email by rememberSaveable { mutableStateOf(\"\") }\r\n    var password by rememberSaveable { mutableStateOf(\"\")}\r\n    var buttonOnClick by rememberSaveable {\r\n        mutableStateOf(false)\r\n    }\r\n    if(buttonOnClick){\r\n        loginViewModel.login(email, password, data)\r\n        buttonOnClick = false\r\n    }\r\n\r\n    Column(\r\n        modifier = Modifier.fillMaxSize(),\r\n        horizontalAlignment = Alignment.CenterHorizontally\r\n    ) {\r\n        LogoApp()\r\n\r\n        Spacer(modifier = Modifier.height(25.dp))\r\n\r\n        Text(\r\n            text = \"Chào mừng trở lại!\",\r\n            fontSize = 32.sp,\r\n            fontWeight = FontWeight.Bold,\r\n            color = Color.Black,\r\n            modifier = Modifier.padding(bottom = 50.dp)\r\n        )\r\n\r\n        Column (\r\n            modifier = Modifier\r\n                .fillMaxHeight()\r\n                .weight(8f),\r\n            verticalArrangement = Arrangement.Center\r\n                ){\r\n            Text(\r\n                text = \"Thông tin tài khoản\",\r\n                fontWeight = FontWeight.Bold,\r\n                modifier = Modifier.padding(bottom = 10.dp)\r\n            )\r\n\r\n\r\n            InputTextField(email, onValueChange = {email = it})\r\n\r\n\r\n            InputPasswordField(password, onValueChange = {password = it})\r\n\r\n            if (invalidEmailNotification) {\r\n                Text(\r\n                    text = \"Email không hợp lệ\",\r\n                    modifier = Modifier.padding(bottom = 10.dp),\r\n                    color = MaterialTheme.colors.error\r\n                )\r\n            }\r\n\r\n            if(loginViewModel.isSuccessLogin.value == 1){\r\n                Text(\r\n                    text = \"Đăng nhập thất bại, xin hãy thử lại\",\r\n                    modifier = Modifier.padding(bottom = 10.dp),\r\n                    color = MaterialTheme.colors.error\r\n                )\r\n            }\r\n\r\n            Text(\r\n                text = \"Quên mật khẩu?\",\r\n                color = MaterialTheme.colors.primaryVariant,\r\n                modifier = Modifier\r\n                    .clickable(onClick = {\r\n                        navController.navigate(Routes.ForgotPassword.route){\r\n                            launchSingleTop = true\r\n                        }\r\n                    })\r\n            )\r\n\r\n            Button(\r\n                onClick = {\r\n                    invalidEmailNotification = !isValidEmail(email)\r\n                    buttonOnClick = true\r\n                },\r\n                colors = ButtonDefaults\r\n                    .buttonColors(backgroundColor = MaterialTheme.colors.primary),\r\n                modifier = Modifier\r\n                    .height(60.dp)\r\n                    .width(295.dp)\r\n            ) {\r\n                Text(text = \"Đăng nhập\")\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Preview\r\n@Composable\r\nfun PreviewScreenSignIn() {\r\n    val navController: NavController = rememberNavController()\r\n    val loginViewModel: LoginViewModel = LoginViewModel()\r\n    //ScreenSignIn(navController, loginViewModel)\r\n}\r\n\r\n\r\n@Composable\r\n\r\nfun InputPasswordField(password: String, onValueChange: (String) -> Unit){\r\n\r\n    var passwordVisible by rememberSaveable { mutableStateOf(false) }\r\n\r\n    TextField(\r\n        modifier = Modifier\r\n            .padding(bottom = 10.dp)\r\n            .height(60.dp)\r\n            .width(295.dp),\r\n        value = password,\r\n        onValueChange = onValueChange,\r\n        label = {\r\n            Text(\r\n                text = stringResource(id = R.string.label_password),\r\n                color = MaterialTheme.colors.onSecondary\r\n            )\r\n        },\r\n        colors = TextFieldDefaults.textFieldColors(\r\n            backgroundColor = MaterialTheme.colors.secondaryVariant\r\n        ),\r\n        shape = RoundedCornerShape(10.dp),\r\n        maxLines = 1,\r\n        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),\r\n        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),\r\n        trailingIcon = {\r\n            val image = if (passwordVisible)\r\n                Icons.Filled.Visibility\r\n            else Icons.Filled.VisibilityOff\r\n\r\n            val description = if (passwordVisible) \"Hide password\" else \"Show password\"\r\n\r\n            IconButton(onClick = { passwordVisible = !passwordVisible }) {\r\n                Icon(imageVector = image, description)\r\n            }\r\n        }\r\n    )\r\n}\r\n\r\n/*@Preview\r\n@Composable\r\nfun ReviewInputPasswordField() {\r\n    InputPasswordField()\r\n}*/\r\n\r\n@Composable\r\nfun InputTextField(text: String, onValueChange: (String) -> Unit) {\r\n    TextField(\r\n        modifier = Modifier\r\n            .padding(bottom = 10.dp)\r\n            .height(60.dp)\r\n            .width(295.dp),\r\n        value = text,\r\n        onValueChange = onValueChange,\r\n        label = {\r\n            Text(\r\n                text = stringResource(id = R.string.label_email),\r\n                color = MaterialTheme.colors.onSecondary\r\n            )\r\n        },\r\n        colors = TextFieldDefaults.textFieldColors(\r\n            backgroundColor = MaterialTheme.colors.secondaryVariant\r\n        ),\r\n        shape = RoundedCornerShape(10.dp),\r\n        maxLines = 1\r\n    )\r\n}\r\n\r\n/*\r\n@Composable\r\n@Preview\r\nfun ReviewInputTextField() {\r\n    var text by rememberSaveable { mutableStateOf(\"\") }\r\n    InputTextField(text, onValueChange = { text = it })\r\n}\r\n*/\r\n\r\n\r\n@Composable\r\nfun LogoApp() {\r\n    Row(\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .height(125.dp)\r\n            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))\r\n            .background(MaterialTheme.colors.secondary),\r\n        verticalAlignment = Alignment.CenterVertically,\r\n        horizontalArrangement = Arrangement.Center\r\n    ) {\r\n        Image(\r\n            painter = painterResource(R.drawable.app_icon),\r\n            contentDescription = \"\",\r\n            modifier = Modifier\r\n                .size(48.dp)\r\n                .clip(CircleShape)\r\n        )\r\n\r\n        Spacer(modifier = Modifier.size(5.dp))\r\n\r\n        Text(\r\n            text = \"Going Merry\",\r\n            fontSize = 45.sp,\r\n            color = Color.White,\r\n            fontWeight = FontWeight.Bold\r\n        )\r\n    }\r\n}\r\n\r\n/*@Preview\r\n@Composable\r\nfun PreviewLogoApp() {\r\n    LogoApp()\r\n}*/\r\n\r\n//Kiểm tra Email có hợp lệ\r\nfun isValidEmail(email: CharSequence?): Boolean {\r\n    return if (TextUtils.isEmpty(email)) {\r\n        false\r\n    } else {\r\n        Patterns.EMAIL_ADDRESS.matcher(email).matches()\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignIn.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignIn.kt
+--- a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignIn.kt	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignIn.kt	
+@@ -47,17 +47,18 @@
+ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, data: DataStore) {
+     var invalidEmailNotification by rememberSaveable { mutableStateOf(false) }
+     var email by rememberSaveable { mutableStateOf("") }
+-    var password by rememberSaveable { mutableStateOf("")}
++    var password by rememberSaveable { mutableStateOf("") }
+     var buttonOnClick by rememberSaveable {
+         mutableStateOf(false)
+     }
+-    if(buttonOnClick){
++    if (buttonOnClick) {
+         loginViewModel.login(email, password, data)
+         buttonOnClick = false
+     }
+ 
+     Column(
+-        modifier = Modifier.fillMaxSize(),
++        modifier = Modifier
++            .fillMaxSize(),
+         horizontalAlignment = Alignment.CenterHorizontally
+     ) {
+         LogoApp()
+@@ -72,23 +73,25 @@
+             modifier = Modifier.padding(bottom = 50.dp)
+         )
+ 
+-        Column (
++        Column(
+             modifier = Modifier
+                 .fillMaxHeight()
+-                .weight(8f),
+-            verticalArrangement = Arrangement.Center
+-                ){
++                .padding(horizontal = 25.dp),
++            horizontalAlignment = Alignment.CenterHorizontally
++        ) {
+             Text(
+                 text = "Thông tin tài khoản",
+                 fontWeight = FontWeight.Bold,
+-                modifier = Modifier.padding(bottom = 10.dp)
++                modifier = Modifier
++                    .padding(bottom = 10.dp)
++                    .offset(x = (-75).dp)
+             )
+ 
+ 
+-            InputTextField(email, onValueChange = {email = it})
++            InputTextField(email, onValueChange = { email = it })
+ 
+ 
+-            InputPasswordField(password, onValueChange = {password = it})
++            InputPasswordField(password, onValueChange = { password = it })
+ 
+             if (invalidEmailNotification) {
+                 Text(
+@@ -98,7 +101,7 @@
+                 )
+             }
+ 
+-            if(loginViewModel.isSuccessLogin.value == 1){
++            if (loginViewModel.isSuccessLogin.value == 1) {
+                 Text(
+                     text = "Đăng nhập thất bại, xin hãy thử lại",
+                     modifier = Modifier.padding(bottom = 10.dp),
+@@ -108,10 +111,13 @@
+ 
+             Text(
+                 text = "Quên mật khẩu?",
++                fontWeight = FontWeight.Bold,
+                 color = MaterialTheme.colors.primaryVariant,
+                 modifier = Modifier
++                    .offset(x = (-85).dp)
++                    .padding(bottom = 10.dp)
+                     .clickable(onClick = {
+-                        navController.navigate(Routes.ForgotPassword.route){
++                        navController.navigate(Routes.ForgotPassword.route) {
+                             launchSingleTop = true
+                         }
+                     })
+@@ -145,7 +151,7 @@
+ 
+ @Composable
+ 
+-fun InputPasswordField(password: String, onValueChange: (String) -> Unit){
++fun InputPasswordField(password: String, onValueChange: (String) -> Unit) {
+ 
+     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+ 
+@@ -237,7 +243,7 @@
+             painter = painterResource(R.drawable.app_icon),
+             contentDescription = "",
+             modifier = Modifier
+-                .size(48.dp)
++                .size(53.dp)
+                 .clip(CircleShape)
+         )
+ 
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/Verification.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.ui.signInSignUp\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.border\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.lazy.LazyRow\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.foundation.text.KeyboardActions\r\nimport androidx.compose.foundation.text.KeyboardOptions\r\nimport androidx.compose.material.*\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.ArrowBack\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.getValue\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.TextStyle\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.input.ImeAction\r\nimport androidx.compose.ui.text.input.KeyboardType\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.navigation.NavController\r\nimport androidx.navigation.compose.currentBackStackEntryAsState\r\nimport com.example.goingmerry.navigate.Routes\r\n\r\n@Composable\r\nfun VerificationScreen(\r\n    navController: NavController,\r\n    titlee: String\r\n) {\r\n    val navBackStackEntry by navController.currentBackStackEntryAsState()\r\n\r\n    val email = navBackStackEntry?.arguments?.getString(\"email\")\r\n    val titlee = \"Nhập mã xác thực vừa được gửi tới email $email của bạn\"\r\n    val numberOfBoxes = 4 // số lượng ô vuông\r\n    val boxSize = 48.dp // kích thước của mỗi ô vuông\r\n    val spacing = 8.dp // khoảng cách giữa các ô vuông\r\n\r\n    Column(\r\n        horizontalAlignment = Alignment.CenterHorizontally,\r\n        modifier = Modifier.fillMaxSize()\r\n    ) {\r\n        LogoApp()\r\n\r\n        Spacer(modifier = Modifier.height(15.dp))\r\n\r\n        Text(\r\n            text = titlee,\r\n            fontSize = 25.sp,\r\n            color = Color.Black,\r\n            fontWeight = FontWeight.Bold,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier.width(300.dp)\r\n        )\r\n\r\n        Spacer(modifier = Modifier.height(25.dp))\r\n\r\n        Row(\r\n            horizontalArrangement = Arrangement.Center,\r\n            modifier = Modifier.fillMaxWidth()\r\n        ) {\r\n            for (i in 1..4) {\r\n                TextField(\r\n                    value = \"\",\r\n                    onValueChange = {},\r\n                    modifier = Modifier\r\n                        .padding(horizontal = 10.dp)\r\n                        .size(60.dp)\r\n                        .background(Color.White)\r\n                        .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),\r\n                    maxLines = 1,\r\n                    keyboardOptions = KeyboardOptions(\r\n                        keyboardType = KeyboardType.Number,\r\n                        imeAction = ImeAction.Next\r\n                    ),\r\n                    keyboardActions = KeyboardActions(\r\n                        onNext = { /* Move focus to the next text field */ }\r\n                    ),\r\n                    textStyle = TextStyle(textAlign = TextAlign.Center)\r\n                )\r\n            }\r\n        }\r\n\r\n        Spacer(modifier = Modifier.height(30.dp))\r\n\r\n        Button(\r\n            onClick = {\r\n//                navController.navigate(Routes.Home.route){\r\n//                    launchSingleTop = true\r\n//                }\r\n            },\r\n            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),\r\n            shape = RoundedCornerShape(10.dp),\r\n            modifier = Modifier\r\n                .height(60.dp)\r\n                .width(160.dp)\r\n                .padding(bottom = 15.dp)\r\n\r\n        ) {\r\n            Text(text = \"Xác thực\")\r\n        }\r\n\r\n        Row(\r\n            horizontalArrangement = Arrangement.Center,\r\n            modifier = Modifier.padding(bottom = 15.dp)\r\n        ) {\r\n            Text(text = \"Chưa nhận được email?\")\r\n\r\n            Spacer(modifier = Modifier.width(5.dp))\r\n\r\n            Text(\r\n                text = \"Gửi lại\",\r\n                color = MaterialTheme.colors.error,\r\n                fontWeight = FontWeight.Bold,\r\n                modifier = Modifier\r\n                    .clickable(onClick = {\r\n\r\n                    })\r\n            )\r\n        }\r\n\r\n        Row(\r\n            horizontalArrangement = Arrangement.Center,\r\n            modifier = Modifier\r\n                .clickable(onClick = {\r\n                    navController.navigate(Routes.SignIn.route) {\r\n                        launchSingleTop = true\r\n                    }\r\n                })\r\n        ) {\r\n            Icon(\r\n                imageVector = Icons.Default.ArrowBack,\r\n                contentDescription = null,\r\n                tint = Color.Blue,\r\n                modifier = Modifier.size(20.dp)\r\n            )\r\n\r\n            Spacer(modifier = Modifier.width(15.dp))\r\n\r\n            Text(\r\n                text = \"Quay trở lại đăng nhập\",\r\n                color = Color.Blue\r\n            )\r\n        }\r\n\r\n    }\r\n}\r\n\r\n//@Composable\r\n//@Preview\r\n//fun PreviewVerification() {\r\n//    VerificationScreen(\r\n//        titlee = \"Nhập mã xác thực vừa được gửi tới email của bạn\"\r\n//    )\r\n//}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Verification.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Verification.kt
+--- a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Verification.kt	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/Verification.kt	
+@@ -12,10 +12,11 @@
+ import androidx.compose.material.*
+ import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.ArrowBack
+-import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.getValue
++import androidx.compose.runtime.*
++import androidx.compose.runtime.saveable.rememberSaveable
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.text.TextStyle
+ import androidx.compose.ui.text.font.FontWeight
+@@ -28,19 +29,19 @@
+ import androidx.navigation.NavController
+ import androidx.navigation.compose.currentBackStackEntryAsState
+ import com.example.goingmerry.navigate.Routes
++import com.example.goingmerry.viewModel.SignUpViewModel
+ 
+ @Composable
+ fun VerificationScreen(
+     navController: NavController,
+-    titlee: String
++    signUpViewModel: SignUpViewModel
++//    email: String?,
++//    isForgotPassword: Boolean = false
+ ) {
+     val navBackStackEntry by navController.currentBackStackEntryAsState()
+-
+     val email = navBackStackEntry?.arguments?.getString("email")
+-    val titlee = "Nhập mã xác thực vừa được gửi tới email $email của bạn"
+-    val numberOfBoxes = 4 // số lượng ô vuông
+-    val boxSize = 48.dp // kích thước của mỗi ô vuông
+-    val spacing = 8.dp // khoảng cách giữa các ô vuông
++    val title = "Nhập mã xác thực vừa được gửi tới email $email"
++    var verificationCode by rememberSaveable { mutableStateOf("") }
+ 
+     Column(
+         horizontalAlignment = Alignment.CenterHorizontally,
+@@ -51,57 +52,40 @@
+         Spacer(modifier = Modifier.height(15.dp))
+ 
+         Text(
+-            text = titlee,
++            text = title,
+             fontSize = 25.sp,
+             color = Color.Black,
+             fontWeight = FontWeight.Bold,
+             textAlign = TextAlign.Center,
+-            modifier = Modifier.width(300.dp)
++            modifier = Modifier.width(300.dp).padding(bottom = 20.dp)
+         )
+ 
+-        Spacer(modifier = Modifier.height(25.dp))
+-
+-        Row(
+-            horizontalArrangement = Arrangement.Center,
+-            modifier = Modifier.fillMaxWidth()
+-        ) {
+-            for (i in 1..4) {
+-                TextField(
+-                    value = "",
+-                    onValueChange = {},
+-                    modifier = Modifier
+-                        .padding(horizontal = 10.dp)
+-                        .size(60.dp)
+-                        .background(Color.White)
+-                        .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+-                    maxLines = 1,
+-                    keyboardOptions = KeyboardOptions(
+-                        keyboardType = KeyboardType.Number,
+-                        imeAction = ImeAction.Next
+-                    ),
+-                    keyboardActions = KeyboardActions(
+-                        onNext = { /* Move focus to the next text field */ }
+-                    ),
+-                    textStyle = TextStyle(textAlign = TextAlign.Center)
+-                )
+-            }
+-        }
++        TextField(
++            value = verificationCode,
++            onValueChange = { verificationCode = it },
++            singleLine = true,
++            modifier = Modifier
++                .height(60.dp)
++                .width(295.dp)
++                .clip(RoundedCornerShape(10.dp))
++                .background(MaterialTheme.colors.secondaryVariant),
++        )
+ 
+-        Spacer(modifier = Modifier.height(30.dp))
++        Spacer(modifier = Modifier.height(10.dp))
+ 
+         Button(
+             onClick = {
+-//                navController.navigate(Routes.Home.route){
+-//                    launchSingleTop = true
+-//                }
++                signUpViewModel.verifyAccount(token = verificationCode)
++
++                navController.navigate(Routes.Welcome.route){
++                    launchSingleTop = true
++                }
+             },
+             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
+-            shape = RoundedCornerShape(10.dp),
+             modifier = Modifier
++                .padding(bottom = 15.dp)
+                 .height(60.dp)
+-                .width(160.dp)
+-                .padding(bottom = 15.dp)
+-
++                .width(295.dp)
+         ) {
+             Text(text = "Xác thực")
+         }
+@@ -110,12 +94,12 @@
+             horizontalArrangement = Arrangement.Center,
+             modifier = Modifier.padding(bottom = 15.dp)
+         ) {
+-            Text(text = "Chưa nhận được email?")
++            Text(text = "Chưa nhận được email? ")
+ 
+             Spacer(modifier = Modifier.width(5.dp))
+ 
+             Text(
+-                text = "Gửi lại",
++                text = " Gửi lại",
+                 color = MaterialTheme.colors.error,
+                 fontWeight = FontWeight.Bold,
+                 modifier = Modifier
+Index: app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignUp.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.goingmerry.ui.signInSignUp\r\n\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.foundation.text.KeyboardOptions\r\nimport androidx.compose.material.*\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.Visibility\r\nimport androidx.compose.material.icons.filled.VisibilityOff\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.runtime.saveable.rememberSaveable\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.focus.focusModifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.res.stringResource\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.input.KeyboardType\r\nimport androidx.compose.ui.text.input.PasswordVisualTransformation\r\nimport androidx.compose.ui.text.input.VisualTransformation\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.navigation.NavController\r\nimport androidx.navigation.compose.rememberNavController\r\nimport com.example.goingmerry.R\r\nimport com.example.goingmerry.navigate.Routes\r\nimport com.example.goingmerry.viewModel.LoginViewModel\r\nimport com.example.goingmerry.viewModel.SignUpViewModel\r\n\r\n@Composable\r\nfun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel) {\r\n    var invalidPasswordNotification by rememberSaveable { mutableStateOf(false) }\r\n    var email by rememberSaveable { mutableStateOf(\"\") }\r\n    var password by rememberSaveable { mutableStateOf(\"\") }\r\n    var rePassword by rememberSaveable { mutableStateOf(\"\") }\r\n\r\n    var buttonOnClick by rememberSaveable {\r\n        mutableStateOf(false)\r\n    }\r\n    Column(\r\n        modifier = Modifier.fillMaxSize(),\r\n        horizontalAlignment = Alignment.CenterHorizontally\r\n    ) {\r\n        LogoApp()\r\n\r\n        Spacer(modifier = Modifier.height(25.dp))\r\n\r\n        Text(\r\n            text = \"Tạo tài khoản của riêng bạn!\",\r\n            fontSize = 30.sp,\r\n            fontWeight = FontWeight.Bold,\r\n            color = Color.Black,\r\n            textAlign = TextAlign.Center,\r\n            modifier = Modifier\r\n                .padding(bottom = 20.dp)\r\n                .width(300.dp)\r\n        )\r\n\r\n        Column(\r\n            modifier = Modifier.fillMaxHeight(),\r\n            verticalArrangement = Arrangement.Center\r\n        ) {\r\n            Text(\r\n                text = \"Thông tin tài khoản\",\r\n                fontWeight = FontWeight.Bold,\r\n                modifier = Modifier.padding(bottom = 10.dp)\r\n            )\r\n\r\n\r\n            InputTextField(email, onValueChange = { email = it })\r\n\r\n            InputPasswordField(password, onValueChange = { password = it })\r\n\r\n            InputRePasswordField(rePassword, onValueChange = { rePassword = it })\r\n\r\n            if (invalidPasswordNotification) {\r\n                Text(\r\n                    text = \"Password nhập lại không đúng\",\r\n                    modifier = Modifier.padding(bottom = 10.dp),\r\n                    color = MaterialTheme.colors.error\r\n                )\r\n            }\r\n\r\n            Row(\r\n                modifier = Modifier.padding(bottom = 10.dp)\r\n            ) {\r\n                Text(\r\n                    text = \"Đã có tài khoản?\",\r\n                    color = Color.Black\r\n                )\r\n\r\n                Spacer(modifier = Modifier.width(5.dp))\r\n\r\n                Text(\r\n                    text = \"Đăng nhập\",\r\n                    color = MaterialTheme.colors.error,\r\n                    modifier = Modifier\r\n                        .clickable(onClick = {\r\n                            navController.navigate(Routes.SignIn.route){\r\n                                launchSingleTop = true\r\n                            }\r\n                        })\r\n                )\r\n            }\r\n\r\n            Button(\r\n                onClick = {\r\n                    if (password != rePassword) {\r\n                        invalidPasswordNotification = true;\r\n                    } else {\r\n                        invalidPasswordNotification = false;\r\n                        signUpViewModel.signUp(email = email, password = password)\r\n                        navController.navigate(\r\n                            route = Routes.Verification.route + \"/${email}\",\r\n                            builder = {\r\n                                launchSingleTop = true\r\n                            }\r\n                        ) }\r\n                },\r\n                colors = ButtonDefaults\r\n                    .buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant),\r\n                modifier = Modifier\r\n                    .height(60.dp)\r\n                    .width(295.dp)\r\n\r\n            ) {\r\n                Text(text = \"Đăng ký\")\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Preview\r\n@Composable\r\nfun PreviewScreenSignUp() {\r\n    val navController = rememberNavController()\r\n    val signUpViewModel: SignUpViewModel = SignUpViewModel()\r\n    ScreenSignUp(navController, signUpViewModel)\r\n}\r\n\r\n@Composable\r\nfun InputUserNameField(text: String, onValueChange: (String) -> Unit) {\r\n    TextField(\r\n        modifier = Modifier\r\n            .padding(bottom = 10.dp)\r\n            .height(60.dp)\r\n            .width(295.dp),\r\n        value = text,\r\n        onValueChange = onValueChange,\r\n        label = {\r\n            Text(\r\n                text = stringResource(id = R.string.label_userName),\r\n                color = MaterialTheme.colors.onSecondary\r\n            )\r\n        },\r\n        colors = TextFieldDefaults.textFieldColors(\r\n            backgroundColor = MaterialTheme.colors.secondaryVariant\r\n        ),\r\n        shape = RoundedCornerShape(10.dp),\r\n        maxLines = 1\r\n    )\r\n}\r\n\r\n/*\r\n@Composable\r\n@Preview\r\nfun ReviewInputUserNameField() {\r\n    var text by rememberSaveable { mutableStateOf(\"\") }\r\n    InputUserNameField(text, onValueChange = { text = it })\r\n}\r\n*/\r\n\r\n\r\n@Composable\r\nfun InputRePasswordField(rePassword: String, onValueChange: (String) -> Unit) {\r\n    var passwordVisible by rememberSaveable { mutableStateOf(false) }\r\n\r\n    TextField(\r\n        modifier = Modifier\r\n            .padding(bottom = 10.dp)\r\n            .height(60.dp)\r\n            .width(295.dp),\r\n        value = rePassword,\r\n        onValueChange = onValueChange,\r\n        label = {\r\n            Text(\r\n                text = stringResource(id = R.string.label_rePassword),\r\n                color = MaterialTheme.colors.onSecondary\r\n            )\r\n        },\r\n        colors = TextFieldDefaults.textFieldColors(\r\n            backgroundColor = MaterialTheme.colors.secondaryVariant\r\n        ),\r\n        shape = RoundedCornerShape(10.dp),\r\n        maxLines = 1,\r\n        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),\r\n        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),\r\n        trailingIcon = {\r\n            val image = if (passwordVisible)\r\n                Icons.Filled.Visibility\r\n            else Icons.Filled.VisibilityOff\r\n\r\n            val description = if (passwordVisible) \"Hide password\" else \"Show password\"\r\n\r\n            IconButton(onClick = { passwordVisible = !passwordVisible }) {\r\n                Icon(imageVector = image, description)\r\n            }\r\n        }\r\n    )\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignUp.kt b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignUp.kt
+--- a/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignUp.kt	
++++ b/app/src/main/java/com/example/goingmerry/ui/signInSignUp/SignUp.kt	
+@@ -36,6 +36,7 @@
+     var email by rememberSaveable { mutableStateOf("") }
+     var password by rememberSaveable { mutableStateOf("") }
+     var rePassword by rememberSaveable { mutableStateOf("") }
++    val token by rememberSaveable { mutableStateOf("") }
+ 
+     var buttonOnClick by rememberSaveable {
+         mutableStateOf(false)
+@@ -46,27 +47,29 @@
+     ) {
+         LogoApp()
+ 
+-        Spacer(modifier = Modifier.height(25.dp))
+-
+-        Text(
+-            text = "Tạo tài khoản của riêng bạn!",
+-            fontSize = 30.sp,
+-            fontWeight = FontWeight.Bold,
+-            color = Color.Black,
+-            textAlign = TextAlign.Center,
+-            modifier = Modifier
+-                .padding(bottom = 20.dp)
+-                .width(300.dp)
+-        )
++        Column(
++            modifier = Modifier
++                .fillMaxWidth()
++                .padding(horizontal = 25.dp),
++            horizontalAlignment = Alignment.CenterHorizontally
++        ) {
++            Text(
++                text = "Tạo tài khoản của riêng bạn!",
++                fontSize = 30.sp,
++                fontWeight = FontWeight.Bold,
++                color = Color.Black,
++                textAlign = TextAlign.Center,
++                modifier = Modifier
++                    .padding(top = 15.dp, bottom = 20.dp)
++            )
+ 
+-        Column(
+-            modifier = Modifier.fillMaxHeight(),
+-            verticalArrangement = Arrangement.Center
+-        ) {
+             Text(
+                 text = "Thông tin tài khoản",
+                 fontWeight = FontWeight.Bold,
+-                modifier = Modifier.padding(bottom = 10.dp)
++                textAlign = TextAlign.Left,
++                modifier = Modifier
++                    .padding(bottom = 10.dp)
++                    .offset(x = (-75).dp)
+             )
+ 
+ 
+@@ -84,27 +87,7 @@
+                 )
+             }
+ 
+-            Row(
+-                modifier = Modifier.padding(bottom = 10.dp)
+-            ) {
+-                Text(
+-                    text = "Đã có tài khoản?",
+-                    color = Color.Black
+-                )
+-
+-                Spacer(modifier = Modifier.width(5.dp))
+-
+-                Text(
+-                    text = "Đăng nhập",
+-                    color = MaterialTheme.colors.error,
+-                    modifier = Modifier
+-                        .clickable(onClick = {
+-                            navController.navigate(Routes.SignIn.route){
+-                                launchSingleTop = true
+-                            }
+-                        })
+-                )
+-            }
++            Spacer(modifier = Modifier.height(10.dp))
+ 
+             Button(
+                 onClick = {
+@@ -112,9 +95,9 @@
+                         invalidPasswordNotification = true;
+                     } else {
+                         invalidPasswordNotification = false;
+-                        signUpViewModel.signUp(email = email, password = password)
++                        signUpViewModel.signUp(inputEmail = email, password = password, token = token)
+                         navController.navigate(
+-                            route = Routes.Verification.route + "/${email}",
++                            route = Routes.Verification.route + "?email=${email}",
+                             builder = {
+                                 launchSingleTop = true
+                             }
+@@ -129,6 +112,30 @@
+             ) {
+                 Text(text = "Đăng ký")
+             }
++
++            Row(
++                modifier = Modifier.padding(top = 10.dp)
++            ) {
++                Text(
++                    text = "Đã có tài khoản? ",
++                    textAlign = TextAlign.Left,
++                    color = Color.Black,
++                    modifier = Modifier.offset(x = (-40).dp)
++                )
++
++                Text(
++                    text = " Đăng nhập",
++                    fontWeight = FontWeight.Bold,
++                    color = MaterialTheme.colors.primaryVariant,
++                    modifier = Modifier
++                        .offset(x = (-37).dp)
++                        .clickable(onClick = {
++                            navController.navigate(Routes.SignIn.route) {
++                                launchSingleTop = true
++                            }
++                        })
++                )
++            }
+         }
+     }
+ }
