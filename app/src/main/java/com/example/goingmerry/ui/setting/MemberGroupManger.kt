@@ -39,8 +39,26 @@ fun MemberGroupManager(listMembers: List<GetGroupsQuery.Member>, groupManagerVie
     if(listChecks.isNotEmpty() && !groupManagerViewModel.state.value){
         groupManagerViewModel.checkMember(listMembers)
     }
+    var showDialog by rememberSaveable{
+        mutableStateOf(0)
+    }
     val idAccount by groupManagerViewModel.idAccount.collectAsState()
     val imageLoader = ImageLoader(context = LocalContext.current)
+
+    if(showDialog == 1){
+        ShowDialog("Không đủ số lượng thành viên", "lỗi", exchangeShowDialog = {showDialog = 0})
+    }
+
+    if(groupManagerViewModel.error.value == 1){
+        ShowDialog(contentLog = "Cập nhật nhóm thất bại. Bạn hãy làm lại", "lỗi") {
+            groupManagerViewModel.error.value = 0
+        }
+    }
+    if(groupManagerViewModel.error.value == 2){
+        ShowDialog(contentLog = "Update thành công", title = "Xác nhận") {
+            groupManagerViewModel.error.value = 0
+        }
+    }
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colors.secondary)
@@ -146,7 +164,11 @@ fun MemberGroupManager(listMembers: List<GetGroupsQuery.Member>, groupManagerVie
                                 Input.fromNullable(UserRole.MANAGER)
                             )
                             list = list + member
-                            groupManagerViewModel.createGroups(token, list, nameGroup, idGroup)
+                            if (list.size < 3) {
+                                showDialog = 1
+                            }else{
+                                groupManagerViewModel.createGroups(token, list, nameGroup, idGroup)
+                            }
                         },
                     fontSize = 20.sp,
                 )

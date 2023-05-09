@@ -42,7 +42,7 @@ class ListRAFViewModel: ViewModel(){
                 users.enqueue(object: ApolloCall.Callback<ReplyRequestAddFriendMutation.Data>(){
                     override fun onResponse(response: Response<ReplyRequestAddFriendMutation.Data>) {
                         Log.e("reply", response.data.toString())
-                        _res.tryEmit(response.data!!.replyRequest!!.sender!!.id)
+                        _res.tryEmit(response.data?.replyRequest?.sender?.id.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {

@@ -35,8 +35,11 @@ fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.Fr
     var idReceiver by rememberSaveable {
         mutableStateOf("")
     }
+    var state by rememberSaveable {
+        mutableStateOf("Deny")
+    }
     val res by listRAFViewModel.res.collectAsState()
-    if (res != "") {
+    if (res != "" && state == "Accept") {
         listRAFViewModel.createConversation(
             token, ConversationInput(
                 Input.absent(),
@@ -52,6 +55,10 @@ fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.Fr
             )
         )
         listRAFViewModel.resetRes()
+        state = "Deny"
+    }
+    if(res != "" && state == "Deny"){
+        listRAFViewModel.resetRes()
     }
     Column(modifier = Modifier
         .fillMaxSize()
@@ -64,13 +71,14 @@ fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.Fr
             items(newList){
                 Column(modifier = Modifier.padding(start = 5.dp)) {
                     Text(text = "${it.sender!!.name} muốn trò chuyện với bạn")
-                    Row (){
+                    Row {
                         Row(
                             modifier = Modifier
                                 .padding(2.dp)
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(MaterialTheme.colors.secondaryVariant)
                                 .clickable {
+                                    state = "Accept"
                                     listRAFViewModel.replyRequestAddFriend(
                                         token,
                                         it.sender.id,
@@ -105,10 +113,4 @@ fun ListRequestAddFriends(token: String, listFriendRequest: List<AccountQuery.Fr
             }
         }
     }
-}
-
-@Composable
-@Preview
-fun PreviewListRequestAddFriends(){
-   // ListRequestAddFriends(listOf())
 }

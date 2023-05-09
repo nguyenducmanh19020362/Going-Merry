@@ -23,6 +23,8 @@ import type.GroupMemberInput
 
 class GroupManagerViewModel: ViewModel() {
     var state = mutableStateOf(false)
+    var error = mutableStateOf(0)
+
     private val _listGroups = MutableStateFlow(listOf<GetGroupsQuery.Group>())
     val listGroups = _listGroups.asStateFlow()
 
@@ -91,10 +93,16 @@ class GroupManagerViewModel: ViewModel() {
                 }
                 users.enqueue(object: ApolloCall.Callback<AddGroupMutation.Data>(){
                     override fun onResponse(response: Response<AddGroupMutation.Data>) {
+                        if(response.data?.group == null){
+                            error.value = 1
+                        }else{
+                            error.value = 2
+                        }
                         Log.e("data", response.data.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {
+                        error.value = 1
                         Log.e("Todo", e.toString())
                     }
                 })

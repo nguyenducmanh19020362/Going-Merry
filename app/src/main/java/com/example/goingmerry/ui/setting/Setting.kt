@@ -1,5 +1,6 @@
 package com.example.goingmerry.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -151,9 +152,9 @@ fun TopBar(
                 .offset(x = (-110).dp, y = (-130).dp)
                 .clip(CircleShape)
                 .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
-                .clickable{
-                    nav.navigate(Routes.Home.route){
-                        popUpTo(Routes.Setting.route){
+                .clickable {
+                    nav.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Setting.route) {
                             inclusive = true
                         }
                     }
@@ -200,6 +201,21 @@ fun BodyScreen(
     chatBoxViewModel: ChatBoxViewModel,
     anonymousChatViewModel: AnonymousChatViewModel
 ) {
+    var showProgressBar by rememberSaveable {
+        mutableStateOf(false)
+    }
+    if(showProgressBar){
+        Column (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ){
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -380,7 +396,11 @@ fun BodyScreen(
             },
             data,
             chatBoxViewModel,
-            anonymousChatViewModel
+            anonymousChatViewModel,
+            changeProgressBar = {
+                Log.e("progressBar", it.toString())
+                showProgressBar = it
+            }
         )
     }
 }
@@ -390,20 +410,32 @@ fun LogoutCard(
     onNavigateToWelcome: () -> Unit,
     data: DataStore,
     chatBoxViewModel: ChatBoxViewModel,
-    anonymousChatViewModel: AnonymousChatViewModel
+    anonymousChatViewModel: AnonymousChatViewModel,
+    changeProgressBar: (value: Boolean) -> Unit
 ) {
     val showDialog = remember { mutableStateOf(false) }
     var clickOk by rememberSaveable{ mutableStateOf(false) }
+    var exit by rememberSaveable{ mutableStateOf(0) }
     if(clickOk){
         LaunchedEffect(key1 = Unit){
             chatBoxViewModel.jobReceiver?.cancel()
             chatBoxViewModel.sendJob?.cancel()
             anonymousChatViewModel.jobSend?.cancel()
             anonymousChatViewModel.jobReceiver?.cancel()
-            data.saveToken("", 0L)
+            exit = data.saveToken("", 0L)
             clickOk = false
         }
     }
+    if(exit == 2){
+        onNavigateToWelcome()
+        exit = 0
+    }
+    if(exit == 1){
+        changeProgressBar(true)
+    }else{
+        changeProgressBar(false)
+    }
+
     var size  = 40.dp
     var fonts = 25.sp
     var cardHeight = 80.dp
@@ -456,7 +488,7 @@ fun LogoutCard(
                     TextButton(onClick = {
                         showDialog.value = false
                         clickOk = true
-                        onNavigateToWelcome()
+                        exit = 1
                     }) {
                         Text("OK")
                     }

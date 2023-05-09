@@ -57,7 +57,31 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
         mutableStateOf("")
     }
 
+    var showDialog by rememberSaveable{
+        mutableStateOf(0)
+    }
+
     val imageLoader = ImageLoader(context = LocalContext.current)
+
+    if(showDialog == 1){
+        ShowDialog("Không đủ số lượng thành viên", "lỗi", exchangeShowDialog = {showDialog = 0})
+    }
+
+    if(showDialog == 2){
+        ShowDialog("Chưa nhập tên nhóm", "lỗi", exchangeShowDialog = {showDialog = 0})
+    }
+
+    if(groupManagerViewModel.error.value == 1){
+        ShowDialog(contentLog = "Tạo Group thất bại. Bạn hãy làm lại", "lỗi") {
+            groupManagerViewModel.error.value = 0
+        }
+    }
+
+    if(groupManagerViewModel.error.value == 2){
+        ShowDialog(contentLog = "Tạo thành công", title = "Xác nhận") {
+            groupManagerViewModel.error.value = 0
+        }
+    }
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -103,6 +127,17 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle.Default.copy(fontSize = 18.sp)
             )
+            if(nameGroup == ""){
+                Text(
+                    text = "Trường tên nhóm là bắt buộc",
+                    fontSize = 15.sp,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.h2,
+                    modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
+                )
+            }
+
             Text(
                 text = "Chọn bạn bè tham gia group: ",
                 fontSize = 20.sp,
@@ -186,7 +221,13 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
                                     Input.fromNullable(UserRole.MANAGER)
                                 )
                                 list = list + member
-                                groupManagerViewModel.createGroups(token, list, nameGroup, "")
+                                if (nameGroup == "") {
+                                    showDialog = 2
+                                } else if (list.size < 3) {
+                                    showDialog = 1
+                                } else {
+                                    groupManagerViewModel.createGroups(token, list, nameGroup, "")
+                                }
                             },
                         fontSize = 20.sp,
                     )
@@ -244,4 +285,27 @@ fun GroupManager(groupManagerViewModel: GroupManagerViewModel, token: String, na
 @Preview
 fun Preview1(){
     //GroupManager(groupManagerViewModel = GroupManagerViewModel(), "")
+}
+
+@Composable
+fun ShowDialog(contentLog: String, title: String, exchangeShowDialog: () -> Unit){
+    AlertDialog(
+        onDismissRequest = { exchangeShowDialog() },
+        title = { Text(text = title) },
+        text = { Text(text = contentLog) },
+        confirmButton = {
+            TextButton(onClick = {
+                exchangeShowDialog()
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                exchangeShowDialog()
+            }) {
+                Text("Cancel")
+            }
+        }
+    )
 }

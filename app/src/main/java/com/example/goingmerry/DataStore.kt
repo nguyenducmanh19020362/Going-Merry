@@ -6,9 +6,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 class DataStore(
     private val sharedPrefs: SharedPreferences,
@@ -26,12 +29,17 @@ class DataStore(
     /*fun setStateSave(value: Boolean){
         stateSave = value
     }*/
-    suspend fun saveToken(token: String, expired: Long) {
+    suspend fun saveToken(token: String, expired: Long): Int {
+        var value = 1
         dataStore.edit { preferences ->
             preferences[TOKEN] = token
             preferences[EXPIRED_TOKEN] = expired
-            //stateSave = true
+            runBlocking {
+                delay(1000)
+                value = 2
+            }
         }
+        return value
     }
     suspend fun readExpired(): Long{
         val value: Flow<Long> = dataStore.data
