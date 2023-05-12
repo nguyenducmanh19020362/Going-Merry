@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +42,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.goingmerry.IconChats
 import com.example.goingmerry.R
 import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
@@ -77,6 +80,11 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     }
 
     val progressBar by chatBoxViewModel.progressBar.collectAsState()
+
+    var selectIcon by remember {
+        mutableStateOf(false)
+    }
+
     var uri by rememberSaveable {
         mutableStateOf(Uri.EMPTY)
     }
@@ -131,10 +139,15 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         }
                     }
                     if(message.messageType == MessageType.TEXT){
-                        MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
-                            url = avatar, id, token)
+                        if(message.messageContent in IconChats.keys){
+                            IconChats.icons[message.messageContent]?.let {
+                                IconCard(icon = it, avatar = avatar, id = id, senderId = message.idSender, token = token)
+                            }
+                        }else{
+                            MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
+                                url = avatar, id, token)
+                        }
                     }else{
-                        Log.e("err", "directMessages")
                         ImageCard(message.messageContent, avatar, id, message.idSender, token)
                     }
                 }
@@ -152,8 +165,19 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                     }
                 }
                 if(message.type == type.MessageType.TEXT){
-                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
-                        avatar, id, token)
+                    if(message.content in IconChats.keys){
+                        IconChats.icons[message.content]
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                    }else {
+                        MessageCard(
+                            msg = Message(
+                                message.sender!!.id,
+                                message.content,
+                                message.sender.name
+                            ),
+                            avatar, id, token
+                        )
+                    }
                 }else{
                     ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
                 }
@@ -170,8 +194,19 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                     }
                 }
                 if(message.type == type.MessageType.TEXT){
-                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
-                        avatar, id, token)
+                    if(message.content in IconChats.keys){
+                        IconChats.icons[message.content]
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                    }else {
+                        MessageCard(
+                            msg = Message(
+                                message.sender!!.id,
+                                message.content,
+                                message.sender.name
+                            ),
+                            avatar, id, token
+                        )
+                    }
                 }else{
                     ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
                 }
@@ -198,6 +233,37 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 }
             }
         }
+        if(selectIcon){
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ){
+                LazyRow(modifier = Modifier.padding(start = 5.dp)){
+                    items(IconChats.keys){key ->
+                        IconChats.icons[key]?.let { icon ->
+                            Icon(
+                                icon,
+                                contentDescription = "icon",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clip(CircleShape)
+                                    .fillMaxSize()
+                                    .clickable {
+                                        chatBoxViewModel.conversationId.value =
+                                            conversation.id.toLong()
+                                        chatBoxViewModel.typeMessage.value = MessageType.TEXT
+                                        chatBoxViewModel.contentSendMessage.value = key
+                                        chatBoxViewModel.flag.value = true
+                                        selectIcon = false
+                                    },
+                                tint = MaterialTheme.colors.secondaryVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
         Row(
             modifier = Modifier
                 .weight(1f)
@@ -206,15 +272,18 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             horizontalArrangement = Arrangement.Center
         ){
             if(messageTyping == ""){
-                val addImage = Icons.Filled.Add
+                val addImage = Icons.Filled.EmojiEmotions
                 Icon(
                     addImage,
-                    contentDescription = "Chọn file đính kèm",
+                    contentDescription = "Chọn Icon",
                     modifier = Modifier
                         .weight(1f)
                         .padding(5.dp)
                         .clip(CircleShape)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .clickable {
+                            selectIcon = !selectIcon
+                        },
                     tint = MaterialTheme.colors.secondaryVariant
                 )
 
@@ -418,10 +487,39 @@ fun ImageCard(image: String, avatar: String, id: String, senderId: String, token
     }
 }
 
-@Preview
 @Composable
-fun PreviewImageCard(){
-
+fun IconCard(icon: ImageVector, avatar: String, id: String, senderId: String, token: String){
+    val imageLoader = ImageLoader(LocalContext.current)
+    Row(
+        modifier = Modifier
+            .padding(all = 8.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = if(id != senderId) Arrangement.Start else Arrangement.End
+    ) {
+        if(id != senderId){
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${URL.urlServer}${avatar}")
+                    .setHeader("Authorization", "Bearer $token").build(),
+                imageLoader = imageLoader,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Icon(
+            icon,
+            contentDescription = "icon",
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(40.dp),
+            tint = MaterialTheme.colors.secondaryVariant
+        )
+    }
 }
 
 data class Message(

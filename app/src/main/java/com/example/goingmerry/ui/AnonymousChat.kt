@@ -43,7 +43,7 @@ fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: Anonym
 
     val listIncognitoMessage by anonymousChatViewModel.listIncognitoMessage.collectAsState()
 
-    val lenInputMessage = if(messageTyping == "") 4f else 7f
+    val lenInputMessage = 7f
     if(stateIncognito){
         anonymousChatViewModel.stateAnonymousChat.value = true
     }
@@ -79,31 +79,6 @@ fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: Anonym
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ){
-            if(messageTyping == ""){
-                val addImage = Icons.Filled.Add
-                Icon(
-                    addImage,
-                    contentDescription = "Chọn file đính kèm",
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(5.dp)
-                        .clip(CircleShape)
-                        .fillMaxSize(),
-                    tint = MaterialTheme.colors.secondaryVariant
-                )
-
-                val img = Icons.Filled.Image
-                Icon(
-                    img,
-                    contentDescription = "Chọn ảnh",
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(5.dp)
-                        .clip(CircleShape)
-                        .fillMaxSize(),
-                    tint = MaterialTheme.colors.secondaryVariant
-                )
-            }
             TextField(
                 modifier = Modifier
                     .padding(start = 5.dp, end = 5.dp)

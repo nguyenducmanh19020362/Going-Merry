@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +39,7 @@ import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.example.goingmerry.IconChats
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.signInSignUp.encodeFile
@@ -73,8 +75,13 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
     var nameUser by rememberSaveable {
         mutableStateOf("")
     }
+
     var uri by rememberSaveable {
         mutableStateOf(Uri.EMPTY)
+    }
+
+    var selectIcon by remember {
+        mutableStateOf(false)
     }
 
     val galleryLauncher =
@@ -129,8 +136,14 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         }
                     }
                     if(message.messageType == MessageType.TEXT){
-                        MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
-                            url = avatar, id, token)
+                        if(message.messageContent in IconChats.keys){
+                            IconChats.icons[message.messageContent]?.let {
+                                IconCard(icon = it, avatar = avatar, id = id, senderId = message.idSender, token = token)
+                            }
+                        }else{
+                            MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
+                                url = avatar, id, token)
+                        }
                     }else{
                         ImageCard(message.messageContent, avatar, id, message.idSender, token)
                     }
@@ -148,8 +161,19 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                     }
                 }
                 if(message.type == type.MessageType.TEXT){
-                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
-                        avatar, id, token)
+                    if(message.content in IconChats.keys){
+                        IconChats.icons[message.content]
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                    }else {
+                        MessageCard(
+                            msg = Message(
+                                message.sender!!.id,
+                                message.content,
+                                message.sender.name
+                            ),
+                            avatar, id, token
+                        )
+                    }
                 }else{
                     ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
                 }
@@ -166,8 +190,19 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                     }
                 }
                 if(message.type == type.MessageType.TEXT){
-                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
-                        avatar, id, token)
+                    if(message.content in IconChats.keys){
+                        IconChats.icons[message.content]
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                    }else {
+                        MessageCard(
+                            msg = Message(
+                                message.sender!!.id,
+                                message.content,
+                                message.sender.name
+                            ),
+                            avatar, id, token
+                        )
+                    }
                 }else{
                     ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
                 }
@@ -194,6 +229,37 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 }
             }
         }
+        if(selectIcon){
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ){
+                LazyRow(modifier = Modifier.padding(start = 5.dp)){
+                    items(IconChats.keys){ key ->
+                        IconChats.icons[key]?.let { icon ->
+                            Icon(
+                                icon,
+                                contentDescription = "icon",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clip(CircleShape)
+                                    .fillMaxSize()
+                                    .clickable {
+                                        chatBoxViewModel.conversationId.value =
+                                            conversation.id.toLong()
+                                        chatBoxViewModel.typeMessage.value = MessageType.TEXT
+                                        chatBoxViewModel.contentSendMessage.value = key
+                                        chatBoxViewModel.flag.value = true
+                                        selectIcon = false
+                                    },
+                                tint = MaterialTheme.colors.secondaryVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
         Row(
             modifier = Modifier
                 .weight(1f)
@@ -202,15 +268,18 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
             horizontalArrangement = Arrangement.Center
         ){
             if(messageTyping == ""){
-                val addImage = Icons.Filled.Add
+                val addImage = Icons.Filled.EmojiEmotions
                 Icon(
                     addImage,
-                    contentDescription = "Chọn file đính kèm",
+                    contentDescription = "Chọn Icon",
                     modifier = Modifier
                         .weight(1f)
                         .padding(5.dp)
                         .clip(CircleShape)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .clickable {
+                            selectIcon = !selectIcon
+                        },
                     tint = MaterialTheme.colors.secondaryVariant
                 )
 
