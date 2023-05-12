@@ -2,7 +2,10 @@ package com.example.goingmerry.ui
 
 import AccountQuery
 import android.graphics.Paint
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,7 +40,11 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.ui.signInSignUp.encodeFile
+import com.example.goingmerry.ui.signInSignUp.getLenNameFile
+import com.example.goingmerry.ui.signInSignUp.getNameFile
 import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.viewModel.MessageType
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
 import kotlinx.coroutines.delay
@@ -51,13 +58,13 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
     Log.e("idConversation", conversation.id)
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
-    val messages by rememberSaveable {
+    val messages by remember {
         mutableStateOf(conversation.latestMessages)
     }
 
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
 
-    var beforeMessage by rememberSaveable {
+    var beforeMessage by remember {
         mutableStateOf(listOf<BeforeMessageQuery.BeforeMessage>())
     }
 
@@ -66,6 +73,28 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
     var nameUser by rememberSaveable {
         mutableStateOf("")
     }
+    var uri by rememberSaveable {
+        mutableStateOf(Uri.EMPTY)
+    }
+
+    val galleryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
+            if(uriList.isNotEmpty()){
+                uri = uriList[0]
+            }
+        }
+
+    if(uri != Uri.EMPTY){
+        val fileName = getNameFile(uri = uri)
+        val lenFileName = getLenNameFile(fileName)
+        val newAvatar = "$lenFileName$fileName;${encodeFile(uri)}"
+        chatBoxViewModel.conversationId.value = conversation.id.toLong()
+        chatBoxViewModel.contentSendMessage.value = newAvatar
+        chatBoxViewModel.typeMessage.value = MessageType.IMAGE
+        chatBoxViewModel.flag.value = true
+        uri = Uri.EMPTY
+    }
+
     val progressBar by chatBoxViewModel.progressBar.collectAsState()
     Column {
         for(member in conversation.members){
@@ -82,6 +111,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 CircularProgressIndicator()
             }
         }
+
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
@@ -98,7 +128,12 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                             break;
                         }
                     }
-                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id, token)
+                    if(message.messageType == MessageType.TEXT){
+                        MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
+                            url = avatar, id, token)
+                    }else{
+                        ImageCard(message.messageContent, avatar, id, message.idSender, token)
+                    }
                 }
             }
             items(messages.sortedBy {
@@ -112,7 +147,12 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
+                if(message.type == type.MessageType.TEXT){
+                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
+                        avatar, id, token)
+                }else{
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                }
             }
             items(beforeMessage.sortedBy {
                 it.sendAt
@@ -125,7 +165,12 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
+                if(message.type == type.MessageType.TEXT){
+                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
+                        avatar, id, token)
+                }else{
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                }
             }
             item{
                 LaunchedEffect(true) {
@@ -177,7 +222,10 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         .weight(1f)
                         .padding(5.dp)
                         .clip(CircleShape)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .clickable {
+                            galleryLauncher.launch("image/*")
+                        },
                     tint = MaterialTheme.colors.secondaryVariant
                 )
             }
@@ -206,8 +254,10 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 onClick = {
                     if(messageTyping != "") {
                         chatBoxViewModel.conversationId.value = conversation.id.toLong()
+                        chatBoxViewModel.typeMessage.value = MessageType.TEXT
                         chatBoxViewModel.contentSendMessage.value = messageTyping
                         chatBoxViewModel.flag.value = true
+                        messageTyping = ""
                     }
                 },
                 modifier = Modifier

@@ -15,27 +15,18 @@ import kotlinx.coroutines.runBlocking
 
 class DataStore(
     private val sharedPrefs: SharedPreferences,
-    private val dataStore: DataStore<Preferences>,
-    //private var stateSave: Boolean
+    private val dataStore: DataStore<Preferences>
 ) {
     companion object {
         private val EXPIRED_TOKEN = longPreferencesKey("expired_token")
         private val TOKEN = stringPreferencesKey("TOKEN")
     }
-    /*fun getStateSave(): Boolean{
-        return stateSave
-    }*/
-
-    /*fun setStateSave(value: Boolean){
-        stateSave = value
-    }*/
     suspend fun saveToken(token: String, expired: Long): Int {
         var value = 1
         dataStore.edit { preferences ->
             preferences[TOKEN] = token
             preferences[EXPIRED_TOKEN] = expired
             runBlocking {
-                delay(1000)
                 value = 2
             }
         }

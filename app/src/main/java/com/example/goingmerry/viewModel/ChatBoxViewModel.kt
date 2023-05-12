@@ -2,6 +2,7 @@ package com.example.goingmerry.viewModel
 
 import AccountQuery
 import BeforeMessageQuery
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -39,6 +40,7 @@ import java.time.Instant
 class ChatBoxViewModel: ViewModel() {
     var stateSockets = mutableStateOf("OFF")
     var conversationId = mutableStateOf(0L)
+    var typeMessage = mutableStateOf(MessageType.TEXT)
 
     private var _progressBar = MutableStateFlow(false)
     var progressBar = _progressBar.asStateFlow()
@@ -103,6 +105,7 @@ class ChatBoxViewModel: ViewModel() {
                             receiverMessage.content,
                             name,
                             Instant.parse(receiverMessage.sentAt).epochSecond.toInt(),
+                            receiverMessage.type
                         )
                         _listReceiverMessage.emit(listReceiverMessage.value + directMessage)
                     }
@@ -150,8 +153,8 @@ class ChatBoxViewModel: ViewModel() {
                 flow{
                     while (true){
                         if(flag.value){
-                            val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, MessageType.TEXT)
-                            //listMessage.value.plus(sendMessage)
+                            Log.e("err", "sendMessage")
+                            val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, typeMessage.value)
                             val gsonSendMessage = gson.toJson(sendMessage)
                             emitOrClose(
                                 buildPayload {
@@ -229,7 +232,8 @@ data class DirectMessage(
     val idSender: String,
     val messageContent: String,
     val messageName: String,
-    val sendAt: Int
+    val sendAt: Int,
+    val messageType: MessageType
 )
 
 enum class MessageType{

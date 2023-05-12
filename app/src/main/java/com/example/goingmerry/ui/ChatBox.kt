@@ -2,7 +2,10 @@ package com.example.goingmerry.ui
 
 import AccountQuery
 import android.graphics.Paint
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.versionedparcelable.ParcelField
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -39,9 +43,14 @@ import coil.request.ImageRequest
 import com.example.goingmerry.R
 import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.ui.signInSignUp.encodeFile
+import com.example.goingmerry.ui.signInSignUp.getLenNameFile
+import com.example.goingmerry.ui.signInSignUp.getNameFile
 import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.viewModel.MessageType
 import com.example.goingmerry.viewModel.ReceiverMessage
 import com.example.goingmerry.viewModel.SendMessage
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -51,12 +60,11 @@ import java.lang.reflect.Member
 fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, nav: NavController, id: String, token: String){
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
-
-    var messages by rememberSaveable {
+    var messages by remember {
         mutableStateOf(conversation.latestMessages)
     }
 
-    var beforeMessage by rememberSaveable {
+    var beforeMessage by remember {
         mutableStateOf(listOf<BeforeMessageQuery.BeforeMessage>())
     }
 
@@ -69,6 +77,26 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     }
 
     val progressBar by chatBoxViewModel.progressBar.collectAsState()
+    var uri by rememberSaveable {
+        mutableStateOf(Uri.EMPTY)
+    }
+
+    val galleryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
+            if(uriList.isNotEmpty()){
+                uri = uriList[0]
+            }
+        }
+    if(uri != Uri.EMPTY){
+        val fileName = getNameFile(uri = uri)
+        val lenFileName = getLenNameFile(fileName)
+        val newAvatar = "$lenFileName$fileName;${encodeFile(uri)}"
+        chatBoxViewModel.conversationId.value = conversation.id.toLong()
+        chatBoxViewModel.contentSendMessage.value = newAvatar
+        chatBoxViewModel.typeMessage.value = MessageType.IMAGE
+        chatBoxViewModel.flag.value = true
+        uri = Uri.EMPTY
+    }
 
     Column {
         for(member in conversation.members){
@@ -102,9 +130,16 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                             break;
                         }
                     }
-                    MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName), url = avatar, id, token)
+                    if(message.messageType == MessageType.TEXT){
+                        MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
+                            url = avatar, id, token)
+                    }else{
+                        Log.e("err", "directMessages")
+                        ImageCard(message.messageContent, avatar, id, message.idSender, token)
+                    }
                 }
             }
+
             items(messages.sortedBy {
                 it.sendAt
             }.asReversed()){
@@ -116,7 +151,12 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
+                if(message.type == type.MessageType.TEXT){
+                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
+                        avatar, id, token)
+                }else{
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                }
             }
             items(beforeMessage.sortedBy {
                 it.sendAt
@@ -129,8 +169,14 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         break;
                     }
                 }
-                MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name), avatar, id, token)
+                if(message.type == type.MessageType.TEXT){
+                    MessageCard(msg = Message(message.sender!!.id, message.content, message.sender.name),
+                        avatar, id, token)
+                }else{
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                }
             }
+
             item{
                 LaunchedEffect(key1 = null) {
                     if(messages.isNotEmpty()){
@@ -180,7 +226,10 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         .weight(1f)
                         .padding(5.dp)
                         .clip(CircleShape)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .clickable {
+                            galleryLauncher.launch("image/*")
+                        },
                     tint = MaterialTheme.colors.secondaryVariant
                 )
             }
@@ -209,6 +258,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 onClick = {
                     if(messageTyping != "") {
                         chatBoxViewModel.conversationId.value = conversation.id.toLong()
+                        chatBoxViewModel.typeMessage.value = MessageType.TEXT
                         chatBoxViewModel.contentSendMessage.value = messageTyping
                         chatBoxViewModel.flag.value = true
                         messageTyping = ""
@@ -265,9 +315,10 @@ fun TopBar(member: AccountQuery.Member, nav: NavController){
                 Icon(
                     Icons.Filled.Person,
                     contentDescription = "To Profile",
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier
+                        .size(30.dp)
                         .clickable {
-                            nav.navigate(Routes.Profile.route + "/${member.id}"){
+                            nav.navigate(Routes.Profile.route + "/${member.id}") {
                                 launchSingleTop = true
                             }
                         }
@@ -328,6 +379,49 @@ fun MessageCard(msg: Message, url: String, id: String, token: String) {
             }
         }
     }
+}
+
+@Composable
+fun ImageCard(image: String, avatar: String, id: String, senderId: String, token: String){
+    val imageLoader = ImageLoader(LocalContext.current)
+    Row(
+        modifier = Modifier
+            .padding(all = 8.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = if(id != senderId) Arrangement.Start else Arrangement.End
+    ) {
+        if(id != senderId){
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${URL.urlServer}${avatar}")
+                    .setHeader("Authorization", "Bearer $token").build(),
+                imageLoader = imageLoader,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("${URL.urlServer}${image}")
+                .setHeader("Authorization", "Bearer $token").build(),
+            imageLoader = imageLoader,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(100.dp)
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewImageCard(){
+
 }
 
 data class Message(
