@@ -49,6 +49,8 @@ import com.example.goingmerry.viewModel.FillInfoViewModel
 import com.example.goingmerry.viewModel.ProfileViewModel
 import type.AccountInput
 import type.Gender
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -128,8 +130,12 @@ fun BodyFill(
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
-        {_: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            birthDate = "$year-${month+1}-$dayOfMonth"
+//        {_: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+//            birthDate = "$year-${month+1}-$dayOfMonth"
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            val date = LocalDate.of(year, month + 1, dayOfMonth)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            birthDate = date.format(formatter)
         }, year, month, day
     )
 
