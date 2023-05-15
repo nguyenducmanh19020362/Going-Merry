@@ -127,7 +127,7 @@ fun TopBar(
                 .align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = "$name",
+                text = name,
                 fontSize = fonts,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
@@ -236,42 +236,49 @@ fun BodyScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         // Thẻ thông tin tài khoản
-        Card(
-            elevation = 4.dp,
-            backgroundColor = MaterialTheme.colors.primary,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(cardHeight)
-                .align(Alignment.CenterHorizontally)
-                .clickable(onClick = {
-                    onNavigateToUserInfo()
-                })
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
-            ) {
-                Row() {
-                    Image(
-                        painter = painterResource(id = R.drawable._user_info),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(size)
-                    )
-
-                    Spacer(modifier = Modifier.width(30.dp))
-
-                    Text(
-                        text = "Thông tin tài khoản",
-                        fontSize = fonts,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
-        }
+//        Card(
+//            elevation = 4.dp,
+//            backgroundColor = MaterialTheme.colors.primary,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(cardHeight)
+//                .align(Alignment.CenterHorizontally)
+//                .clickable(onClick = {
+//                    onNavigateToUserInfo()
+//                })
+//        ) {
+//            Row(
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(12.dp)
+//            ) {
+//                Row() {
+//                    Image(
+//                        painter = painterResource(id = R.drawable._user_info),
+//                        contentDescription = null,
+//                        modifier = Modifier
+//                            .size(size)
+//                    )
+//
+//                    Spacer(modifier = Modifier.width(30.dp))
+//
+//                    Text(
+//                        text = "Thông tin tài khoản",
+//                        fontSize = fonts,
+//                        fontWeight = FontWeight.Bold,
+//                        color = Color.White
+//                    )
+//                }
+//
+//                Image(
+//                    painter = painterResource(id = R.drawable._right_arrow),
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .size(size)
+//                )
+//            }
+//        }
 
         // Thẻ hồ sơ người dùng
         Card(
@@ -308,10 +315,17 @@ fun BodyScreen(
                         color = Color.White,
                     )
                 }
+
+                Image(
+                    painter = painterResource(id = R.drawable._right_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(size)
+                )
             }
         }
 
-        // Thẻ Danh sách bạn bè
+        // Thẻ Danh sách yêu cầu kết bạn
         Card(
             elevation = 4.dp,
             backgroundColor = MaterialTheme.colors.primary,
@@ -339,15 +353,23 @@ fun BodyScreen(
                     Spacer(modifier = Modifier.width(30.dp))
 
                     Text(
-                        text = "Danh sách yêu cầu kết bạn",
+                        text = "Yêu cầu kết bạn",
                         fontSize = fonts,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
+
+                Image(
+                    painter = painterResource(id = R.drawable._right_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(size)
+                )
             }
         }
 
+        // Thẻ quản lý nhóm
         Card(
             elevation = 4.dp,
             backgroundColor = MaterialTheme.colors.primary,
@@ -382,6 +404,58 @@ fun BodyScreen(
                         color = Color.White
                     )
                 }
+
+                Image(
+                    painter = painterResource(id = R.drawable._right_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(size)
+                )
+            }
+        }
+
+        // Thẻ đổi mật khẩu
+        Card(
+            elevation = 4.dp,
+            backgroundColor = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(cardHeight)
+                .align(Alignment.CenterHorizontally)
+                .clickable(onClick = {
+
+                })
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Row() {
+                    Image(
+                        painter = painterResource(id = R.drawable._changed_pass_ic),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size)
+                    )
+
+                    Spacer(modifier = Modifier.width(30.dp))
+
+                    Text(
+                        text = "Đổi mật khẩu",
+                        fontSize = fonts,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Image(
+                    painter = painterResource(id = R.drawable._right_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(size)
+                )
             }
         }
 
@@ -402,6 +476,51 @@ fun BodyScreen(
                 showProgressBar = it
             }
         )
+
+        //Thẻ xóa tài khoản
+        Card(
+            elevation = 4.dp,
+            backgroundColor = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(cardHeight)
+                .align(Alignment.CenterHorizontally)
+                .clickable(onClick = {
+
+                })
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Row() {
+                    Image(
+                        painter = painterResource(id = R.drawable.deleted_account),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(size)
+                    )
+
+                    Spacer(modifier = Modifier.width(30.dp))
+
+                    Text(
+                        text = "Xóa tài khoản",
+                        fontSize = fonts,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Image(
+                    painter = painterResource(id = R.drawable._right_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(size)
+                )
+            }
+        }
     }
 }
 
@@ -477,6 +596,13 @@ fun LogoutCard(
                     color = Color.White
                 )
             }
+
+            Image(
+                painter = painterResource(id = R.drawable._right_arrow),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size)
+            )
         }
 
         if (showDialog.value) {

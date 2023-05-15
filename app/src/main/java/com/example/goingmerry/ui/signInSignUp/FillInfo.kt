@@ -1,13 +1,14 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import android.app.DatePickerDialog
 import android.content.ContentResolver
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.content.Context
+import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Base64
 import android.util.Log
+import android.widget.DatePicker
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,11 +49,18 @@ import com.example.goingmerry.viewModel.FillInfoViewModel
 import com.example.goingmerry.viewModel.ProfileViewModel
 import type.AccountInput
 import type.Gender
-import java.io.ByteArrayOutputStream
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FillScreen(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
+fun FillScreen(
+    navController: NavController,
+    fillInfoViewModel: FillInfoViewModel,
+    profileViewModel: ProfileViewModel,
+    token: String
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
     ) {
@@ -86,13 +92,53 @@ fun PreviewFill() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel, profileViewModel: ProfileViewModel, token: String) {
+fun BodyFill(
+    navController: NavController,
+    fillInfoViewModel: FillInfoViewModel,
+    profileViewModel: ProfileViewModel,
+    token: String
+) {
     var nameAccount by rememberSaveable { mutableStateOf(profileViewModel.name.value) }
     var birthDate by rememberSaveable { mutableStateOf(profileViewModel.age.value) }
     var address by rememberSaveable { mutableStateOf(profileViewModel.address.value) }
     val selectedGender = remember { mutableStateOf(profileViewModel.gender.value) }
     var job by rememberSaveable { mutableStateOf(profileViewModel.job.value) }
     var hobby by rememberSaveable { mutableStateOf(profileViewModel.favorites.value) }
+    val selectedHobbies = remember { mutableStateListOf<String>() }
+    val hobbies = listOf(
+        "Reading",
+        "Playing games",
+        "Watching movies",
+        "Traveling",
+        "Cooking",
+        "Sports",
+        "Photography",
+        "Music",
+        "Drawing",
+        "Writing"
+    )
+
+    val year: Int
+    val month: Int
+    val day: Int
+
+    val calendar = Calendar.getInstance()
+    year = calendar.get(Calendar.YEAR)
+    month = calendar.get(Calendar.MONTH)
+    day = calendar.get(Calendar.DAY_OF_MONTH)
+    calendar.time = Date()
+
+    val datePickerDialog = DatePickerDialog(
+        LocalContext.current,
+//        {_: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+//            birthDate = "$year-${month+1}-$dayOfMonth"
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            val date = LocalDate.of(year, month + 1, dayOfMonth)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            birthDate = date.format(formatter)
+        }, year, month, day
+    )
+
     var avatar by rememberSaveable {
         mutableStateOf(profileViewModel.avatar.value)
     }
@@ -103,32 +149,49 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
         mutableStateOf(false)
     }
 
-    if(clickComplete){
+    if (clickComplete) {
         var render = Gender.MALE
-        if(selectedGender.value == "Nữ"){
+        if (selectedGender.value == "Nữ") {
             render = Gender.FEMALE
         }
-        if(selectedGender.value == "Khác"){
+        if (selectedGender.value == "Khác") {
             render = Gender.OTHER
         }
-        if(uri != Uri.EMPTY){
+        if (uri != Uri.EMPTY) {
             val fileName = getNameFile(uri = uri)
             val lenFileName = getLenNameFile(fileName)
             val newAvatar = "$lenFileName$fileName;${encodeFile(uri)}"
-            Log.e("information", "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby")
-            if(birthDate != "" && nameAccount != ""){
-                val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(job),
-                    Input.fromNullable(render), Input.fromNullable(address),Input.fromNullable(newAvatar), Input.fromNullable(hobby))
+            Log.e(
+                "information",
+                "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby"
+            )
+            if (birthDate != "" && nameAccount != "") {
+                val input = AccountInput(
+                    Input.fromNullable(nameAccount),
+                    Input.fromNullable(birthDate),
+                    Input.fromNullable(job),
+                    Input.fromNullable(render),
+                    Input.fromNullable(address),
+                    Input.fromNullable(newAvatar),
+                    Input.fromNullable(hobby)
+                )
                 fillInfoViewModel.updateAccount(token, input)
-            }else{
+            } else {
                 fillInfoViewModel.state.value = 1
             }
-        }else{
-            if(birthDate != "" && nameAccount != ""){
-                val input = AccountInput(Input.fromNullable(nameAccount), Input.fromNullable(birthDate), Input.fromNullable(job),
-                    Input.fromNullable(render), Input.fromNullable(address),Input.absent(), Input.fromNullable(hobby))
+        } else {
+            if (birthDate != "" && nameAccount != "") {
+                val input = AccountInput(
+                    Input.fromNullable(nameAccount),
+                    Input.fromNullable(birthDate),
+                    Input.fromNullable(job),
+                    Input.fromNullable(render),
+                    Input.fromNullable(address),
+                    Input.absent(),
+                    Input.fromNullable(hobby)
+                )
                 fillInfoViewModel.updateAccount(token, input)
-            }else{
+            } else {
                 fillInfoViewModel.state.value = 1
             }
         }
@@ -136,20 +199,20 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
     }
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
-           if(uriList.isNotEmpty()){
-               uri = uriList[0]
-           }
+            if (uriList.isNotEmpty()) {
+                uri = uriList[0]
+            }
         }
-    if(fillInfoViewModel.idAccountUpdate.value != "" && fillInfoViewModel.idAccountUpdate.value.isNotEmpty()){
-        navController.navigate(Routes.Home.route){
-            popUpTo(Routes.FillInfo.route){
+    if (fillInfoViewModel.idAccountUpdate.value != "" && fillInfoViewModel.idAccountUpdate.value.isNotEmpty()) {
+        navController.navigate(Routes.Home.route) {
+            popUpTo(Routes.FillInfo.route) {
                 inclusive = true
             }
         }
         fillInfoViewModel.idAccountUpdate.value = ""
     }
 
-    if(fillInfoViewModel.state.value == 1){
+    if (fillInfoViewModel.state.value == 1) {
         AlertDialog(
             onDismissRequest = { fillInfoViewModel.state.value = 0 },
             title = { Text(text = "Thông báo") },
@@ -170,7 +233,7 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            if(uri == Uri.EMPTY && avatar != ""){
+            if (uri == Uri.EMPTY && avatar != "") {
                 val imageLoader = ImageLoader(context = LocalContext.current)
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -188,9 +251,12 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                             galleryLauncher.launch("image/*")
                         }
                 )
-            }else{
+            } else {
                 Image(
-                    painter = rememberAsyncImagePainter(uri, ImageLoader(context = LocalContext.current)),
+                    painter = rememberAsyncImagePainter(
+                        uri,
+                        ImageLoader(context = LocalContext.current)
+                    ),
                     contentScale = ContentScale.Crop,
                     contentDescription = "thêm ảnh",
                     modifier = Modifier
@@ -226,7 +292,7 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                     .background(MaterialTheme.colors.secondaryVariant),
             )
 
-            if(nameAccount == ""){
+            if (nameAccount == "") {
                 Text(
                     text = "Yêu cầu nhập trường bắt buộc",
                     fontSize = 10.sp,
@@ -243,26 +309,63 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Left,
-                modifier = Modifier.width(295.dp)
+                modifier = Modifier
+                    .width(295.dp)
                     .padding(top = 10.dp)
             )
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            TextField(
-                value = birthDate,
-                onValueChange = { birthDate = it },
-                singleLine = true,
-                placeholder = { Text("yyyy-MM-dd") },
-                modifier = Modifier
-                    .padding(bottom = 5.dp)
-                    .height(60.dp)
-                    .width(295.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colors.secondaryVariant),
-            )
+//            TextField(
+//                value = birthDate,
+//                onValueChange = { birthDate = it },
+//                singleLine = true,
+//                placeholder = { Text("yyyy-MM-dd") },
+//                modifier = Modifier
+//                    .padding(bottom = 5.dp)
+//                    .height(60.dp)
+//                    .width(295.dp)
+//                    .clip(RoundedCornerShape(10.dp))
+//                    .background(MaterialTheme.colors.secondaryVariant),
+//            )
 
-            if(birthDate == ""){
+            Row(
+                modifier = Modifier
+                    .width(295.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(200.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colors.secondaryVariant),
+                ) {
+                    Text(
+                        text = birthDate,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.offset(x = 15.dp, y = 18.dp)
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        datePickerDialog.show()
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .height(60.dp)
+                ) {
+                    Text(
+                        text = "Chọn",
+                        color = Color.White
+                    )
+                }
+            }
+
+            if (birthDate == "") {
                 Text(
                     text = "Yêu cầu nhập trường bắt buộc",
                     fontSize = 10.sp,
@@ -279,7 +382,8 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Left,
-                modifier = Modifier.width(295.dp)
+                modifier = Modifier
+                    .width(295.dp)
                     .padding(top = 10.dp)
             )
 
@@ -298,7 +402,10 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            DropBoxFill(changeAddress = {selectedProvince: String -> address = selectedProvince}, address)
+            DropBoxFill(
+                changeAddress = { selectedProvince: String -> address = selectedProvince },
+                address
+            )
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -336,17 +443,48 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            TextField(
-                value = hobby,
-                onValueChange = { hobby = it },
+//            TextField(
+//                value = hobby,
+//                onValueChange = { hobby = it },
+//                modifier = Modifier
+//                    .padding(bottom = 15.dp)
+//                    .height(60.dp)
+//                    .width(295.dp)
+//                    .clip(RoundedCornerShape(10.dp))
+//                    .background(MaterialTheme.colors.secondaryVariant),
+//                shape = RoundedCornerShape(10.dp)
+//            )
+            Column(
                 modifier = Modifier
-                    .padding(bottom = 15.dp)
-                    .height(60.dp)
-                    .width(295.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colors.secondaryVariant),
-                shape = RoundedCornerShape(10.dp)
-            )
+                    .fillMaxWidth()
+                    .padding(horizontal = 25.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                for (checkedHobby in hobbies) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selectedHobbies.contains(checkedHobby),
+                            onCheckedChange = { isChecked ->
+                                if (isChecked) {
+                                    selectedHobbies.add(checkedHobby)
+                                } else {
+                                    selectedHobbies.remove(checkedHobby)
+                                }
+                            }
+                        )
+                        Text(
+                            text = checkedHobby,
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -360,10 +498,12 @@ fun BodyFill(navController: NavController, fillInfoViewModel: FillInfoViewModel,
                     .height(60.dp)
                     .width(120.dp)
                     .padding(bottom = 10.dp)
-
+                    .offset(x = 100.dp)
             ) {
                 Text(text = "Hoàn thành")
             }
+
+
 
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -455,8 +595,8 @@ fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
             "Long An"
         )
         var index = 0
-        for(province in provinceList){
-            if(province == address){
+        for (province in provinceList) {
+            if (province == address) {
                 index = provinceList.indexOf(province)
                 break;
             }
@@ -499,7 +639,10 @@ fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .width(295.dp)
+                .height(400.dp)
+                .clip(RoundedCornerShape(15.dp))
         ) {
             provinceList.forEachIndexed { index, province ->
                 DropdownMenuItem(onClick = {
@@ -510,6 +653,7 @@ fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
                 }) {
                     Text(
                         text = province,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
@@ -520,7 +664,7 @@ fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun encodeFile(uri: Uri): String{
+fun encodeFile(uri: Uri): String {
     val context = LocalContext.current
     var ct = ""
     context.contentResolver.openInputStream(uri)?.use {
@@ -543,7 +687,8 @@ fun getNameFile(uri: Uri): String {
     }
     return realFileName
 }
-fun getLenNameFile(realFileName: String):String{
+
+fun getLenNameFile(realFileName: String): String {
     val len = realFileName.length
     return String.format("%03d", len)
 }
