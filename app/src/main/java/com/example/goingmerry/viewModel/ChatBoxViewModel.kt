@@ -77,46 +77,43 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = URL.host, port = 8080)
-
-            val stream: Flow<Payload> = rSocket.requestStream(
-                buildPayload {
-                    compositeMetadata {
-                        add(bearerAuthMetadata)
-                        add(routeMetadata)
-                    }
-                    data(Instant.now().epochSecond.toString())
-                }
-            )
-            stream.collect { payload: Payload ->
-                val json = payload.data.readText()
-                val receiverMessage = gson.fromJson(json, ReceiverMessage::class.java)
-                for(item in homeViewModel.conversations.value){
-                    if(item.id.toLong() == receiverMessage.conversationId){
-                        var name = ""
-                        for(member in item.members){
-                            if(member.id.toLong() == receiverMessage.senderId){
-                                name = member.name
-                            }
+            try{
+                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = URL.host, port = 8080)
+                val stream: Flow<Payload> = rSocket.requestStream(
+                    buildPayload {
+                        compositeMetadata {
+                            add(bearerAuthMetadata)
+                            add(routeMetadata)
                         }
-                        val directMessage = DirectMessage(
-                            receiverMessage.conversationId.toString(),
-                            receiverMessage.senderId.toString(),
-                            receiverMessage.content,
-                            name,
-                            Instant.parse(receiverMessage.sentAt).epochSecond.toInt(),
-                            receiverMessage.type
-                        )
-                        _listReceiverMessage.emit(listReceiverMessage.value + directMessage)
+                        data(Instant.now().epochSecond.toString())
                     }
+                )
+                stream.collect { payload: Payload ->
+                    val json = payload.data.readText()
+                    val receiverMessage = gson.fromJson(json, ReceiverMessage::class.java)
+                    for(item in homeViewModel.conversations.value){
+                        if(item.id.toLong() == receiverMessage.conversationId){
+                            var name = ""
+                            for(member in item.members){
+                                if(member.id.toLong() == receiverMessage.senderId){
+                                    name = member.name
+                                }
+                            }
+                            val directMessage = DirectMessage(
+                                receiverMessage.conversationId.toString(),
+                                receiverMessage.senderId.toString(),
+                                receiverMessage.content,
+                                name,
+                                Instant.parse(receiverMessage.sentAt).epochSecond.toInt(),
+                                receiverMessage.type
+                            )
+                            _listReceiverMessage.emit(listReceiverMessage.value + directMessage)
+                        }
 
-                }/*
-                listReceiverMessage.value.plus(receiverMessage)
-                val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                val createdAt = LocalDateTime.ofInstant(receiverMessage.createdAt, ZoneId.systemDefault()).format(format)
-                val updatedAt = LocalDateTime.ofInstant(receiverMessage.updatedAt, ZoneId.systemDefault()).format(format)
-                val deletedAt = LocalDateTime.ofInstant(receiverMessage.deletedAt, ZoneId.systemDefault()).format(format)
-                println("$createdAt $updatedAt $deletedAt")*/
+                    }
+                }
+            }catch (e: Exception){
+                Log.e("error", "ok")
             }
         }
     }
@@ -140,37 +137,41 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = URL.host, port = 8080)
+            try {
+                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = URL.host, port = 8080)
 
-            rSocket.requestChannel(
-                buildPayload {
-                    compositeMetadata {
-                        add(bearerAuthMetadata)
-                        add(routeMetadata)
-                    }
-                    data(ByteReadPacket.Empty)
-                },
-                flow{
-                    while (true){
-                        if(flag.value){
-                            Log.e("err", "sendMessage")
-                            val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, typeMessage.value)
-                            val gsonSendMessage = gson.toJson(sendMessage)
-                            emitOrClose(
-                                buildPayload {
-                                    compositeMetadata {
-                                        add(bearerAuthMetadata)
-                                        add(routeMetadata)
-                                    }
-                                    data(gsonSendMessage)
-                                }
-                            )
-                            flag.value = false
+                rSocket.requestChannel(
+                    buildPayload {
+                        compositeMetadata {
+                            add(bearerAuthMetadata)
+                            add(routeMetadata)
                         }
-                    }
+                        data(ByteReadPacket.Empty)
+                    },
+                    flow{
+                        while (true){
+                            if(flag.value){
+                                Log.e("err", "sendMessage")
+                                val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, typeMessage.value)
+                                val gsonSendMessage = gson.toJson(sendMessage)
+                                emitOrClose(
+                                    buildPayload {
+                                        compositeMetadata {
+                                            add(bearerAuthMetadata)
+                                            add(routeMetadata)
+                                        }
+                                        data(gsonSendMessage)
+                                    }
+                                )
+                                flag.value = false
+                            }
+                        }
 
-                }
-            ).collect()
+                    }
+                ).collect()
+            }catch (e: Exception){
+                Log.e("error", "socket")
+            }
         }
     }
 

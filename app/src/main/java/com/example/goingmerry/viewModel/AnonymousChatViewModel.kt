@@ -77,21 +77,25 @@ class AnonymousChatViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = com.example.goingmerry.URL.host, port = 8080)
+            try {
+                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = com.example.goingmerry.URL.host, port = 8080)
 
-            val stream: Flow<Payload> = rSocket.requestStream(
-                buildPayload {
-                    compositeMetadata {
-                        add(bearerAuthMetadata)
-                        add(routeMetadata)
+                val stream: Flow<Payload> = rSocket.requestStream(
+                    buildPayload {
+                        compositeMetadata {
+                            add(bearerAuthMetadata)
+                            add(routeMetadata)
+                        }
+                        data(Instant.MIN.epochSecond.toString())
                     }
-                    data(Instant.MIN.epochSecond.toString())
+                )
+                stream.collect { payload: Payload ->
+                    val json = payload.data.readText()
+                    val incognitoMessageMessage = gson.fromJson(json, IncognitoMessage::class.java)
+                    _listIncognitoMessageMessages.tryEmit(listIncognitoMessage.value + incognitoMessageMessage)
                 }
-            )
-            stream.collect { payload: Payload ->
-                val json = payload.data.readText()
-                val incognitoMessageMessage = gson.fromJson(json, IncognitoMessage::class.java)
-                _listIncognitoMessageMessages.tryEmit(listIncognitoMessage.value + incognitoMessageMessage)
+            }catch (e: Exception){
+                Log.e("error", "AnonymousChatViewModel")
             }
         }
     }
@@ -114,36 +118,40 @@ class AnonymousChatViewModel: ViewModel() {
                     }
                 }
             }
-            val rSocket: RSocket = client.rSocket(path = "/rsocket", host = com.example.goingmerry.URL.host, port = 8080)
+            try{
+                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = com.example.goingmerry.URL.host, port = 8080)
 
-            rSocket.requestChannel(
-                buildPayload {
-                    compositeMetadata {
-                        add(bearerAuthMetadata)
-                        add(routeMetadata)
-                    }
-                    data(ByteReadPacket.Empty)
-                },
-                flow{
-                    while (true){
-                        if(flag.value){
-                            val sendMessage = SendIncognitoMessage(contentSendMessage.value, IncognitoMessageType.TEXT)
-                            val gsonSendMessage = gson.toJson(sendMessage)
-                            emitOrClose(
-                                buildPayload {
-                                    compositeMetadata {
-                                        add(bearerAuthMetadata)
-                                        add(routeMetadata)
-                                    }
-                                    data(gsonSendMessage)
-                                }
-                            )
-                            flag.value = false
+                rSocket.requestChannel(
+                    buildPayload {
+                        compositeMetadata {
+                            add(bearerAuthMetadata)
+                            add(routeMetadata)
                         }
-                    }
+                        data(ByteReadPacket.Empty)
+                    },
+                    flow{
+                        while (true){
+                            if(flag.value){
+                                val sendMessage = SendIncognitoMessage(contentSendMessage.value, IncognitoMessageType.TEXT)
+                                val gsonSendMessage = gson.toJson(sendMessage)
+                                emitOrClose(
+                                    buildPayload {
+                                        compositeMetadata {
+                                            add(bearerAuthMetadata)
+                                            add(routeMetadata)
+                                        }
+                                        data(gsonSendMessage)
+                                    }
+                                )
+                                flag.value = false
+                            }
+                        }
 
-                }
-            ).collect()
+                    }
+                ).collect()
+            }catch (e: Exception){
+                Log.e("error", "AnonumousChatViewModelSend")
+            }
         }
     }
 
