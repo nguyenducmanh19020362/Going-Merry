@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -93,7 +94,7 @@ fun ProfileScreen(id: String, token: String, profileViewModel: ProfileViewModel,
 
         ChangeImage(profileViewModel.avatar.value, token)
 
-        BodyProfile(profileViewModel, isFriend, changeShowDialog = {showDialog = true}, token, nav)
+        BodyProfile(profileViewModel, isFriend, changeShowDialog = {showDialog = true}, nav)
 
     }
 }
@@ -112,9 +113,10 @@ fun TopBar(nav: NavController, content: String) {
             imageVector = Icons.Default.ArrowBack,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier
+                .size(24.dp)
                 .clickable {
-                    nav.navigate(Routes.Setting.route){
+                    nav.navigate(Routes.Setting.route) {
                         launchSingleTop = true
                     }
                 },
@@ -209,7 +211,6 @@ fun BodyProfile(
     profileViewModel: ProfileViewModel,
     isFriend: String,
     changeShowDialog: () -> Unit,
-    token: String,
     nav: NavController
 ) {
     Column(
@@ -390,13 +391,20 @@ fun BodyProfile(
                         )
 
                         Spacer(modifier = Modifier.width(25.dp))
-
-                        Text(
-                            text = profileViewModel.favorites.value,
-                            fontSize = fontsContent,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                        )
+                        var favorites = ""
+                        if(profileViewModel.favorites.value != ""){
+                            favorites = profileViewModel.convertFavorites()
+                        }
+                        LazyRow{
+                            item{
+                                Text(
+                                    text = favorites,
+                                    fontSize = fontsContent,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                )
+                            }
+                        }
                     }
                 }
             }

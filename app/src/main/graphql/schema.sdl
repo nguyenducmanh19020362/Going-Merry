@@ -14,7 +14,7 @@ type User {
 	gender: Gender
 	address: String
 	avatar: String
-	favorites: String
+	favorites: [String!]
 }
 
 type Conversation {
@@ -80,7 +80,7 @@ type Account {
 	gender: Gender
 	address: String
 	avatar: String
-	favorites: String
+	favorites: [String!]
 	groups: [Group!]!
 	conversations: [Conversation!]!
 	friends: [User!]!
@@ -102,7 +102,7 @@ input AccountInput {
 	gender: Gender
 	address: String
 	avatar: String
-	favorites: String
+	favorites: [String!]
 }
 
 enum FriendRequestReply {

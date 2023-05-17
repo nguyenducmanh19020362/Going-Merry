@@ -124,6 +124,7 @@ fun ScreenStart(
         }
 
         composable(Routes.Welcome.route){
+            profileViewModel.reset()
             WelcomeScreen(navController = navController,
                 signupViewModel = signUpViewModel, loginViewModel = loginViewModel,
                 startScreenViewModel = startScreenViewModel, dataStore = data)
@@ -155,6 +156,7 @@ fun ScreenStart(
         composable(Routes.Home.route){
             chatBoxViewModel.resetListReceiverMessage()
             ScreenHome(loginViewModel, chatBoxViewModel = chatBoxViewModel, homeViewModel = homeViewModel, navController)
+            loginViewModel.isSuccessLogin.value = 0
         }
 
         composable(Routes.SignUp.route){

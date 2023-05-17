@@ -74,6 +74,27 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
     val conversations by homeViewModel.conversations.collectAsState()
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
 
+    if(homeViewModel.firstLogin.value){
+        nav.navigate(Routes.FillInfo.route){
+            popUpTo(Routes.Home.route){
+                inclusive = true
+            }
+        }
+        homeViewModel.firstLogin.value = false
+    }
+    if(homeViewModel.idAccount.value == ""){
+        Column (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ){
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(16.dp),
+                color = Color.White
+            )
+        }
+    }
     Column (modifier = Modifier.fillMaxHeight()){
         Column(
             modifier = Modifier

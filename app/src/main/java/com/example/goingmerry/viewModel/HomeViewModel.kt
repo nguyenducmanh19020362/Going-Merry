@@ -35,6 +35,7 @@ class HomeViewModel: ViewModel(){
     val nameAccount = mutableStateOf("")
     val avatarAccount =  mutableStateOf("")
     val stateIncognito = mutableStateOf(false)
+    val firstLogin = mutableStateOf(false)
     fun findPeoples(matcher: String, model: LoginViewModel){
         viewModelScope.launch (Dispatchers.IO){
             try {
@@ -90,11 +91,13 @@ class HomeViewModel: ViewModel(){
                             _conversations.tryEmit(response.data!!.account.conversations)
                             idAccount.value = response.data!!.account.id
                             nameAccount.value = response.data!!.account.name
+                            if(nameAccount.value.isNotEmpty()){
+                                firstLogin.value = true
+                            }
                             avatarAccount.value = response.data!!.account.avatar.orEmpty()
                             stateIncognito.value = response.data?.account?.incognito!!
                             _listRequestAddFriend.tryEmit(response.data!!.account.friendRequests)
                         }
-                        Log.e("Abcdef", response.data.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {

@@ -101,10 +101,13 @@ fun BodyFill(
     var nameAccount by rememberSaveable { mutableStateOf(profileViewModel.name.value) }
     var birthDate by rememberSaveable { mutableStateOf(profileViewModel.age.value) }
     var address by rememberSaveable { mutableStateOf(profileViewModel.address.value) }
+    if(profileViewModel.address.value == ""){
+        address = "An Giang"
+    }
     val selectedGender = remember { mutableStateOf(profileViewModel.gender.value) }
     var job by rememberSaveable { mutableStateOf(profileViewModel.job.value) }
-    var hobby by rememberSaveable { mutableStateOf(profileViewModel.favorites.value) }
-    val selectedHobbies = remember { mutableStateListOf<String>() }
+    //var hobby by rememberSaveable { mutableStateOf(profileViewModel.favorites.value) }
+    val selectedHobbies = remember { convertHobbiesToList(profileViewModel.favorites.value) }
     val hobbies = listOf(
         "Reading",
         "Playing games",
@@ -150,6 +153,9 @@ fun BodyFill(
     }
 
     if (clickComplete) {
+        for(a in selectedHobbies){
+            Log.e("hobbies", a)
+        }
         var render = Gender.MALE
         if (selectedGender.value == "Nữ") {
             render = Gender.FEMALE
@@ -163,7 +169,7 @@ fun BodyFill(
             val newAvatar = "$lenFileName$fileName;${encodeFile(uri)}"
             Log.e(
                 "information",
-                "$nameAccount $birthDate $address ${selectedGender.value} $job $hobby"
+                "$nameAccount $birthDate $address ${selectedGender.value} $job $selectedHobbies"
             )
             if (birthDate != "" && nameAccount != "") {
                 val input = AccountInput(
@@ -173,13 +179,17 @@ fun BodyFill(
                     Input.fromNullable(render),
                     Input.fromNullable(address),
                     Input.fromNullable(newAvatar),
-                    Input.fromNullable(hobby)
+                    Input.fromNullable(selectedHobbies)
                 )
                 fillInfoViewModel.updateAccount(token, input)
             } else {
                 fillInfoViewModel.state.value = 1
             }
         } else {
+            Log.e(
+                "information",
+                "$nameAccount $birthDate $address ${selectedGender.value} $job $selectedHobbies"
+            )
             if (birthDate != "" && nameAccount != "") {
                 val input = AccountInput(
                     Input.fromNullable(nameAccount),
@@ -188,7 +198,7 @@ fun BodyFill(
                     Input.fromNullable(render),
                     Input.fromNullable(address),
                     Input.absent(),
-                    Input.fromNullable(hobby)
+                    Input.fromNullable(selectedHobbies)
                 )
                 fillInfoViewModel.updateAccount(token, input)
             } else {
@@ -443,17 +453,8 @@ fun BodyFill(
 
             Spacer(modifier = Modifier.height(5.dp))
 
-//            TextField(
-//                value = hobby,
-//                onValueChange = { hobby = it },
-//                modifier = Modifier
-//                    .padding(bottom = 15.dp)
-//                    .height(60.dp)
-//                    .width(295.dp)
-//                    .clip(RoundedCornerShape(10.dp))
-//                    .background(MaterialTheme.colors.secondaryVariant),
-//                shape = RoundedCornerShape(10.dp)
-//            )
+
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -691,6 +692,23 @@ fun getNameFile(uri: Uri): String {
 fun getLenNameFile(realFileName: String): String {
     val len = realFileName.length
     return String.format("%03d", len)
+}
+
+fun convertHobbiesToList(favorites: String): MutableList<String>{
+    return if(favorites == ""){
+        mutableStateListOf()
+    }else{
+        if(favorites.length > 2){
+            val str = favorites.subSequence(1, favorites.length - 1)
+            val list = mutableStateListOf<String>()
+            for(value in str.split(", ")){
+                list.add(value)
+            }
+            return list
+        }else{
+             mutableStateListOf()
+        }
+    }
 }
 
 

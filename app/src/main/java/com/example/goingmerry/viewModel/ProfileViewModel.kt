@@ -49,6 +49,9 @@ class ProfileViewModel: ViewModel(){
                         name.value = response.data!!.user.name
                         age.value = response.data!!.user.birthday.toString()
                         job.value = response.data!!.user.job.toString()
+                        if(job.value == "null"){
+                            job.value = ""
+                        }
                         gender.value = response.data!!.user.gender.toString()
                         address.value = response.data!!.user.address.toString()
                         avatar.value = response.data!!.user.avatar.toString()
@@ -124,6 +127,26 @@ class ProfileViewModel: ViewModel(){
                 Log.d("error", e.toString())
             }
         }
+    }
+
+    fun convertFavorites(): String{
+        val len = favorites.value.length
+        return if(len > 2)
+        {
+            favorites.value.subSequence(1, len - 1).toString()
+        }else{
+            return ""
+        }
+    }
+
+    fun reset(){
+        name.value = ""
+        age.value = ""
+        job.value = ""
+        gender.value = ""
+        address.value = ""
+        avatar.value = ""
+        favorites.value = ""
     }
 }
 
