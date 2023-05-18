@@ -3,6 +3,7 @@ package com.example.goingmerry.repository
 import ForgotPasswordDto
 import ResetPassword
 import com.example.goingmerry.dataTransferObjects.*
+import com.example.goingmerry.navigate.Routes
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
@@ -33,4 +34,13 @@ interface AuthApiService {
 
     @POST("/reset-password")
     suspend fun resetPassword(@Body body: ResetPassword): Response<Unit>
+
+    @POST("/change-password")
+    suspend fun changePassword(@Body body: ChangePassword): Response<Unit>
+
+    @POST("/request-deleted-account")
+    suspend fun reqDelAcc(@Body body: ReqDelAcc): Response<Unit>
+
+    @POST("/delete-account")
+    suspend fun deleteAccount(@Body body: DeleteAccount): Response<Unit>
 }

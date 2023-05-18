@@ -32,12 +32,21 @@ import coil.request.ImageRequest
 import com.example.goingmerry.*
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.ui.setting.CustomDialog
 import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 
 @Composable
-fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore,
-                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel, token: String) {
+fun SettingScreen(
+    navController: NavController,
+    name: String,
+    avatar: String,
+    idAccount: String,
+    data: DataStore,
+    chatBoxViewModel: ChatBoxViewModel,
+    anonymousChatViewModel: AnonymousChatViewModel,
+    token: String
+) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -58,12 +67,12 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 }
             },
             onNavigateToListAddFriend = {
-                navController.navigate(Routes.ListRequestAddFriend.route){
+                navController.navigate(Routes.ListRequestAddFriend.route) {
                     launchSingleTop = true
                 }
             },
             onNavigateToGroupManager = {
-                navController.navigate(Routes.GroupManager.route){
+                navController.navigate(Routes.GroupManager.route) {
                     launchSingleTop = true
                 }
             },
@@ -92,7 +101,7 @@ fun TopBar(
     var sizeBar = 300.dp
     var fonts = 25.sp
     var sizeImage = 90.dp
-    if(ScreenSizes.type() == TypeScreen.Compat){
+    if (ScreenSizes.type() == TypeScreen.Compat) {
         sizeBar = 200.dp
         fonts = 20.sp
         sizeImage = 70.dp
@@ -204,18 +213,37 @@ fun BodyScreen(
     var showProgressBar by rememberSaveable {
         mutableStateOf(false)
     }
-    if(showProgressBar){
-        Column (
+
+    if (showProgressBar) {
+        Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ){
+        ) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .padding(16.dp)
             )
         }
     }
+
+    val onClickChangePass = remember { mutableStateOf(false) }
+    val onClickDeletedAcc = remember { mutableStateOf(false) }
+
+    if (onClickChangePass.value) {
+        CustomDialog(
+            title = "Cập nhật mật khẩu",
+            onDismiss = { onClickChangePass.value = false }
+            )
+    }
+
+    if (onClickDeletedAcc.value) {
+        CustomDialog(
+            title = "Xác nhận xóa tài khoản",
+            onDismiss = { onClickDeletedAcc.value = false }
+        )
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -224,10 +252,10 @@ fun BodyScreen(
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(MaterialTheme.colors.primary)
     ) {
-        var size  = 40.dp
-        var fonts = 25.sp
-        var cardHeight = 80.dp
-        if(ScreenSizes.type() == TypeScreen.Compat){
+        var size = 30.dp
+        var fonts = 20.sp
+        var cardHeight = 60.dp
+        if (ScreenSizes.type() == TypeScreen.Compat) {
             cardHeight = 60.dp
             size = 30.dp
             fonts = 20.sp
@@ -423,7 +451,7 @@ fun BodyScreen(
                 .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
-
+                    onClickChangePass.value = true
                 })
         ) {
             Row(
@@ -463,7 +491,7 @@ fun BodyScreen(
         LogoutCard(
             onNavigateToWelcome = {
                 navController.navigate("welcome") {
-                    popUpTo(Routes.Setting.route){
+                    popUpTo(Routes.Setting.route) {
                         inclusive = true
                     }
                 }
@@ -486,7 +514,7 @@ fun BodyScreen(
                 .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
-
+                    onClickDeletedAcc.value = true
                 })
         ) {
             Row(
@@ -533,10 +561,10 @@ fun LogoutCard(
     changeProgressBar: (value: Boolean) -> Unit
 ) {
     val showDialog = remember { mutableStateOf(false) }
-    var clickOk by rememberSaveable{ mutableStateOf(false) }
-    var exit by rememberSaveable{ mutableStateOf(0) }
-    if(clickOk){
-        LaunchedEffect(key1 = Unit){
+    var clickOk by rememberSaveable { mutableStateOf(false) }
+    var exit by rememberSaveable { mutableStateOf(0) }
+    if (clickOk) {
+        LaunchedEffect(key1 = Unit) {
             chatBoxViewModel.jobReceiver?.cancel()
             chatBoxViewModel.sendJob?.cancel()
             anonymousChatViewModel.jobSend?.cancel()
@@ -545,20 +573,20 @@ fun LogoutCard(
             clickOk = false
         }
     }
-    if(exit == 2){
+    if (exit == 2) {
         onNavigateToWelcome()
         exit = 0
     }
-    if(exit == 1){
+    if (exit == 1) {
         changeProgressBar(true)
-    }else{
+    } else {
         changeProgressBar(false)
     }
 
-    var size  = 40.dp
-    var fonts = 25.sp
-    var cardHeight = 80.dp
-    if(ScreenSizes.type() == TypeScreen.Compat){
+    var size = 30.dp
+    var fonts = 20.sp
+    var cardHeight = 60.dp
+    if (ScreenSizes.type() == TypeScreen.Compat) {
         cardHeight = 60.dp
         size = 30.dp
         fonts = 20.sp

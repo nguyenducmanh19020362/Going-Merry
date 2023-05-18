@@ -6,9 +6,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.goingmerry.dataTransferObjects.ExchangeToken
-import com.example.goingmerry.dataTransferObjects.ReTokenDto
-import com.example.goingmerry.dataTransferObjects.VerifyAccountDto
+import com.example.goingmerry.dataTransferObjects.*
 import com.example.goingmerry.repository.Retrofit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -88,6 +86,39 @@ class VerifyViewModel : ViewModel() {
             val responseService = authService.resetPassword(ResetPassword(password = newPassword, token = resetPasswordToken!!))
             if (responseService.isSuccessful) {
                 Log.e("tag", "Password changed successfully")
+            }
+        }
+    }
+
+    fun changePassword(oldPassword: String, newPassword: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val authService = Retrofit.getAuthService()
+            val responseService =
+                authService.changePassword(ChangePassword(oldPassword, newPassword))
+            if (responseService.isSuccessful) {
+                Log.e("tag", "Changed password successfully")
+            }
+        }
+    }
+
+    fun reqDelAcc(password: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val authService = Retrofit.getAuthService()
+            val responseService =
+                authService.reqDelAcc(ReqDelAcc(password))
+            if (responseService.isSuccessful) {
+                Log.e("tag", "Verify code sent successfully")
+            }
+        }
+    }
+
+    fun deleteAccount(token: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val authService = Retrofit.getAuthService()
+            val responseService =
+                authService.deleteAccount(DeleteAccount(token))
+            if (responseService.isSuccessful) {
+                Log.e("tag", "Deleted account")
             }
         }
     }

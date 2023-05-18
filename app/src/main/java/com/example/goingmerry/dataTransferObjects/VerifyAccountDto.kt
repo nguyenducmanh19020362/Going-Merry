@@ -23,3 +23,16 @@ data class ResponseStatus(
 data class ResponseResetPasswordToken(
     @SerializedName("data") val responseToken: String
 )
+
+data class ChangePassword(
+    @SerializedName("oldPassword") val oldPassword: String,
+    @SerializedName("newPassword") val newPassword: String
+)
+
+data class ReqDelAcc(
+    @SerializedName("password") val password: String
+)
+
+data class DeleteAccount(
+    @SerializedName("token") val token: String
+)
