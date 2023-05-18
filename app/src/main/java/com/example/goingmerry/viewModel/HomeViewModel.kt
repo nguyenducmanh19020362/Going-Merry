@@ -91,7 +91,7 @@ class HomeViewModel: ViewModel(){
                             _conversations.tryEmit(response.data!!.account.conversations)
                             idAccount.value = response.data!!.account.id
                             nameAccount.value = response.data!!.account.name
-                            if(nameAccount.value.isNotEmpty()){
+                            if(nameAccount.value == ""){
                                 firstLogin.value = true
                             }
                             avatarAccount.value = response.data!!.account.avatar.orEmpty()

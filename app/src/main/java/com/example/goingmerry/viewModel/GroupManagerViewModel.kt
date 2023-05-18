@@ -55,6 +55,7 @@ class GroupManagerViewModel: ViewModel() {
                 val users = apolloClient.query(GetGroupsQuery())
                 users.enqueue(object: ApolloCall.Callback<GetGroupsQuery.Data>(){
                     override fun onResponse(response: Response<GetGroupsQuery.Data>) {
+                        Log.e("data", response.data.toString())
                         _listGroups.tryEmit(response.data!!.account.groups)
                         _listFriends.tryEmit(response.data!!.account.friends)
                         _listChecks.tryEmit(List(response.data!!.account.friends.size){false})
@@ -126,7 +127,7 @@ class GroupManagerViewModel: ViewModel() {
             if(list.isNotEmpty()){
                 for(member in listMembers){
                     for(fri in listFriend.value){
-                        if(member.user?.id == fri.id){
+                        if(member.user?.id == fri.user.id){
                             list[listFriend.value.indexOf(fri)] = true;
                             break;
                         }

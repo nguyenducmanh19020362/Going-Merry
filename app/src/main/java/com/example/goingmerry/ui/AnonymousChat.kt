@@ -184,7 +184,7 @@ fun IncognitoMessage(content: String, id: Long) {
         modifier = Modifier
             .padding(all = 8.dp)
             .fillMaxWidth(),
-        horizontalArrangement = if(id == -1L) Arrangement.Start else Arrangement.End
+        horizontalArrangement = if(id == 0L || id == -1L) Arrangement.Start else Arrangement.End
     ) {
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -195,7 +195,7 @@ fun IncognitoMessage(content: String, id: Long) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val backgroundBody = if(id != -1L) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
+            val backgroundBody = if(id != 0L && id != -1L) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 elevation = 1.dp,

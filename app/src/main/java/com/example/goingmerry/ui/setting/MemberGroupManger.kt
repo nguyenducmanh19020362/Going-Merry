@@ -111,7 +111,7 @@ fun MemberGroupManager(listMembers: List<GetGroupsQuery.Member>, groupManagerVie
                         )
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data("${URL.urlServer}${member.avatar}")
+                                .data("${URL.urlServer}${member.user.avatar}")
                                 .setHeader("Authorization", "Bearer $token").build(),
                             imageLoader = imageLoader,
                             contentDescription = "Ẩn danh",
@@ -122,7 +122,7 @@ fun MemberGroupManager(listMembers: List<GetGroupsQuery.Member>, groupManagerVie
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = member.name,
+                            text = member.user.name,
                             style = MaterialTheme.typography.subtitle2,
                             fontSize = 20.sp,
                             modifier = Modifier.padding(5.dp)
@@ -153,7 +153,7 @@ fun MemberGroupManager(listMembers: List<GetGroupsQuery.Member>, groupManagerVie
                             for (fri in listFriend) {
                                 if (listChecks[listFriend.indexOf(fri)]) {
                                     val member = GroupMemberInput(
-                                        Input.fromNullable(fri.id),
+                                        Input.fromNullable(fri.user.id),
                                         Input.fromNullable(UserRole.MEMBER)
                                     )
                                     list = list + member

@@ -90,9 +90,14 @@ query GetGroups{
             }
         }
         friends{
-            id
-            name
-            avatar
+            user{
+                id
+                name
+                avatar
+            }
+            conversation{
+                id
+            }
         }
     }
 }

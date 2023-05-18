@@ -57,9 +57,6 @@ import kotlinx.coroutines.flow.asStateFlow
 fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeViewModel: HomeViewModel, nav: NavController){
     val listPeople by homeViewModel.listPeople.collectAsState()
     var wordSearch by rememberSaveable { mutableStateOf("") }
-    var buttonSearch by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     var typeList by rememberSaveable {
         mutableStateOf("Friend")
@@ -73,8 +70,8 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
 
     val conversations by homeViewModel.conversations.collectAsState()
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
-
-    if(homeViewModel.firstLogin.value){
+    if(homeViewModel.firstLogin.value && homeViewModel.idAccount.value != ""){
+        Log.e("in", homeViewModel.firstLogin.value.toString())
         nav.navigate(Routes.FillInfo.route){
             popUpTo(Routes.Home.route){
                 inclusive = true
@@ -166,6 +163,7 @@ fun ScreenHome(model: LoginViewModel,chatBoxViewModel: ChatBoxViewModel, homeVie
             ListPeople(listPeople, nav, model.token.value)
         }
     }
+    model.isSuccessLogin.value = 0
 }
 
 @Composable

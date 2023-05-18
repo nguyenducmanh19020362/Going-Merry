@@ -71,6 +71,11 @@ type FriendRequest {
 	sendAt: Int!
 }
 
+type Friend {
+  user: User!
+  conversation: Conversation
+}
+
 type Account {
 	id: ID!
 	name: String!
@@ -83,7 +88,7 @@ type Account {
 	favorites: [String!]
 	groups: [Group!]!
 	conversations: [Conversation!]!
-	friends: [User!]!
+	friends: [Friend!]!
 	friendRequests: [FriendRequest!]!
 	blacklist: [User!]!
 	myRequests: [FriendRequest!]!

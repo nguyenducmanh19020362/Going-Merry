@@ -28,7 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.net.URL
 import java.time.Instant
 
 class AnonymousChatViewModel: ViewModel() {
@@ -78,7 +77,7 @@ class AnonymousChatViewModel: ViewModel() {
                 }
             }
             try {
-                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = com.example.goingmerry.URL.host, port = 8080)
+                val rSocket: RSocket = client.rSocket(com.example.goingmerry.URL.host)
 
                 val stream: Flow<Payload> = rSocket.requestStream(
                     buildPayload {
@@ -119,7 +118,7 @@ class AnonymousChatViewModel: ViewModel() {
                 }
             }
             try{
-                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = com.example.goingmerry.URL.host, port = 8080)
+                val rSocket: RSocket = client.rSocket(com.example.goingmerry.URL.host)
 
                 rSocket.requestChannel(
                     buildPayload {
