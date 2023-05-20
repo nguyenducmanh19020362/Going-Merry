@@ -102,9 +102,9 @@ fun ForgotPasswordScreen(
 
             Button(
                 onClick = {
-                navController.navigate(Routes.SignIn.route){
-                    launchSingleTop = true
-                }
+                    navController.navigate(Routes.SignIn.route) {
+                        launchSingleTop = true
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
                 shape = RoundedCornerShape(10.dp),
