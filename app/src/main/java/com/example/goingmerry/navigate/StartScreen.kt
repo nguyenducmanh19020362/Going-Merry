@@ -15,10 +15,11 @@ import com.example.goingmerry.ui.AnonymousChat
 import com.example.goingmerry.ui.ChatBox
 import com.example.goingmerry.ui.ChatBoxGroup
 import com.example.goingmerry.ui.home.ScreenHome
+import com.example.goingmerry.ui.home.SettingScreen
 import com.example.goingmerry.ui.signInSignUp.ScreenSignIn
 import com.example.goingmerry.ui.signInSignUp.ScreenSignUp
 import com.example.goingmerry.ui.signInSignUp.WelcomeScreen
-import com.example.goingmerry.ui.home.SettingScreen
+//import com.example.goingmerry.ui.setting.SettingScreen
 import com.example.goingmerry.ui.setting.*
 import com.example.goingmerry.ui.signInSignUp.*
 import com.example.goingmerry.viewModel.*
@@ -67,7 +68,7 @@ fun ScreenStart(
 
         composable(Routes.Setting.route){
             SettingScreen(navController, homeViewModel.nameAccount.value, homeViewModel.avatarAccount.value,
-            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel, loginViewModel.token.value)
+            homeViewModel.idAccount.value, data, chatBoxViewModel, anonymousChatViewModel, loginViewModel.token.value, verifyViewModel, loginViewModel)
         }
 
         composable(Routes.UserInfo.route){
