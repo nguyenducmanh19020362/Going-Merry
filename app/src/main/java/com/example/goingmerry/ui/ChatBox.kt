@@ -109,7 +109,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
     Column {
         for(member in conversation.members){
             if(member.id != id){
-                TopBar(member, nav)
+                TopBar(member, nav, token)
             }else{
                 nameUser = member.name
             }
@@ -349,7 +349,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
 }
 
 @Composable
-fun TopBar(member: AccountQuery.Member, nav: NavController){
+fun TopBar(member: AccountQuery.Member, nav: NavController, token: String){
     val imageLoader = ImageLoader(context = LocalContext.current)
     TopAppBar (
         modifier = Modifier
@@ -358,7 +358,9 @@ fun TopBar(member: AccountQuery.Member, nav: NavController){
         backgroundColor = MaterialTheme.colors.secondaryVariant,
         title = {
             AsyncImage(
-                model = "${URL.urlServer}${member.avatar}",
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${URL.urlServer}${member.avatar}")
+                    .setHeader("Authorization", "Bearer $token").build(),
                 imageLoader = imageLoader,
                 contentDescription = "Friend",
                 contentScale = ContentScale.Crop,

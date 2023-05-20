@@ -133,7 +133,9 @@ fun ScreenStart(
 
         composable(Routes.SignIn.route){
             chatBoxViewModel.stateSockets.value = "OFF"
+            Log.e("StartScreen", loginViewModel.isSuccessLogin.value.toString())
             if(loginViewModel.isSuccessLogin.value == 2){
+                Log.e("StartScreen", loginViewModel.firstLogin.value.toString())
                 LaunchedEffect(key1 = Unit){
                     navController.navigate(route = Routes.Home.route){
                         popUpTo(route = Routes.SignIn.route) {
@@ -157,7 +159,6 @@ fun ScreenStart(
         composable(Routes.Home.route){
             chatBoxViewModel.resetListReceiverMessage()
             ScreenHome(loginViewModel, chatBoxViewModel = chatBoxViewModel, homeViewModel = homeViewModel, navController)
-            loginViewModel.isSuccessLogin.value = 0
         }
 
         composable(Routes.SignUp.route){

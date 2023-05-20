@@ -78,7 +78,7 @@ class ChatBoxViewModel: ViewModel() {
                 }
             }
             try{
-                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = URL.host, port = 8080)
+                val rSocket: RSocket = client.rSocket(URL.host)
                 val stream: Flow<Payload> = rSocket.requestStream(
                     buildPayload {
                         compositeMetadata {
@@ -138,7 +138,7 @@ class ChatBoxViewModel: ViewModel() {
                 }
             }
             try {
-                val rSocket: RSocket = client.rSocket(path = "/rsocket", host = URL.host, port = 8080)
+                val rSocket: RSocket = client.rSocket(URL.host)
 
                 rSocket.requestChannel(
                     buildPayload {

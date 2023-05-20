@@ -38,6 +38,7 @@ class LoginViewModel : ViewModel() {
                         expiredToken.value = tokenDto.tokenVerify.expire
                         data.saveToken(token.value, Instant.parse(expiredToken.value).epochSecond)
                         firstLogin.value = tokenDto.tokenVerify.enough
+                        Log.e("loginViewModel", "${firstLogin.value} ${tokenDto.tokenVerify.enough}")
                         Log.e("Logging", "Response TokenDto: $tokenDto")
                     }
                     if(!firstLogin.value){
