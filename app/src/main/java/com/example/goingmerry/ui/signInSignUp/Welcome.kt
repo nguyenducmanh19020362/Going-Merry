@@ -130,7 +130,7 @@ fun Banner() {
         Text(
             text = "Chào mừng bạn đến với Going Merry!",
             fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = Color.Black,
             textAlign = TextAlign.Center,
             modifier = Modifier

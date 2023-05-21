@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,10 +82,11 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
         ) {
             Text(
                 text = "Thông tin tài khoản",
-                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Left,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
-                    .offset(x = (-75).dp)
+                    .width(295.dp)
             )
 
 
@@ -96,7 +98,8 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
             if (invalidEmailNotification) {
                 Text(
                     text = "Email không hợp lệ",
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.padding(bottom = 10.dp).width(295.dp),
                     color = MaterialTheme.colors.error
                 )
             }
@@ -104,7 +107,8 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
             if (loginViewModel.isSuccessLogin.value == 1) {
                 Text(
                     text = "Đăng nhập thất bại, xin hãy thử lại",
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.padding(bottom = 10.dp).width(295.dp),
                     color = MaterialTheme.colors.error
                 )
             }
@@ -126,9 +130,10 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
             Text(
                 text = "Quên mật khẩu?",
                 fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Left,
                 color = MaterialTheme.colors.primaryVariant,
                 modifier = Modifier
-                    .offset(x = (-85).dp)
+                    .width(295.dp)
                     .padding(top = 10.dp)
                     .clickable(onClick = {
                         navController.navigate(Routes.ForgotPassword.route) {
@@ -136,6 +141,29 @@ fun ScreenSignIn(navController: NavController, loginViewModel: LoginViewModel, d
                         }
                     })
             )
+
+            Row(
+                modifier = Modifier.width(295.dp)
+            ) {
+                Text(
+                    text = "Chưa có tài khoản? ",
+                    textAlign = TextAlign.Left,
+                    color = Color.Black
+                )
+
+                Text(
+                    text = " Đăng ký",
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Left,
+                    color = MaterialTheme.colors.primaryVariant,
+                    modifier = Modifier
+                        .clickable(onClick = {
+                            navController.navigate(Routes.SignUp.route) {
+                                launchSingleTop = true
+                            }
+                        })
+                )
+            }
         }
     }
 }
@@ -253,7 +281,7 @@ fun LogoApp() {
             text = "Going Merry",
             fontSize = 45.sp,
             color = Color.White,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

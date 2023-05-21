@@ -157,7 +157,8 @@ fun VerificationScreen(
         if (errorAuthenCode) {
             Text(
                 text = "Mã xác thực không chính xác!",
-                modifier = Modifier.padding(bottom = 10.dp),
+                textAlign = TextAlign.Left,
+                modifier = Modifier.padding(bottom = 10.dp).width(295.dp),
                 color = MaterialTheme.colors.error
             )
         }
@@ -178,10 +179,12 @@ fun VerificationScreen(
         }
 
         Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(bottom = 15.dp)
+            modifier = Modifier.padding(bottom = 15.dp).width(295.dp)
         ) {
-            Text(text = "Chưa nhận được email? ")
+            Text(
+                text = "Chưa nhận được email? ",
+                textAlign = TextAlign.Left,
+            )
 
             Spacer(modifier = Modifier.width(5.dp))
 
