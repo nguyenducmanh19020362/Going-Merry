@@ -19,13 +19,10 @@ object Retrofit {
         val builder = Retrofit.Builder()
             .baseUrl("${URL.urlServer}")
             .addConverterFactory(GsonConverterFactory.create(gson))
-        //val loggingInterceptor = HttpLoggingInterceptor()
 
         val okHttpClient = OkHttpClient.Builder()
-            //.addInterceptor(loggingInterceptor)
-            .writeTimeout(0, TimeUnit.MILLISECONDS)
             .writeTimeout(2, TimeUnit.MINUTES)
-            .connectTimeout(1, TimeUnit.MINUTES).build()
+            .connectTimeout(3, TimeUnit.MINUTES).build()
         retrofit = builder.client(okHttpClient).build()
     }
 

@@ -86,18 +86,17 @@ class HomeViewModel: ViewModel(){
                 val conversation = apolloClient.query(AccountQuery())
                 conversation.enqueue(object: ApolloCall.Callback<AccountQuery.Data>(){
                     override fun onResponse(response: Response<AccountQuery.Data>) {
-                        if(response.data != null){
                             //Log.e("dbt", response.data.toString())
-                            _conversations.tryEmit(response.data!!.account.conversations)
-                            idAccount.value = response.data!!.account.id
-                            nameAccount.value = response.data!!.account.name
-                            if(nameAccount.value == ""){
-                                firstLogin.value = true
-                            }
-                            avatarAccount.value = response.data!!.account.avatar.orEmpty()
-                            stateIncognito.value = response.data?.account?.incognito!!
-                            _listRequestAddFriend.tryEmit(response.data!!.account.friendRequests)
+                        _conversations.tryEmit(response.data!!.account.conversations)
+                        idAccount.value = response.data!!.account.id
+                        nameAccount.value = response.data!!.account.name
+                        if(nameAccount.value == ""){
+                            firstLogin.value = true
                         }
+                        avatarAccount.value = response.data!!.account.avatar.orEmpty()
+                        stateIncognito.value = response.data?.account?.incognito!!
+                        _listRequestAddFriend.tryEmit(response.data!!.account.friendRequests)
+                        Log.e("dbt", response.data.toString())
                     }
 
                     override fun onFailure(e: ApolloException) {

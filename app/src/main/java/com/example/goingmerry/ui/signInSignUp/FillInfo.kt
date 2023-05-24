@@ -681,7 +681,7 @@ fun getNameFile(uri: Uri): String {
     var realFileName = "";
     val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
     val cr: ContentResolver = LocalContext.current.contentResolver
-    cr.query(uri, projection, null, null, null)?.use { metaCursor ->
+     cr.query(uri, projection, null, null, null)?.use { metaCursor ->
         if (metaCursor.moveToFirst()) {
             realFileName = metaCursor.getString(0)
         }
