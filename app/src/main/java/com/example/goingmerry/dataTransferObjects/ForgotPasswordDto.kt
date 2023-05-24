@@ -4,7 +4,7 @@ data class ForgotPasswordDto(
     @SerializedName("email") val email: String
 )
 
-data class ResetPassword(
+data class ResetPasswordDto(
     @SerializedName("password") val password: String,
     @SerializedName("token") val token: String
 )

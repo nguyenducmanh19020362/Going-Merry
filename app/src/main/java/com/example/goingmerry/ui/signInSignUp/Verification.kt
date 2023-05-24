@@ -1,5 +1,6 @@
 package com.example.goingmerry.ui.signInSignUp
 
+import android.widget.Toast
 import com.example.goingmerry.viewModel.VerifyViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.goingmerry.navigate.Routes
 import kotlinx.coroutines.delay
+import java.util.Currency
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -40,6 +43,7 @@ fun VerificationScreen(
     var verificationCode by rememberSaveable { mutableStateOf("") }
     var buttonOnClick by rememberSaveable { mutableStateOf(false) }
     var errorAuthenCode by rememberSaveable { mutableStateOf(false) }
+    val ctx = LocalContext.current
 
     // Khởi tạo một State để lưu trữ trạng thái của đồng hồ đếm ngược
     val isCountingDown = remember { mutableStateOf(false) }
@@ -64,6 +68,21 @@ fun VerificationScreen(
                 verifyViewModel.exchangeToken(verificationCode)
                 navController.navigate(Routes.ChangePassword.route + "/$verificationCode") {
                     launchSingleTop = true
+                }
+            }
+
+            typeToken == "delete-account" -> {
+                verifyViewModel.deleteAccount(verificationCode)
+                when (verifyViewModel.isDeleted.value) {
+                    1 -> {
+                        Toast.makeText(ctx, "Đã xóa tài khoản", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Routes.Welcome.route) { launchSingleTop = true }
+                    }
+
+                    2 -> {
+                        isCountingDown.value = true
+                        errorAuthenCode = true
+                    }
                 }
             }
         }
@@ -138,7 +157,8 @@ fun VerificationScreen(
         if (errorAuthenCode) {
             Text(
                 text = "Mã xác thực không chính xác!",
-                modifier = Modifier.padding(bottom = 10.dp),
+                textAlign = TextAlign.Left,
+                modifier = Modifier.padding(bottom = 10.dp).width(295.dp),
                 color = MaterialTheme.colors.error
             )
         }
@@ -159,10 +179,12 @@ fun VerificationScreen(
         }
 
         Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(bottom = 15.dp)
+            modifier = Modifier.padding(bottom = 15.dp).width(295.dp)
         ) {
-            Text(text = "Chưa nhận được email? ")
+            Text(
+                text = "Chưa nhận được email? ",
+                textAlign = TextAlign.Left,
+            )
 
             Spacer(modifier = Modifier.width(5.dp))
 

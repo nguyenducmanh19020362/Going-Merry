@@ -1,6 +1,7 @@
 package com.example.goingmerry.ui.home
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -21,9 +24,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
@@ -32,12 +37,26 @@ import coil.request.ImageRequest
 import com.example.goingmerry.*
 import com.example.goingmerry.R
 import com.example.goingmerry.navigate.Routes
+import com.example.goingmerry.ui.signInSignUp.InputPasswordField
+import com.example.goingmerry.ui.signInSignUp.InputRePasswordField
 import com.example.goingmerry.viewModel.AnonymousChatViewModel
 import com.example.goingmerry.viewModel.ChatBoxViewModel
+import com.example.goingmerry.viewModel.LoginViewModel
+import com.example.goingmerry.viewModel.VerifyViewModel
 
 @Composable
-fun SettingScreen(navController: NavController, name: String, avatar: String, idAccount: String, data: DataStore,
-                  chatBoxViewModel: ChatBoxViewModel, anonymousChatViewModel: AnonymousChatViewModel, token: String) {
+fun SettingScreen(
+    navController: NavController,
+    name: String,
+    avatar: String,
+    idAccount: String,
+    data: DataStore,
+    chatBoxViewModel: ChatBoxViewModel,
+    anonymousChatViewModel: AnonymousChatViewModel,
+    token: String,
+    verifyViewModel: VerifyViewModel,
+    loginViewModel: LoginViewModel
+) {
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -58,18 +77,20 @@ fun SettingScreen(navController: NavController, name: String, avatar: String, id
                 }
             },
             onNavigateToListAddFriend = {
-                navController.navigate(Routes.ListRequestAddFriend.route){
+                navController.navigate(Routes.ListRequestAddFriend.route) {
                     launchSingleTop = true
                 }
             },
             onNavigateToGroupManager = {
-                navController.navigate(Routes.GroupManager.route){
+                navController.navigate(Routes.GroupManager.route) {
                     launchSingleTop = true
                 }
             },
             data,
             chatBoxViewModel,
-            anonymousChatViewModel
+            anonymousChatViewModel,
+            verifyViewModel,
+            loginViewModel
         )
     }
 
@@ -92,7 +113,7 @@ fun TopBar(
     var sizeBar = 300.dp
     var fonts = 25.sp
     var sizeImage = 90.dp
-    if(ScreenSizes.type() == TypeScreen.Compat){
+    if (ScreenSizes.type() == TypeScreen.Compat) {
         sizeBar = 200.dp
         fonts = 20.sp
         sizeImage = 70.dp
@@ -199,23 +220,39 @@ fun BodyScreen(
     onNavigateToGroupManager: () -> Unit,
     data: DataStore,
     chatBoxViewModel: ChatBoxViewModel,
-    anonymousChatViewModel: AnonymousChatViewModel
+    anonymousChatViewModel: AnonymousChatViewModel,
+    verifyViewModel: VerifyViewModel,
+    loginViewModel: LoginViewModel
 ) {
     var showProgressBar by rememberSaveable {
         mutableStateOf(false)
     }
-    if(showProgressBar){
-        Column (
+
+    if (showProgressBar) {
+        Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ){
+        ) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .padding(16.dp)
             )
         }
     }
+
+    val onClickChangePass = remember { mutableStateOf(false) }
+    val onClickDeletedAcc = remember { mutableStateOf(false) }
+
+    var password by rememberSaveable { mutableStateOf("") }
+    var newPassword by rememberSaveable { mutableStateOf("") }
+    var rePassword by rememberSaveable { mutableStateOf("") }
+    var wrongRePW by rememberSaveable { mutableStateOf(false) }
+    var wrongPW by rememberSaveable { mutableStateOf(false) }
+    val ctx = LocalContext.current
+    val typeToken = "delete-account"
+    val email = "của bạn"
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -224,61 +261,16 @@ fun BodyScreen(
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(MaterialTheme.colors.primary)
     ) {
-        var size  = 40.dp
-        var fonts = 25.sp
-        var cardHeight = 80.dp
-        if(ScreenSizes.type() == TypeScreen.Compat){
+        var size = 30.dp
+        var fonts = 20.sp
+        var cardHeight = 60.dp
+        if (ScreenSizes.type() == TypeScreen.Compat) {
             cardHeight = 60.dp
             size = 30.dp
             fonts = 20.sp
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-
-        // Thẻ thông tin tài khoản
-//        Card(
-//            elevation = 4.dp,
-//            backgroundColor = MaterialTheme.colors.primary,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(cardHeight)
-//                .align(Alignment.CenterHorizontally)
-//                .clickable(onClick = {
-//                    onNavigateToUserInfo()
-//                })
-//        ) {
-//            Row(
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(12.dp)
-//            ) {
-//                Row() {
-//                    Image(
-//                        painter = painterResource(id = R.drawable._user_info),
-//                        contentDescription = null,
-//                        modifier = Modifier
-//                            .size(size)
-//                    )
-//
-//                    Spacer(modifier = Modifier.width(30.dp))
-//
-//                    Text(
-//                        text = "Thông tin tài khoản",
-//                        fontSize = fonts,
-//                        fontWeight = FontWeight.Bold,
-//                        color = Color.White
-//                    )
-//                }
-//
-//                Image(
-//                    painter = painterResource(id = R.drawable._right_arrow),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .size(size)
-//                )
-//            }
-//        }
 
         // Thẻ hồ sơ người dùng
         Card(
@@ -423,7 +415,7 @@ fun BodyScreen(
                 .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
-
+                    onClickChangePass.value = true
                 })
         ) {
             Row(
@@ -458,12 +450,13 @@ fun BodyScreen(
                 )
             }
         }
+//        ChangePWCard()
 
         // Thẻ Đăng xuất
         LogoutCard(
             onNavigateToWelcome = {
                 navController.navigate("welcome") {
-                    popUpTo(Routes.Setting.route){
+                    popUpTo(Routes.Setting.route) {
                         inclusive = true
                     }
                 }
@@ -486,7 +479,7 @@ fun BodyScreen(
                 .height(cardHeight)
                 .align(Alignment.CenterHorizontally)
                 .clickable(onClick = {
-
+                    onClickDeletedAcc.value = true
                 })
         ) {
             Row(
@@ -522,6 +515,258 @@ fun BodyScreen(
             }
         }
     }
+
+    if (onClickChangePass.value) {
+        Dialog(
+            onDismissRequest = { onClickChangePass.value = false }
+        ) {
+            Card(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .clickable(
+                                onClick = { onClickChangePass.value = false }
+                            )
+                    )
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Text(
+                        text = "Cập nhật mật khẩu",
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 15.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Nhập mật khẩu hiện tại và mật khẩu mới",
+                            fontSize = 15.sp,
+                            color = Color.LightGray,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "Mật khẩu hiển tại",
+                            fontSize = 13.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier
+                                .width(295.dp)
+                                .padding(bottom = 5.dp)
+                        )
+
+                        InputPasswordField(password, onValueChange = { password = it })
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        if (wrongRePW) {
+                            Text(
+                                text = "Password nhập lại không đúng",
+                                modifier = Modifier.padding(bottom = 5.dp),
+                                color = MaterialTheme.colors.error
+                            )
+                        }
+
+                        Text(
+                            text = "Mật khẩu mới",
+                            fontSize = 13.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier
+                                .width(295.dp)
+                                .padding(bottom = 5.dp)
+                        )
+
+                        InputPasswordField(newPassword, onValueChange = { newPassword = it })
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        Text(
+                            text = "Nhập lại mật khẩu mới",
+                            fontSize = 13.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier
+                                .width(295.dp)
+                                .padding(bottom = 5.dp)
+                        )
+
+                        InputRePasswordField(rePassword, onValueChange = { rePassword = it })
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        if (wrongRePW) {
+                            Text(
+                                text = "Password nhập lại không đúng",
+                                modifier = Modifier.padding(bottom = 5.dp),
+                                color = MaterialTheme.colors.error
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextButton(
+                                onClick = { onClickChangePass.value = false }
+                            ) {
+                                Text(text = "Hủy")
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (rePassword != newPassword) {
+                                        wrongRePW = true
+                                    } else {
+                                        verifyViewModel.changePassword(loginViewModel.token.value, password, newPassword)
+                                        when (verifyViewModel.isVerified.value) {
+                                            1 -> {
+                                                Toast.makeText(ctx, "Cập nhật mật khẩu thành công!", Toast.LENGTH_SHORT).show()
+                                                onClickChangePass.value = false
+                                            }
+
+                                            2 -> Toast.makeText(ctx, "Cập nhật thất bại!", Toast.LENGTH_SHORT).show()
+                                        }
+
+                                    }
+
+                                }
+                            ) {
+                                Text(text = "Xong")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (onClickDeletedAcc.value) {
+        Dialog(onDismissRequest = { onClickDeletedAcc.value = false }) {
+            Card(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .clickable(
+                                onClick = { onClickDeletedAcc.value = false }
+                            )
+                    )
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Text(
+                        text = "Xác nhận xóa tài khoản",
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 15.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Nhập mật khẩu hiện tại để xác nhận xóa tài khoản",
+                            fontSize = 15.sp,
+                            color = Color.LightGray,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "Mật khẩu hiển tại",
+                            fontSize = 13.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier
+                                .width(295.dp)
+                                .padding(bottom = 5.dp)
+                        )
+
+                        InputPasswordField(password, onValueChange = { password = it })
+
+                        if (wrongPW) {
+                            Text(
+                                text = "Password nhập lại không đúng",
+                                modifier = Modifier.padding(top = 5.dp),
+                                color = MaterialTheme.colors.error
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextButton(
+                                onClick = { onClickDeletedAcc.value = false }
+                            ) {
+                                Text(text = "Hủy")
+                            }
+
+                            Button(
+                                onClick = {
+                                    verifyViewModel.reqDelAcc(password)
+                                    when (verifyViewModel.isReqDel.value) {
+                                        1 -> {
+                                            navController.navigate(Routes.Verification.route + "/$email/$typeToken")
+                                            { launchSingleTop = true }
+                                        }
+
+                                        2 -> wrongPW = true
+                                    }
+
+                                }
+                            ) {
+                                Text(text = "Xong")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 @Composable
@@ -533,10 +778,10 @@ fun LogoutCard(
     changeProgressBar: (value: Boolean) -> Unit
 ) {
     val showDialog = remember { mutableStateOf(false) }
-    var clickOk by rememberSaveable{ mutableStateOf(false) }
-    var exit by rememberSaveable{ mutableStateOf(0) }
-    if(clickOk){
-        LaunchedEffect(key1 = Unit){
+    var clickOk by rememberSaveable { mutableStateOf(false) }
+    var exit by rememberSaveable { mutableStateOf(0) }
+    if (clickOk) {
+        LaunchedEffect(key1 = Unit) {
             chatBoxViewModel.jobReceiver?.cancel()
             chatBoxViewModel.sendJob?.cancel()
             anonymousChatViewModel.jobSend?.cancel()
@@ -545,20 +790,20 @@ fun LogoutCard(
             clickOk = false
         }
     }
-    if(exit == 2){
+    if (exit == 2) {
         onNavigateToWelcome()
         exit = 0
     }
-    if(exit == 1){
+    if (exit == 1) {
         changeProgressBar(true)
-    }else{
+    } else {
         changeProgressBar(false)
     }
 
-    var size  = 40.dp
-    var fonts = 25.sp
-    var cardHeight = 80.dp
-    if(ScreenSizes.type() == TypeScreen.Compat){
+    var size = 30.dp
+    var fonts = 20.sp
+    var cardHeight = 60.dp
+    if (ScreenSizes.type() == TypeScreen.Compat) {
         cardHeight = 60.dp
         size = 30.dp
         fonts = 20.sp

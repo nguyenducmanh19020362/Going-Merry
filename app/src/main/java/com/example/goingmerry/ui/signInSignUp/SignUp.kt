@@ -51,7 +51,7 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
             Text(
                 text = "Tạo tài khoản của riêng bạn!",
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -64,7 +64,7 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
                 textAlign = TextAlign.Left,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
-                    .offset(x = (-75).dp)
+                    .width(295.dp)
             )
 
 
@@ -77,7 +77,8 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
             if (invalidPasswordNotification) {
                 Text(
                     text = "Password nhập lại không đúng",
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.padding(bottom = 10.dp).width(295.dp),
                     color = MaterialTheme.colors.error
                 )
             }
@@ -109,21 +110,20 @@ fun ScreenSignUp(navController: NavController, signUpViewModel: SignUpViewModel)
             }
 
             Row(
-                modifier = Modifier.padding(top = 10.dp)
+                modifier = Modifier.padding(top = 10.dp).width(295.dp)
             ) {
                 Text(
                     text = "Đã có tài khoản? ",
                     textAlign = TextAlign.Left,
-                    color = Color.Black,
-                    modifier = Modifier.offset(x = (-40).dp)
+                    color = Color.Black
                 )
 
                 Text(
                     text = " Đăng nhập",
                     fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Left,
                     color = MaterialTheme.colors.primaryVariant,
                     modifier = Modifier
-                        .offset(x = (-37).dp)
                         .clickable(onClick = {
                             navController.navigate(Routes.SignIn.route) {
                                 launchSingleTop = true
