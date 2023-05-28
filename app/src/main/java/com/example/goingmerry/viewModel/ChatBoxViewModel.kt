@@ -107,6 +107,7 @@ class ChatBoxViewModel: ViewModel() {
                                 Instant.parse(receiverMessage.sentAt).epochSecond.toInt(),
                                 receiverMessage.type
                             )
+                            Log.e("receiverMessage", directMessage.toString())
                             _listReceiverMessage.emit(listReceiverMessage.value + directMessage)
                         }
 
@@ -153,6 +154,7 @@ class ChatBoxViewModel: ViewModel() {
                             if(flag.value){
                                 Log.e("err", "sendMessage")
                                 val sendMessage = SendMessage(contentSendMessage.value, conversationId.value, typeMessage.value)
+                                Log.e("err", sendMessage.toString())
                                 val gsonSendMessage = gson.toJson(sendMessage)
                                 emitOrClose(
                                     buildPayload {

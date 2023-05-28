@@ -73,7 +73,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
 
     val directMessages by chatBoxViewModel.listReceiverMessage.collectAsState()
 
-    val lenInputMessage = if(messageTyping == "") 4f else 7f
+    val lenInputMessage = if(messageTyping == "") 3.5f else 6f
 
     var nameUser by rememberSaveable {
         mutableStateOf("")
@@ -122,6 +122,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 CircularProgressIndicator()
             }
         }
+
         LazyColumn(
             modifier = Modifier.weight(9f),
             reverseLayout = true
@@ -129,7 +130,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
             items(directMessages.sortedBy {
                 it.sendAt
             }.asReversed()){
-                message->
+                    message->
                 var avatar = "";
                 if(conversation.id == message.idConversation){
                     for(member in conversation.members){
@@ -153,13 +154,14 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 }
             }
 
+
             items(messages.sortedBy {
                 it.sendAt
             }.asReversed()){
                     message->
                 var avatar = "";
                 for(member in conversation.members){
-                    if(message.sender!!.id == member.id){
+                    if(message.sender?.id == member.id){
                         avatar = member.avatar.toString()
                         break;
                     }
@@ -182,6 +184,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                     ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
                 }
             }
+
             items(beforeMessage.sortedBy {
                 it.sendAt
             }.asReversed()){
@@ -212,9 +215,10 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 }
             }
 
+
             item{
                 LaunchedEffect(key1 = null) {
-                    if(messages.isNotEmpty()){
+                    if(messages.size > 20){
                         var idMessage: String = messages.last().id
                         if(beforeMessage.isNotEmpty()){
                             idMessage = beforeMessage.last().id

@@ -2,6 +2,7 @@ package com.example.goingmerry.ui.home
 
 import AccountQuery
 import FindUsersQuery
+import android.media.Image
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -505,6 +507,23 @@ fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController, to
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ReloadAsyncImage(token: String, size: Dp, imageLoader: ImageLoader, mode: String){
+    key(mode){
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("${URL.urlServer}${mode}")
+                .setHeader("Authorization", "Bearer $token").build(),
+            imageLoader = imageLoader,
+            contentDescription = "Ẩn danh",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(size)
+                .clip(CircleShape)
+        )
     }
 }
 

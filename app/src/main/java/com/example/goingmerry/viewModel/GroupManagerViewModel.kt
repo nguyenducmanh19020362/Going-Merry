@@ -58,7 +58,9 @@ class GroupManagerViewModel: ViewModel() {
                         Log.e("data", response.data.toString())
                         _listGroups.tryEmit(response.data!!.account.groups)
                         _listFriends.tryEmit(response.data!!.account.friends)
-                        _listChecks.tryEmit(List(response.data!!.account.friends.size){false})
+                        if(listChecks.value.isEmpty()){
+                            _listChecks.tryEmit(List(response.data!!.account.friends.size){false})
+                        }
                         _idAccount.tryEmit(response.data!!.account.id)
                         Log.e("data", response.data.toString())
                     }
@@ -123,7 +125,7 @@ class GroupManagerViewModel: ViewModel() {
     }
     fun checkMember(listMembers: List<GetGroupsQuery.Member>){
         viewModelScope.launch(Dispatchers.IO){
-            val list = listChecks.value.toMutableList()
+            val list = MutableList(listFriend.value.size){false}
             if(list.isNotEmpty()){
                 for(member in listMembers){
                     for(fri in listFriend.value){

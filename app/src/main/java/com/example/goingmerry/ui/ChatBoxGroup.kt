@@ -57,7 +57,6 @@ import java.lang.reflect.Member
 @Composable
 fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, id: String,
                  navController: NavController, token: String){
-    Log.e("idConversation", conversation.id)
     chatBoxViewModel.conversationId.value = conversation.id.toLong()
     var messageTyping by rememberSaveable { mutableStateOf("") }
     val messages by remember {
@@ -70,7 +69,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
         mutableStateOf(listOf<BeforeMessageQuery.BeforeMessage>())
     }
 
-    val lenInputMessage = if(messageTyping == "") 4f else 7f
+    val lenInputMessage = if(messageTyping == "") 3.5f else 6f
 
     var nameUser by rememberSaveable {
         mutableStateOf("")
@@ -209,7 +208,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
             }
             item{
                 LaunchedEffect(true) {
-                    if(messages.isNotEmpty()){
+                    if(messages.size > 20){
                         var idMessage: String = messages.last().id
                         if(beforeMessage.isNotEmpty()){
                             Log.e("IdMessage", idMessage)

@@ -43,7 +43,7 @@ fun AnonymousChat(loginViewModel: LoginViewModel, anonymousChatViewModel: Anonym
 
     val listIncognitoMessage by anonymousChatViewModel.listIncognitoMessage.collectAsState()
 
-    val lenInputMessage = 7f
+    val lenInputMessage = 6f
     if(stateIncognito){
         anonymousChatViewModel.stateAnonymousChat.value = true
     }
