@@ -663,13 +663,13 @@ fun DropBoxFill(changeAddress: (String) -> Unit, address: String) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+//@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun encodeFile(uri: Uri): String {
     val context = LocalContext.current
     var ct = ""
     context.contentResolver.openInputStream(uri)?.use {
-        ct = java.util.Base64.getEncoder().encodeToString(
+        ct = Base64.getEncoder().encodeToString(
             it.readBytes()
         )
     }

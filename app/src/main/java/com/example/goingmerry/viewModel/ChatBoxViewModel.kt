@@ -124,6 +124,7 @@ class ChatBoxViewModel: ViewModel() {
         val routeMetadata = RoutingMetadata("api.v1.messages.stream")
         sendJob?.cancel()
         sendJob = viewModelScope.launch (Dispatchers.IO) {
+            Log.e("ChatBoxViewModel", "1")
             val gson = Gson()
             val client = HttpClient (CIO){ //create and configure ktor client
                 install(WebSockets)
@@ -138,9 +139,11 @@ class ChatBoxViewModel: ViewModel() {
                     }
                 }
             }
+            Log.e("ChatBoxViewModel", "2")
             try {
+                Log.e("ChatBoxViewModel", "3")
                 val rSocket: RSocket = client.rSocket(URL.host)
-
+                Log.e("ChatBoxViewModel", rSocket.toString())
                 rSocket.requestChannel(
                     buildPayload {
                         compositeMetadata {
@@ -148,6 +151,7 @@ class ChatBoxViewModel: ViewModel() {
                             add(routeMetadata)
                         }
                         data(ByteReadPacket.Empty)
+                        Log.e("ChatBoxViewModel", "4")
                     },
                     flow{
                         while (true){

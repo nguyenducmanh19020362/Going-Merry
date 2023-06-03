@@ -160,27 +160,30 @@ fun TopBar(
             )
         }
         val imageLoader = ImageLoader(context = LocalContext.current)
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("${URL.urlServer}${avatar}")
-                .setHeader("Authorization", "Bearer $token").build(),
-            imageLoader = imageLoader,
-            contentDescription = "",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(sizeImage)
-                .align(Alignment.CenterHorizontally)
-                .offset(x = (-110).dp, y = (-130).dp)
-                .clip(CircleShape)
-                .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
-                .clickable {
-                    nav.navigate(Routes.Home.route) {
-                        popUpTo(Routes.Setting.route) {
-                            inclusive = true
+        //lỗi thì bỏ key
+        key(avatar){
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${URL.urlServer}${avatar}")
+                    .setHeader("Authorization", "Bearer $token").build(),
+                imageLoader = imageLoader,
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(sizeImage)
+                    .align(Alignment.CenterHorizontally)
+                    .offset(x = (-110).dp, y = (-130).dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colors.secondaryVariant, CircleShape)
+                    .clickable {
+                        nav.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Setting.route) {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-        )
+            )
+        }
     }
 }
 

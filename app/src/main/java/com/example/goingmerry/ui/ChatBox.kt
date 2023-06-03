@@ -1,13 +1,10 @@
 package com.example.goingmerry.ui
 
 import AccountQuery
-import android.graphics.Paint
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,25 +22,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.versionedparcelable.ParcelField
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
+import coil.disk.DiskCache
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.goingmerry.IconChats
-import com.example.goingmerry.R
 import com.example.goingmerry.URL
 import com.example.goingmerry.navigate.Routes
 import com.example.goingmerry.ui.signInSignUp.encodeFile
@@ -51,13 +41,6 @@ import com.example.goingmerry.ui.signInSignUp.getLenNameFile
 import com.example.goingmerry.ui.signInSignUp.getNameFile
 import com.example.goingmerry.viewModel.ChatBoxViewModel
 import com.example.goingmerry.viewModel.MessageType
-import com.example.goingmerry.viewModel.ReceiverMessage
-import com.example.goingmerry.viewModel.SendMessage
-import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asFlow
-import java.lang.reflect.Member
 
 @Composable
 fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxViewModel, nav: NavController, id: String, token: String){
@@ -142,14 +125,14 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                     if(message.messageType == MessageType.TEXT){
                         if(message.messageContent in IconChats.keys){
                             IconChats.icons[message.messageContent]?.let {
-                                IconCard(icon = it, avatar = avatar, id = id, senderId = message.idSender, token = token)
+                                IconCard(icon = it, avatar = avatar, id = id, senderId = message.idSender, token = token, message.messageName)
                             }
                         }else{
                             MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
                                 url = avatar, id, token)
                         }
                     }else{
-                        ImageCard(message.messageContent, avatar, id, message.idSender, token)
+                        ImageCard(message.messageContent, avatar, id, message.idSender, token, message.messageName)
                     }
                 }
             }
@@ -169,7 +152,8 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 if(message.type == type.MessageType.TEXT){
                     if(message.content in IconChats.keys){
                         IconChats.icons[message.content]
-                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(),
+                                token = token, message.sender?.name.toString()) }
                     }else {
                         MessageCard(
                             msg = Message(
@@ -181,7 +165,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         )
                     }
                 }else{
-                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token, message.sender?.name.toString())
                 }
             }
 
@@ -199,7 +183,8 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                 if(message.type == type.MessageType.TEXT){
                     if(message.content in IconChats.keys){
                         IconChats.icons[message.content]
-                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString()
+                                , token = token, message.sender?.name.toString()) }
                     }else {
                         MessageCard(
                             msg = Message(
@@ -211,7 +196,7 @@ fun ChatBox(conversation: AccountQuery.Conversation, chatBoxViewModel: ChatBoxVi
                         )
                     }
                 }else{
-                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token, message.sender?.name.toString())
                 }
             }
 
@@ -434,9 +419,16 @@ fun MessageCard(msg: Message, url: String, id: String, token: String) {
 
         Column(
             modifier = Modifier.clickable { isExpanded = !isExpanded },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
         ) {
+            if(id != msg.idMember){
+                Text(
+                    text = msg.author,
+                    style = MaterialTheme.typography.subtitle2
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+            }
             val backgroundBody = if(id == msg.idMember) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background
             Surface(
                 shape = MaterialTheme.shapes.medium,
@@ -457,8 +449,10 @@ fun MessageCard(msg: Message, url: String, id: String, token: String) {
 }
 
 @Composable
-fun ImageCard(image: String, avatar: String, id: String, senderId: String, token: String){
-    val imageLoader = ImageLoader(LocalContext.current)
+fun ImageCard(image: String, avatar: String, id: String, senderId: String, token: String, name: String){
+    val imageLoader = ImageLoader.Builder(LocalContext.current.applicationContext)
+        .respectCacheHeaders(true)
+        .build()
     Row(
         modifier = Modifier
             .padding(all = 8.dp)
@@ -469,6 +463,7 @@ fun ImageCard(image: String, avatar: String, id: String, senderId: String, token
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data("${URL.urlServer}${avatar}")
+                    .diskCachePolicy(CachePolicy.ENABLED)
                     .setHeader("Authorization", "Bearer $token").build(),
                 imageLoader = imageLoader,
                 contentDescription = null,
@@ -480,21 +475,32 @@ fun ImageCard(image: String, avatar: String, id: String, senderId: String, token
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("${URL.urlServer}${image}")
-                .setHeader("Authorization", "Bearer $token").build(),
-            imageLoader = imageLoader,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(100.dp)
-        )
+        key(image){
+            Column {
+                if(id != senderId){
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.subtitle2
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("${URL.urlServer}${image}")
+                        .setHeader("Authorization", "Bearer $token").build(),
+                    imageLoader = imageLoader,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(100.dp)
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun IconCard(icon: ImageVector, avatar: String, id: String, senderId: String, token: String){
+fun IconCard(icon: ImageVector, avatar: String, id: String, senderId: String, token: String, name: String){
     val imageLoader = ImageLoader(LocalContext.current)
     Row(
         modifier = Modifier
@@ -517,14 +523,23 @@ fun IconCard(icon: ImageVector, avatar: String, id: String, senderId: String, to
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            icon,
-            contentDescription = "icon",
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(40.dp),
-            tint = MaterialTheme.colors.secondaryVariant
-        )
+        Column {
+            if(id != senderId){
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.subtitle2
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+            }
+            Icon(
+                icon,
+                contentDescription = "icon",
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(40.dp),
+                tint = MaterialTheme.colors.secondaryVariant
+            )
+        }
     }
 }
 

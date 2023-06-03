@@ -510,23 +510,6 @@ fun ListPeople(listPeople: List<FindUsersQuery.FindUser>, nav: NavController, to
     }
 }
 
-@Composable
-fun ReloadAsyncImage(token: String, size: Dp, imageLoader: ImageLoader, mode: String){
-    key(mode){
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("${URL.urlServer}${mode}")
-                .setHeader("Authorization", "Bearer $token").build(),
-            imageLoader = imageLoader,
-            contentDescription = "Ẩn danh",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(size)
-                .clip(CircleShape)
-        )
-    }
-}
-
 fun compare(directMessages: List<DirectMessage>, conversation: AccountQuery.Conversation): Int{
     if(directMessages.isNotEmpty()){
         for(item in directMessages.reversed()){

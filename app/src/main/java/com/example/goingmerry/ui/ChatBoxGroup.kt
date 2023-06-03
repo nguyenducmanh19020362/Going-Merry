@@ -137,14 +137,15 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                     if(message.messageType == MessageType.TEXT){
                         if(message.messageContent in IconChats.keys){
                             IconChats.icons[message.messageContent]?.let {
-                                IconCard(icon = it, avatar = avatar, id = id, senderId = message.idSender, token = token)
+                                IconCard(icon = it, avatar = avatar, id = id, senderId = message.idSender, token = token,
+                                message.messageName)
                             }
                         }else{
                             MessageCard(msg = Message(message.idSender, message.messageContent, message.messageName),
                                 url = avatar, id, token)
                         }
                     }else{
-                        ImageCard(message.messageContent, avatar, id, message.idSender, token)
+                        ImageCard(message.messageContent, avatar, id, message.idSender, token, message.messageName)
                     }
                 }
             }
@@ -162,7 +163,8 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 if(message.type == type.MessageType.TEXT){
                     if(message.content in IconChats.keys){
                         IconChats.icons[message.content]
-                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString()
+                                , token = token, message.sender?.name.toString()) }
                     }else {
                         MessageCard(
                             msg = Message(
@@ -174,7 +176,7 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         )
                     }
                 }else{
-                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token, message.sender?.name.toString())
                 }
             }
             items(beforeMessage.sortedBy {
@@ -191,7 +193,8 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                 if(message.type == type.MessageType.TEXT){
                     if(message.content in IconChats.keys){
                         IconChats.icons[message.content]
-                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString(), token = token) }
+                            ?.let { IconCard(icon = it, avatar = avatar, id = id, senderId = message.sender?.id.toString()
+                                , token = token, message.sender?.name.toString()) }
                     }else {
                         MessageCard(
                             msg = Message(
@@ -203,7 +206,8 @@ fun ChatBoxGroup(conversation: AccountQuery.Conversation, chatBoxViewModel: Chat
                         )
                     }
                 }else{
-                    ImageCard(message.content.toString(), avatar, id, message.sender?.id.toString(), token)
+                    ImageCard(message.content.toString(), avatar, id,
+                        message.sender?.id.toString(), token, message.sender?.name.toString())
                 }
             }
             item{
